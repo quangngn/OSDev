@@ -1,8 +1,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "kprint.h"
 #include "stivale2.h"
 #include "util.h"
+
+// Function to write to stivale2 terminal
+term_write_t term_write = NULL;
 
 // Reserve space for the stack
 static uint8_t stack[8192];
@@ -50,9 +54,6 @@ void* find_tag(struct stivale2_struct* hdr, uint64_t id) {
   return NULL;
 }
 
-typedef void (*term_write_t)(const char*, size_t);
-term_write_t term_write = NULL;
-
 void term_setup(struct stivale2_struct* hdr) {
   // Look for a terminal tag
   struct stivale2_struct_tag_terminal* tag =
@@ -71,6 +72,7 @@ void _start(struct stivale2_struct* hdr) {
 
   // Print a greeting
   term_write("Hello Kernel!\n", 14);
+  
 
   // We're done, just hang...
   halt();
