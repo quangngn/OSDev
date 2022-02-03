@@ -10,10 +10,6 @@
 
 extern term_write_t term_write;
 
-// Buffers being used to store digit characters when printing number
-char buffer_dec_uint64[NUM_DIGIT_DEC_UINT64 + 1];
-char buffer_hex_uint64[NUM_DIGIT_HEX_UINT64 + 1];
-
 // Count the number of character in the input string
 size_t kstr_length(const char* str);
 

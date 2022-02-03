@@ -7,7 +7,7 @@ LDFLAGS := -nostdlib -static
 
 OUT := obj
 
-SRC := $(wildcard *.c)
+SRC := $(wildcard src/*.c)
 OBJ := $(patsubst %.c, $(OUT)/%.o, $(SRC))
 DEP := $(patsubst %.c, $(OUT)/%.d, $(SRC))
 

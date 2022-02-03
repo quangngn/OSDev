@@ -1,5 +1,9 @@
 #include "kprint.h"
 
+// Buffers being used to store digit characters when printing number
+char buffer_dec_uint64[NUM_DIGIT_DEC_UINT64 + 1];
+char buffer_hex_uint64[NUM_DIGIT_HEX_UINT64 + 1];
+
 // count the number of character in the input string
 size_t kstr_length(const char* str) {
   const char* cursor = str;
@@ -30,7 +34,7 @@ void kprint_d(uint64_t value) {
 
     // using the global buffer to store the stringified decimal value
     buffer_dec_uint64[NUM_DIGIT_DEC_UINT64] = '\0';
-    char* cursor = buffer_dec_uint64[NUM_DIGIT_DEC_UINT64];
+    char* cursor = buffer_dec_uint64 + NUM_DIGIT_DEC_UINT64;
 
     // Fill in the buffer from the end to the beginning with each digit of value
     // (from right to left)
@@ -57,7 +61,7 @@ void kprint_x(uint64_t value) {
 
 		// using the global buffer to store the stringified hex value
 		buffer_hex_uint64[NUM_DIGIT_HEX_UINT64] = '\0';
-		char* cursor = buffer_hex_uint64[NUM_DIGIT_HEX_UINT64];
+		char* cursor = buffer_hex_uint64 + NUM_DIGIT_HEX_UINT64;
 
 		// Fill in the buffer from the end to the beginning with each digit of value
     // (from right to left)
