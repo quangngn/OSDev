@@ -73,7 +73,15 @@ void _start(struct stivale2_struct* hdr) {
   // Print a greeting
   term_write("Hello Kernel!\n", 14);
   
-
+  kprint_c('q');
+  kprint_c('\n');
+  kprint_s("Hi, this is Quang\n");
+  kprint_d(2342345909);
+  kprint_c('\n');
+  kprint_x(2342345909);
+  kprint_c('\n');
+  kprint_p(_start);
+  kprint_c('\n');
   // We're done, just hang...
   halt();
 }
