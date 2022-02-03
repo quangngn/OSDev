@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdarg.h>
 #include <stdint.h>
 
 #include "stivale2.h"
@@ -26,3 +27,10 @@ void kprint_x(uint64_t value);
 // Print the value of a pointer to the terminal in lowercase hexadecimal with
 // the prefix “0x”
 void kprint_p(void* ptr);
+// Print formatted string, supporting:
+// - %s for string
+// - %c for character
+// - %d for decimal number
+// - %x for hex number
+// - %p for pointer address
+void kprintf(const char* format, ...);

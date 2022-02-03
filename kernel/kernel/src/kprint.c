@@ -84,3 +84,55 @@ void kprint_p(void* ptr) {
 	kprint_s("0x");
 	kprint_x((uint64_t) ptr);
 }
+
+void kprintf(const char* format, ...) {
+  const char* cursor = format;
+
+  // Set up va_list to read arguments 
+  va_list args; 
+  va_start(args, format);
+
+  // Read each character in format and handle each case when we see %
+  while (*cursor != "\0") {
+    if (*cursor == '%') {
+      // Process the character right after the '%'
+      cursor++;
+      switch (*cursor) {
+        // case "%" -> print nothing
+        case '\0':
+          return;
+        // case "%%" --> print '%' 
+        case '%':
+          kprint_c('%');
+          break;
+        // case "%c" --> print next arg as a character 
+        case 'c':
+          kprint_c(va_arg(args, int));
+          break;
+        // case "%s" --> print next arg as a string 
+        case 's':
+          kprint_s(va_arg(args, char*));
+          break;
+        // case "%d" --> print next arg as a decimal number 
+        case 'd':
+          kprint_d(va_arg(args, uint64_t));
+          break;
+        // case "%x" --> print next arg as a hex number 
+        case 'x':
+          kprint_x(va_arg(args, uint64_t));
+          break;
+        // case "%p" --> print next arg as a pointer address 
+        case 'p':
+          kprint_x(va_arg(args, void*));
+          break;
+        // unsupported escape character
+        default:
+          kprint_s("<not supported>");
+      }
+    } else {
+      kprint_c(*cursor);
+    }
+    cursor++;
+  }
+
+}
