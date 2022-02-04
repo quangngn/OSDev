@@ -4,8 +4,12 @@
 char buffer_dec_uint64[NUM_DIGIT_DEC_UINT64 + 1];
 char buffer_hex_uint64[NUM_DIGIT_HEX_UINT64 + 1];
 
+// Function to write to terminal. Init as NULL. Set after read terminal
+// structure tag
+term_write_t term_write = NULL;
+
 // count the number of character in the input string
-size_t kstr_length(const char* str) {
+size_t kstrlen(const char* str) {
   const char* cursor = str;
   size_t len = 0;
   // Count the number of character before seeing '\0'
@@ -21,7 +25,7 @@ size_t kstr_length(const char* str) {
 void kprint_c(char c) { term_write(&c, 1); }
 
 // Print a string to the terminal
-void kprint_s(const char* str) { term_write(str, kstr_length(str)); }
+void kprint_s(const char* str) { term_write(str, kstrlen(str)); }
 
 // Print an unsigned 64-bit integer value to the terminal in decimal notation
 // (no leading zeros please!)
@@ -98,7 +102,7 @@ void kprintf(const char* format, ...) {
   va_start(args, format);
 
   // Read each character in format and handle each case when we see %
-  while (*cursor != "\0") {
+  while (*cursor != '\0') {
     if (*cursor == '%') {
       // Process the character right after the '%'
       cursor++;
@@ -125,7 +129,7 @@ void kprintf(const char* format, ...) {
           break;
         // case "%p" --> print next arg as a pointer address
         case 'p':
-          kprint_x(va_arg(args, void*));
+          kprint_p(va_arg(args, void*));
           break;
         // case "%" -> print nothing, return
         case '\0':
@@ -139,4 +143,9 @@ void kprintf(const char* format, ...) {
     }
     cursor++;
   }
+}
+
+// Set function to term_write
+void kset_term_write(term_write_t fn) {
+  term_write = fn;
 }

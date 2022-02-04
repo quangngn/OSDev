@@ -5,8 +5,7 @@
 #include "stivale2.h"
 #include "util.h"
 
-// Function to write to stivale2 terminal
-term_write_t term_write = NULL;
+extern term_write_t term_write;
 
 // Reserve space for the stack
 static uint8_t stack[8192];
@@ -63,7 +62,12 @@ void term_setup(struct stivale2_struct* hdr) {
   if (tag == NULL) halt();
 
   // Save the term_write function pointer
-  term_write = (term_write_t)tag->term_write;
+  kset_term_write((term_write_t)tag->term_write);
+}
+
+void memmap_setup(struct stivale2_struct* hdr) {
+  // Look for memmap struct to get the physical memmory
+  
 }
 
 void _start(struct stivale2_struct* hdr) {
