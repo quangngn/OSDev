@@ -1,7 +1,6 @@
 #pragma once
 
 #include <stddef.h>
-#include "util.h"
 
 // Halt the CPU in an infinite loop
 static void halt() {

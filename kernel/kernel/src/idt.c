@@ -1,6 +1,7 @@
 #include "idt.h"
 
 #include "kprint.h"
+#include "util.h"
 
 /*
  * By professor Charlie Curtsinger
@@ -31,7 +32,7 @@ void idt_set_handler(uint8_t index, void* fn, uint8_t type) {
 
 void idt_setup() {
   // Zero out IDT
-  kmemset(idt, 0, IDT_NUM_ENTRIES * sizeof(idt));
+  kmemset(idt, 0, IDT_NUM_ENTRIES * sizeof(idt_entry_t));
 
   // Setup the reserved interrupt handler
   idt_set_handler(0, idt_handler_div_error, IDT_TYPE_TRAP);
@@ -60,36 +61,33 @@ void idt_setup() {
   idt_set_handler(21, idt_handler_ctrl_proc_exception, IDT_TYPE_TRAP);
 
   // Step 3: Install the IDT
-  idt_record_t record = {
-    .size = sizeof(idt),
-    .base = idt
-  };
-  __asm__("lidt %0" :: "m"(record));
+  idt_record_t record = {.size = sizeof(idt), .base = idt};
+  __asm__("lidt %0" ::"m"(record));
 }
 
 // HANDLERS
-void idt_handler_div_error() { 
-  kprint_s("[INT 0] Divide Error\n"); 
+void idt_handler_div_error() {
+  kprint_s("[INT 0] Divide Error\n");
   halt();
 }
 
-void idt_handler_db_exception() { 
-  kprint_s("[INT 1] Debug Exception\n"); 
+void idt_handler_db_exception() {
+  kprint_s("[INT 1] Debug Exception\n");
   halt();
 }
 
-void idt_handler_NMI_interrupt() { 
-  kprint_s("[INT 2] NMI Interrupt\n"); 
+void idt_handler_NMI_interrupt() {
+  kprint_s("[INT 2] NMI Interrupt\n");
   halt();
 }
 
-void idt_handler_breakpoint() { 
-  kprint_s("[INT 3] Breakpoint\n"); 
+void idt_handler_breakpoint() {
+  kprint_s("[INT 3] Breakpoint\n");
   halt();
 }
 
-void idt_handler_overflow() { 
-  kprint_s("[INT 4] Overflow\n"); 
+void idt_handler_overflow() {
+  kprint_s("[INT 4] Overflow\n");
   halt();
 }
 
@@ -97,8 +95,8 @@ void idt_handler_BOUND_range_exceed() {
   kprint_s("[INT 5] BOUND Range Exception\n");
   halt();
 }
-void idt_handler_invalid_opcode() { 
-  kprint_s("[INT 6] Invalid Opcode\n"); 
+void idt_handler_invalid_opcode() {
+  kprint_s("[INT 6] Invalid Opcode\n");
   halt();
 }
 
@@ -107,8 +105,8 @@ void idt_handler_dev_unavailable() {
   halt();
 }
 
-void idt_handler_double_fault() { 
-  kprint_s("[INT 8] Double Fault\n"); 
+void idt_handler_double_fault() {
+  kprint_s("[INT 8] Double Fault\n");
   halt();
 }
 
@@ -116,8 +114,8 @@ void idt_handler_coproc_seg_overrun() {
   kprint_s("[INT 9] Coprocessor Segment Overrun (reserved)\n");
   halt();
 }
-void idt_handler_invalid_tss() { 
-  kprint_s("[INT 10] Invalid TSS\n"); 
+void idt_handler_invalid_tss() {
+  kprint_s("[INT 10] Invalid TSS\n");
   halt();
 }
 
@@ -129,13 +127,13 @@ void idt_handler_seg_not_present() {
 void idt_handler_stack_seg_fault() {
   kprint_s("[INT 12] Stack-Segment Fault\n");
 }
-void idt_handler_general_proc() { 
-  kprint_s("[INT 13] General Protection\n"); 
+void idt_handler_general_proc() {
+  kprint_s("[INT 13] General Protection\n");
   halt();
 }
 
-void idt_handler_page_fault() { 
-  kprint_s("[INT 14] Page Fault\n"); 
+void idt_handler_page_fault() {
+  kprint_s("[INT 14] Page Fault\n");
   halt();
 }
 
@@ -144,13 +142,13 @@ void idt_handler_x87_fpu_fp_error() {
   halt();
 }
 
-void idt_handler_alignment_check() { 
-  kprint_s("[INT 17] Alignment Check\n"); 
+void idt_handler_alignment_check() {
+  kprint_s("[INT 17] Alignment Check\n");
   halt();
 }
 
-void idt_handler_machine_check() { 
-  kprint_s("[INT 18] Machine Check\n"); 
+void idt_handler_machine_check() {
+  kprint_s("[INT 18] Machine Check\n");
   halt();
 }
 

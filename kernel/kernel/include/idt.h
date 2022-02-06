@@ -40,9 +40,6 @@ typedef struct idt_record {
   void* base;
 } __attribute__((packed)) idt_record_t;
 
-// Make an IDT
-idt_entry_t idt[256];
-
 /**
  * Set an interrupt handler for the given interrupt number.
  *
@@ -80,4 +77,3 @@ void idt_handler_machine_check();
 void idt_handler_simd_fp_exception();
 void idt_handler_vir_exception();
 void idt_handler_ctrl_proc_exception();
-

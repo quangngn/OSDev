@@ -9,7 +9,6 @@ char buffer_hex_uint64[NUM_DIGIT_HEX_UINT64 + 1];
 struct stivale2_struct_tag_memmap* mmap_struct_tag = NULL;
 struct stivale2_struct_tag_hhdm* hhdm_struct_tag = NULL;
 
-
 // Function to write to terminal. Init as NULL. Set after read terminal
 // structure tag
 term_write_t term_write = NULL;

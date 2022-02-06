@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "idt.h"
 #include "kprint.h"
 #include "stivale2.h"
 #include "util.h"
@@ -82,13 +83,16 @@ void _start(struct stivale2_struct* hdr) {
   term_setup(hdr);
   memmap_setup(hdr);
 
+  // Set up the IDT to handler interruption
+  idt_setup();
+
   // Print a greeting
   term_write("Hello Kernel!\n", 14);
 
   // Test the int 0
   float x = 10;
   x = x / 0;
-  
+
   // We're done, just hang...
   halt();
 }

@@ -1,10 +1,10 @@
 #pragma once
 
 #include <stdarg.h>
+#include <stddef.h>
 #include <stdint.h>
 
 #include "stivale2.h"
-#include "util.h"
 
 #define NUM_DIGIT_DEC_UINT64 20
 #define NUM_DIGIT_HEX_UINT64 16
