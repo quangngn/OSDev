@@ -16,8 +16,8 @@ static struct stivale2_header_tag_terminal terminal_hdr_tag = {
     .flags = 0};
 
 // Declare the header for the bootloader
-__attribute__((section(".stivale2hdr"), used)) 
-static struct stivale2_header stivale_hdr = {
+__attribute__((section(".stivale2hdr"),
+               used)) static struct stivale2_header stivale_hdr = {
     // Use ELF file's default entry point
     .entry_point = 0,
 
@@ -66,26 +66,29 @@ void term_setup(struct stivale2_struct* hdr) {
 }
 
 void memmap_setup(struct stivale2_struct* hdr) {
-  // Look for memmap struct to get the physical memmory
-  
+  // Look for memmap struct tag and hhdm struct tag to get the physical memmory
+  struct stivale2_struct_tag_memmap* mmap_struct_tag =
+      find_tag(hdr, STIVALE2_STRUCT_TAG_MEMMAP_ID);
+  struct stivale2_struct_tag_hhdm* hhdm_struct_tag =
+      find_tag(hdr, STIVALE2_STRUCT_TAG_HHDM_ID);
+
+  // Init value for the mempry tag pointers in kprint.c, used for print mem
+  // usage
+  kset_mem_struct_tags(mmap_struct_tag, hhdm_struct_tag);
 }
 
 void _start(struct stivale2_struct* hdr) {
   // We've booted! Let's start processing tags passed to use from the bootloader
   term_setup(hdr);
+  memmap_setup(hdr);
 
   // Print a greeting
   term_write("Hello Kernel!\n", 14);
+
+  // Test the int 0
+  float x = 10;
+  x = x / 0;
   
-  kprint_c('q');
-  kprint_c('\n');
-  kprint_s("Hi, this is Quang\n");
-  kprint_d(2342345909);
-  kprint_c('\n');
-  kprint_x(2342345909);
-  kprint_c('\n');
-  kprint_p(_start);
-  kprint_c('\n');
   // We're done, just hang...
   halt();
 }

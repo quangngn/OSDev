@@ -34,5 +34,13 @@ void kprint_p(void* ptr);
 // - %x for hex number
 // - %p for pointer address
 void kprintf(const char* format, ...);
+// Print usable memory in format:
+// "[P. Addr start]-[P. Addr end] mapped at [Vir. Addr start] - [Vir. Addr end]
+void kprint_mem_usage();
+
 // Set function to term_write
 void kset_term_write(term_write_t fn);
+// Set value to mmap_struct_tag and hhdm_struct_tag
+void kset_mem_struct_tags(
+    struct stivale2_struct_tag_memmap* new_mmap_struct_tag,
+    struct stivale2_struct_tag_hhdm* new_hhdm_struct_tag);

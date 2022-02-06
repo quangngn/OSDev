@@ -4,6 +4,12 @@
 char buffer_dec_uint64[NUM_DIGIT_DEC_UINT64 + 1];
 char buffer_hex_uint64[NUM_DIGIT_HEX_UINT64 + 1];
 
+// Pointers to memmap struct tag and hhdm struct tag to help with printing
+// memory usage
+struct stivale2_struct_tag_memmap* mmap_struct_tag = NULL;
+struct stivale2_struct_tag_hhdm* hhdm_struct_tag = NULL;
+
+
 // Function to write to terminal. Init as NULL. Set after read terminal
 // structure tag
 term_write_t term_write = NULL;
@@ -145,7 +151,42 @@ void kprintf(const char* format, ...) {
   }
 }
 
-// Set function to term_write
-void kset_term_write(term_write_t fn) {
-  term_write = fn;
+// Print usable memory in format:
+// "[P. Addr start]-[P. Addr end] mapped at [Vir. Addr start]-[Vir. Addr end]
+void kprint_mem_usage() {
+  // Check for null tag pointers
+  if (mmap_struct_tag == NULL) {
+    kprint_s("<Unable to identify memmap tag>\n");
+    return;
+  }
+  if (hhdm_struct_tag == NULL) {
+    kprint_s("<Unable to identify hhdm tag>\n");
+    return;
+  }
+  
+  // Get the higher half direct map virtual start address
+  uint64_t hhdm_addr = hhdm_struct_tag->addr;
+
+  // Find usable memory entries
+  struct stivale2_mmap_entry* mmap_entry;
+  // Loop through each entry in the memory
+  for (size_t i = 0; i < mmap_struct_tag->entries; i++) {
+    mmap_entry = &(mmap_struct_tag->memmap[i]);
+    if (mmap_entry->type == STIVALE2_MMAP_TYPE_USABLE) {
+      kprintf("%p-%p mapped at %p-%p\n", mmap_entry->base,
+              mmap_entry->base + mmap_entry->length,
+              mmap_entry->base + hhdm_addr,
+              mmap_entry->base + mmap_entry->length + hhdm_addr);
+    }
+  }
+}
+
+// Set value to term_write
+void kset_term_write(term_write_t fn) { term_write = fn; }
+
+// Set value to mmap_struct_tag and hhdm_struct_tag
+void kset_mem_struct_tags(struct stivale2_struct_tag_memmap *new_mmap_struct_tag,
+                      struct stivale2_struct_tag_hhdm *new_hhdm_struct_tag) {
+  mmap_struct_tag = new_mmap_struct_tag;
+  hhdm_struct_tag = new_hhdm_struct_tag;
 }
