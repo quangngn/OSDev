@@ -35,30 +35,30 @@ void idt_setup() {
   kmemset(idt, 0, IDT_NUM_ENTRIES * sizeof(idt_entry_t));
 
   // Setup the reserved interrupt handler
-  idt_set_handler(0, idt_handler_div_error, IDT_TYPE_TRAP);
-  idt_set_handler(1, idt_handler_db_exception, IDT_TYPE_TRAP);
-  idt_set_handler(2, idt_handler_NMI_interrupt, IDT_TYPE_INTERRUPT);
-  idt_set_handler(3, idt_handler_breakpoint, IDT_TYPE_TRAP);
+  idt_set_handler(0, &idt_handler_div_error, IDT_TYPE_TRAP);
+  idt_set_handler(1, &idt_handler_db_exception, IDT_TYPE_TRAP);
+  idt_set_handler(2, &idt_handler_NMI_interrupt, IDT_TYPE_INTERRUPT);
+  idt_set_handler(3, &idt_handler_breakpoint, IDT_TYPE_TRAP);
 
-  idt_set_handler(4, idt_handler_overflow, IDT_TYPE_TRAP);
-  idt_set_handler(5, idt_handler_BOUND_range_exceed, IDT_TYPE_TRAP);
-  idt_set_handler(6, idt_handler_invalid_opcode, IDT_TYPE_TRAP);
-  idt_set_handler(7, idt_handler_dev_unavailable, IDT_TYPE_TRAP);
+  idt_set_handler(4, &idt_handler_overflow, IDT_TYPE_TRAP);
+  idt_set_handler(5, &idt_handler_BOUND_range_exceed, IDT_TYPE_TRAP);
+  idt_set_handler(6, &idt_handler_invalid_opcode, IDT_TYPE_TRAP);
+  idt_set_handler(7, &idt_handler_dev_unavailable, IDT_TYPE_TRAP);
 
-  idt_set_handler(8, idt_handler_double_fault, IDT_TYPE_TRAP);
-  idt_set_handler(10, idt_handler_invalid_tss, IDT_TYPE_TRAP);
-  idt_set_handler(11, idt_handler_seg_not_present, IDT_TYPE_TRAP);
-  idt_set_handler(12, idt_handler_stack_seg_fault, IDT_TYPE_TRAP);
+  idt_set_handler(8, &idt_handler_double_fault, IDT_TYPE_TRAP);
+  idt_set_handler(10, &idt_handler_invalid_tss, IDT_TYPE_TRAP);
+  idt_set_handler(11, &idt_handler_seg_not_present, IDT_TYPE_TRAP);
+  idt_set_handler(12, &idt_handler_stack_seg_fault, IDT_TYPE_TRAP);
 
-  idt_set_handler(13, idt_handler_general_proc, IDT_TYPE_TRAP);
-  idt_set_handler(14, idt_handler_page_fault, IDT_TYPE_TRAP);
-  idt_set_handler(16, idt_handler_x87_fpu_fp_error, IDT_TYPE_TRAP);
-  idt_set_handler(17, idt_handler_alignment_check, IDT_TYPE_TRAP);
+  idt_set_handler(13, &idt_handler_general_proc, IDT_TYPE_TRAP);
+  idt_set_handler(14, &idt_handler_page_fault, IDT_TYPE_TRAP);
+  idt_set_handler(16, &idt_handler_x87_fpu_fp_error, IDT_TYPE_TRAP);
+  idt_set_handler(17, &idt_handler_alignment_check, IDT_TYPE_TRAP);
 
-  idt_set_handler(18, idt_handler_machine_check, IDT_TYPE_TRAP);
-  idt_set_handler(19, idt_handler_simd_fp_exception, IDT_TYPE_TRAP);
-  idt_set_handler(20, idt_handler_vir_exception, IDT_TYPE_TRAP);
-  idt_set_handler(21, idt_handler_ctrl_proc_exception, IDT_TYPE_TRAP);
+  idt_set_handler(18, &idt_handler_machine_check, IDT_TYPE_TRAP);
+  idt_set_handler(19, &idt_handler_simd_fp_exception, IDT_TYPE_TRAP);
+  idt_set_handler(20, &idt_handler_vir_exception, IDT_TYPE_TRAP);
+  idt_set_handler(21, &idt_handler_ctrl_proc_exception, IDT_TYPE_TRAP);
 
   // Step 3: Install the IDT
   idt_record_t record = {.size = sizeof(idt), .base = idt};
