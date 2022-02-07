@@ -11,13 +11,9 @@ extern term_write_t term_write;
 // Reserve space for the stack
 static uint8_t stack[8192];
 
-static struct stivale2_tag unmap_null_hdr_tag = {
-    .identifier = STIVALE2_HEADER_TAG_UNMAP_NULL_ID, .next = 0};
-
 // Request a terminal from the bootloader
 static struct stivale2_header_tag_terminal terminal_hdr_tag = {
-    .tag = {.identifier = STIVALE2_HEADER_TAG_TERMINAL_ID,
-            .next = (uintptr_t)&unmap_null_hdr_tag},
+    .tag = {.identifier = STIVALE2_HEADER_TAG_TERMINAL_ID, .next = 0},
     .flags = 0};
 
 // Declare the header for the bootloader
@@ -92,12 +88,6 @@ void _start(struct stivale2_struct* hdr) {
 
   // Print a greeting
   term_write("Hello Kernel!\n", 14);
-
-  // Test the int 0
-  // int* p = (int*)0x1;
-  // *p = 123;
-
-  __asm__("int $21");
 
   // We're done, just hang...
   halt();
