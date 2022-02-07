@@ -34,6 +34,14 @@ typedef struct idt_entry {
   uint32_t _unused_2;
 } __attribute__((packed)) idt_entry_t;
 
+typedef struct interrupt_context {
+  uintptr_t ip;
+  uint64_t cs;
+  uint64_t flags;
+  uintptr_t sp;
+  uint64_t ss;
+} __attribute__((packed)) interrupt_context_t;
+
 // This struct is used to load the IDT
 typedef struct idt_record {
   uint16_t size;
@@ -54,26 +62,3 @@ void idt_set_handler(uint8_t index, void* fn, uint8_t type);
  * exceptions, and install the IDT.
  */
 void idt_setup();
-
-// HANDLERS
-void idt_handler_div_error();
-void idt_handler_db_exception();
-void idt_handler_NMI_interrupt();
-void idt_handler_breakpoint();
-void idt_handler_overflow();
-void idt_handler_BOUND_range_exceed();
-void idt_handler_invalid_opcode();
-void idt_handler_dev_unavailable();
-void idt_handler_double_fault();
-void idt_handler_coproc_seg_overrun();
-void idt_handler_invalid_tss();
-void idt_handler_seg_not_present();
-void idt_handler_stack_seg_fault();
-void idt_handler_general_proc();
-void idt_handler_page_fault();
-void idt_handler_x87_fpu_fp_error();
-void idt_handler_alignment_check();
-void idt_handler_machine_check();
-void idt_handler_simd_fp_exception();
-void idt_handler_vir_exception();
-void idt_handler_ctrl_proc_exception();

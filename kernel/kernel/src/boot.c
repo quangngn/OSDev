@@ -94,6 +94,10 @@ void _start(struct stivale2_struct* hdr) {
   term_write("Hello Kernel!\n", 14);
 
   // Test the int 0
+  // int* p = (int*)0x1;
+  // *p = 123;
+
+  __asm__("int $21");
 
   // We're done, just hang...
   halt();
