@@ -3,6 +3,7 @@
 
 #include "idt.h"
 #include "kprint.h"
+#include "pic.h"
 #include "stivale2.h"
 #include "util.h"
 
@@ -85,6 +86,11 @@ void _start(struct stivale2_struct* hdr) {
 
   // Set up the IDT to handler interruption
   idt_setup();
+
+  // Set up PIC 
+  pic_init();
+  // Enable keyboard interrupt
+  pic_unmask_irq(1);
 
   // Print a greeting
   term_write("Hello Kernel!\n", 14);

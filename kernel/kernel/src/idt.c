@@ -1,6 +1,8 @@
 #include "idt.h"
 
 #include "kprint.h"
+#include "pic.h"
+#include "port.h"
 #include "util.h"
 
 /*
@@ -138,6 +140,14 @@ __attribute__((interrupt)) void idt_handler_ctrl_proc_exception(
   halt();
 }
 
+__attribute__((interrupt)) void idt_handler_keyboard(interrupt_context_t* ctx) {
+  // Read and print the key being pressed
+  kprint_p(inb(0x60));
+  kprint_c('\n');
+  // Acknowledge the interrupt
+  outb(PIC1_COMMAND, PIC_EOI);
+}
+
 // Set up IDT code
 void idt_set_handler(uint8_t index, void* fn, uint8_t type) {
   // The entry is present
@@ -191,6 +201,8 @@ void idt_setup() {
   idt_set_handler(19, idt_handler_simd_fp_exception, IDT_TYPE_TRAP);
   idt_set_handler(20, idt_handler_vir_exception, IDT_TYPE_TRAP);
   idt_set_handler(21, idt_handler_ctrl_proc_exception, IDT_TYPE_TRAP);
+
+  idt_set_handler(IRQ1_INTERRUPT, idt_handler_keyboard, IDT_TYPE_INTERRUPT);
 
   // Step 3: Install the IDT
   idt_record_t record = {.size = sizeof(idt), .base = idt};
