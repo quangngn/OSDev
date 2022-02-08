@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stddef.h>
+#include <stdint.h>
 
 // Halt the CPU in an infinite loop
 static void halt() {
@@ -12,7 +13,7 @@ static void halt() {
 // Set memory to a certain value
 static void* kmemset(void* ptr, int value, size_t num) {
   for (int i = 0; i < num; i++) {
-    ((unsigned char*)ptr)[i] = (unsigned char) value;
+    ((unsigned char*)ptr)[i] = (unsigned char)value;
   }
   return ptr;
 }

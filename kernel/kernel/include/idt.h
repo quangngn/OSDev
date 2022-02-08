@@ -1,12 +1,12 @@
-#pragma once
-
-#include <stdint.h>
-
 /*
  * By professor Charlie Curtsinger
  * src:
  * https://curtsinger.cs.grinnell.edu/teaching/2022S/CSC395/kernel/exceptions.html
  */
+#pragma once
+
+#include <stdint.h>
+
 // Every interrupt handler must specify a code selector. We'll use entry 5
 // (5*8=0x28), which is where our bootloader set up a usable code selector for
 // 64-bit mode.
