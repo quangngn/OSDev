@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "circular_queue.h"
 #include "stivale2.h"
 
 #define NUM_DIGIT_DEC_UINT64 20
@@ -44,3 +45,11 @@ void kset_term_write(term_write_t fn);
 void kset_mem_struct_tags(
     struct stivale2_struct_tag_memmap* new_mmap_struct_tag,
     struct stivale2_struct_tag_hhdm* new_hhdm_struct_tag);
+
+/**
+ * Read one character from the keyboard buffer. If the keyboard buffer is empty
+ * this function will block until a key is pressed.
+ *
+ * \returns the next character input from the keyboard
+ */
+char kgetc();

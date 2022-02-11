@@ -1,5 +1,7 @@
 #include "kprint.h"
 
+#include "keyboard.h"
+
 // Buffers being used to store digit characters when printing number
 char buffer_dec_uint64[NUM_DIGIT_DEC_UINT64 + 1];
 char buffer_hex_uint64[NUM_DIGIT_HEX_UINT64 + 1];
@@ -12,6 +14,13 @@ struct stivale2_struct_tag_hhdm* hhdm_struct_tag = NULL;
 // Function to write to terminal. Init as NULL. Set after read terminal
 // structure tag
 term_write_t term_write = NULL;
+
+// Keyboard to handle the input. The input would trigger the interrupt handler
+// defined in idt.h. Then, the handler would write to circular buffer of
+// keyboard object. Function such as kgetc can utilize this buffer to read input
+// from keyboard
+keyboard_t keyboard = {.buffer = {.read = 0, .write = 0, .size = 0},
+                       .shift = false};
 
 // count the number of character in the input string
 size_t kstrlen(const char* str) {
@@ -162,7 +171,7 @@ void kprint_mem_usage() {
     kprint_s("<Unable to identify hhdm tag>\n");
     return;
   }
-  
+
   // Get the higher half direct map virtual start address
   uint64_t hhdm_addr = hhdm_struct_tag->addr;
 
@@ -183,9 +192,29 @@ void kprint_mem_usage() {
 // Set value to term_write
 void kset_term_write(term_write_t fn) { term_write = fn; }
 
-// Set value to mmap_struct_tag and hhdm_struct_tag
-void kset_mem_struct_tags(struct stivale2_struct_tag_memmap *new_mmap_struct_tag,
-                      struct stivale2_struct_tag_hhdm *new_hhdm_struct_tag) {
+// Set mmap_struct_tag and hhdm_struct_tag to the address of these structs. This
+// help with printing mem usage
+void kset_mem_struct_tags(
+    struct stivale2_struct_tag_memmap* new_mmap_struct_tag,
+    struct stivale2_struct_tag_hhdm* new_hhdm_struct_tag) {
   mmap_struct_tag = new_mmap_struct_tag;
   hhdm_struct_tag = new_hhdm_struct_tag;
+}
+
+/**
+ * Read one character from the keyboard buffer. If the keyboard buffer is empty
+ * this function will block until a key is pressed.
+ *
+ * \returns the next character input from the keyboard
+ */
+char kgetc() {
+  // Read from the keyboard buffer...
+  char ret;
+  // kb_read_c would return false if it failed to read character off the buffer
+  // and true otherwise. The read character is put in ret variable.
+  while (!kb_read_c(&keyboard, &ret)) {  
+    // doing nothing 
+  }
+  // Return the read character
+  return ret;
 }

@@ -1,15 +1,13 @@
 #include "idt.h"
 
+#include "keyboard.h"
 #include "kprint.h"
 #include "pic.h"
 #include "port.h"
 #include "util.h"
 
-/*
- * By professor Charlie Curtsinger
- * src:
- * https://curtsinger.cs.grinnell.edu/teaching/2022S/CSC395/kernel/exceptions.html
- */
+// keyboard_buffer is initialized in kprint.c
+extern circular_queue_t keyboard_buffer;
 
 // Make an IDT
 idt_entry_t idt[IDT_NUM_ENTRIES] __attribute__((aligned(8)));
@@ -141,9 +139,8 @@ __attribute__((interrupt)) void idt_handler_ctrl_proc_exception(
 }
 
 __attribute__((interrupt)) void idt_handler_keyboard(interrupt_context_t* ctx) {
-  // Read and print the key being pressed
-  kprint_p(inb(0x60));
-  kprint_c('\n');
+  // Read the input value from keyboard and pass it to the keyboard obj
+  kb_input_scan_code(&keyboard, inb(0x60));
   // Acknowledge the interrupt
   outb(PIC1_COMMAND, PIC_EOI);
 }
