@@ -95,6 +95,14 @@ void _start(struct stivale2_struct* hdr) {
   // Print a greeting
   term_write("Hello Kernel!\n", 14);
 
+  char c = 0;
+  kprint_s("Start printing \n");
+  while (c != '\n') {
+    c = kgetc();
+    kprint_c(c);
+  }
+  kprint_s("Finish printing \n");
+
   // We're done, just hang...
   halt();
 }

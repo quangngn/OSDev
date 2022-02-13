@@ -6,8 +6,10 @@
 #include "port.h"
 #include "util.h"
 
-// keyboard_buffer is initialized in kprint.c
-extern circular_queue_t keyboard_buffer;
+#define KB_IN_PORT 0x60
+
+// keyboard is initialized in kprint.c
+extern keyboard_t keyboard;
 
 // Make an IDT
 idt_entry_t idt[IDT_NUM_ENTRIES] __attribute__((aligned(8)));
@@ -140,7 +142,7 @@ __attribute__((interrupt)) void idt_handler_ctrl_proc_exception(
 
 __attribute__((interrupt)) void idt_handler_keyboard(interrupt_context_t* ctx) {
   // Read the input value from keyboard and pass it to the keyboard obj
-  kb_input_scan_code(&keyboard, inb(0x60));
+  kb_input_scan_code(&keyboard, inb(KB_IN_PORT));
   // Acknowledge the interrupt
   outb(PIC1_COMMAND, PIC_EOI);
 }

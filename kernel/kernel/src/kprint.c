@@ -20,7 +20,10 @@ term_write_t term_write = NULL;
 // keyboard object. Function such as kgetc can utilize this buffer to read input
 // from keyboard
 keyboard_t keyboard = {.buffer = {.read = 0, .write = 0, .size = 0},
-                       .shift = false};
+                       .alt = 0,
+                       .ctrl = 0,
+                       .shift = 0,
+                       .capslock = 0};
 
 // count the number of character in the input string
 size_t kstrlen(const char* str) {
@@ -212,9 +215,7 @@ char kgetc() {
   char ret;
   // kb_read_c would return false if it failed to read character off the buffer
   // and true otherwise. The read character is put in ret variable.
-  while (!kb_read_c(&keyboard, &ret)) {  
-    // doing nothing 
-  }
+  while (!kb_read_c(&keyboard, &ret)) {};
   // Return the read character
   return ret;
 }

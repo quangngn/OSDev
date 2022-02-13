@@ -3,8 +3,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "circular_queue.h"
-
 // ESC key
 #define ESC_DOWN_SS 0x01
 #define ESC_UP_SS 0x81
@@ -30,25 +28,60 @@
 #define ASCII_ESC 27
 #define ASCII_BACKSPACE 8
 
-// True characters based on the scan code
-char ss_code_1st[] =
-    "\e1234567890-=\b"
-    "\tqwertyuiop[]"
-    "\n%asdfghjkl;\'`%\\"
-    "zxcvbnm,./%*% ";
-// True characters based on the scan code with the Shift key being pressed
-char ss_code_2nd[] =
-    "\e!@#$%^&*()_+\b"
-    "\tQWERTYUIOP{}"
-    "\n%ASDFGHJKL:\"~%|"
-    "ZXCVBNM<>\?";
+// SET KEYBOARD STAGE BITS
+#define SHIFT_ON_MASK 0x80000000
+#define CTRL_ON_MASK 0x40000000
+#define CAPSLOCK_ON_MASK 0x20000000
+#define ALT_ON_MASK 0x10000000
 
+#define KEYBOARD_BUFFER_SIZE 1024
+
+// CIRCULAR_QUEUE for KEYBOARD
+typedef struct circular_queue {
+  int read;
+  int write;
+  int size;
+  uint64_t buffer[KEYBOARD_BUFFER_SIZE];
+} circular_queue_t;
+
+// Functions
+/*
+ * Init the circular queue with default value:
+ * - read = 0
+ * - write = 0
+ * - size = 0
+ * - buffer is NOT 0-init
+ */
+void cq_init(circular_queue_t **cq);
+/*
+ * Read the data from the buffer.
+ * - If the queue is full, we return (unsigned)-1.
+ * - Else, we reduced the size, advance the read pointer, and return the value
+ * currently pointed at cq->read pointer.
+ */
+bool cq_read(circular_queue_t *cq, uint64_t *dest_val);
+/*
+ * Write the data to the buffer.
+ * - If the buffer is full, we overwrite the old value. Size value is unchanged.
+ * read and write value are both advanced.
+ * - Else we write the value at where write pointer points. Size is increased
+ * by 1. write is advanced by 1.
+ */
+void cq_write(circular_queue_t *cq, uint64_t val);
+// Functions to check for queue whether it is empty or full
+static inline bool cq_is_empty(circular_queue_t *cq) { return cq->size <= 0; }
+static inline bool cq_is_full(circular_queue_t *cq) {
+  return cq->size >= KEYBOARD_BUFFER_SIZE;
+}
+
+// KEYBOARD
+// Struct the hold the state of the keyboard, including the input buffer
 typedef struct keyboard {
   circular_queue_t buffer;
-  bool alt;
-  bool ctrl;
-  bool shift;
-  bool capslock;
+  uint32_t alt;
+  uint32_t ctrl;
+  uint32_t shift;
+  uint32_t capslock;
 } keyboard_t;
 
 // Functions

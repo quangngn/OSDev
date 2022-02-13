@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "circular_queue.h"
+#include "keyboard.h"
 #include "stivale2.h"
 
 #define NUM_DIGIT_DEC_UINT64 20
