@@ -19,4 +19,10 @@ static inline uint8_t inb(uint16_t port) {
   return ret;
 }
 
+static inline uintptr_t read_cr3() {
+  uintptr_t value;
+  __asm__("mov %%cr3, %0" : "=r"(value));
+  return value;
+}
+
 static inline void io_wait() { outb(0x80, 0); }
