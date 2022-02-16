@@ -10,16 +10,22 @@ static void halt() {
   }
 }
 
-static inline uint64_t get_incl_bit(uint64_t val, uint64_t bit_left,
-                                    uint64_t bit_right) {
-  uint64_t mask = (((uint64_t)1 << (bit_right - bit_left + 1)) - 1) << bit_left;
-  return (val & mask) >> bit_left;
+/*
+ * Return value from bit start:end inclusively
+ */
+static inline uint64_t get_incl_bit(uint64_t val, uint64_t start,
+                                    uint64_t end) {
+  uint64_t mask = (((uint64_t)1 << (end - start + 1)) - 1) << start;
+  return (val & mask) >> start;
 }
 
-static inline uint64_t get_excl_bit(uint64_t val, unsigned char bit_left,
-                                    unsigned char bit_right) {
-  uint64_t mask = ((uint64_t)1 << (bit_right - bit_left)) << bit_left;
-  return (val & mask) >> bit_left;
+/*
+ * Return value from bit start:end exclusively
+ */
+static inline uint64_t get_excl_bit(uint64_t val, unsigned char start,
+                                    unsigned char end) {
+  uint64_t mask = ((uint64_t)1 << (end - start)) << start;
+  return (val & mask) >> start;
 }
 
 // Set memory to a certain value
