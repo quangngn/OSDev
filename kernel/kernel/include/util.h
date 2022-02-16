@@ -11,7 +11,7 @@ static void halt() {
 }
 
 /*
- * Return value from bit start:end inclusively
+ * Return value from bit val[start:end]
  */
 static inline uint64_t get_incl_bit(uint64_t val, uint64_t start,
                                     uint64_t end) {
@@ -20,7 +20,7 @@ static inline uint64_t get_incl_bit(uint64_t val, uint64_t start,
 }
 
 /*
- * Return value from bit start:end exclusively
+ * Return value from bit val[start:end-1]
  */
 static inline uint64_t get_excl_bit(uint64_t val, uint64_t start,
                                     uint64_t end) {
