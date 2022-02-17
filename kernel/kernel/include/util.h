@@ -24,7 +24,7 @@ static inline uint64_t get_incl_bit(uint64_t val, uint64_t start,
  */
 static inline uint64_t get_excl_bit(uint64_t val, uint64_t start,
                                     uint64_t end) {
-  uint64_t mask = ((uint64_t)1 << (end - start)) << start;
+  uint64_t mask = (((uint64_t)1 << (end - start)) - 1) << start;
   return (val & mask) >> start;
 }
 

@@ -6,7 +6,9 @@
 #include "pic.h"
 #include "stivale2.h"
 #include "util.h"
+#include "page.h"
 
+// Function to write to terminal is defined in stivale2 source
 extern term_write_t term_write;
 
 // Reserve space for the stack
@@ -94,6 +96,9 @@ void _start(struct stivale2_struct* hdr) {
 
   // Print a greeting
   term_write("Hello Kernel!\n", 14);
+  kprint_mem_usage();
+  kprint_c('\n');
+  translate(NULL);
 
   // We're done, just hang...
   halt();

@@ -73,7 +73,7 @@ typedef struct pdpt_entry {
   // bit 12:51
   uint64_t pd_phyaddr : 40;
   // bit 52:62
-  uint64_t ignored1 : 11;
+  uint64_t ignored2 : 11;
   // bit 63
   uint64_t exe_disable : 1;
 } __attribute__((packed)) pdpt_entry_t;
@@ -96,7 +96,7 @@ typedef struct pd_entry {
   // bit 12:51
   uint64_t pt_phyaddr : 40;
   // bit 52:62
-  uint64_t ignored1 : 11;
+  uint64_t ignored2 : 11;
   // bit 63
   uint64_t exe_disable : 1;
 } __attribute__((packed)) pd_entry_t;
@@ -131,4 +131,4 @@ typedef struct pt_4kb_entry {
  *
  * \param address The virtual address to translate
  */
-void translate(uintptr_t page_table, void* address);
+void translate(void* address);
