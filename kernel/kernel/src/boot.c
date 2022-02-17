@@ -3,10 +3,10 @@
 
 #include "idt.h"
 #include "kprint.h"
+#include "page.h"
 #include "pic.h"
 #include "stivale2.h"
 #include "util.h"
-#include "page.h"
 
 // Function to write to terminal is defined in stivale2 source
 extern term_write_t term_write;
@@ -14,9 +14,14 @@ extern term_write_t term_write;
 // Reserve space for the stack
 static uint8_t stack[8192];
 
+// Tell booloader to unmap the lower part 
+static struct stivale2_tag unmap_null_hdr_tag = {
+    .identifier = STIVALE2_HEADER_TAG_UNMAP_NULL_ID, .next = 0};
+
 // Request a terminal from the bootloader
 static struct stivale2_header_tag_terminal terminal_hdr_tag = {
-    .tag = {.identifier = STIVALE2_HEADER_TAG_TERMINAL_ID, .next = 0},
+    .tag = {.identifier = STIVALE2_HEADER_TAG_TERMINAL_ID,
+            .next = (uintptr_t)(&unmap_null_hdr_tag)},
     .flags = 0};
 
 // Declare the header for the bootloader
@@ -89,7 +94,7 @@ void _start(struct stivale2_struct* hdr) {
   // Set up the IDT to handler interruption
   idt_setup();
 
-  // Set up PIC 
+  // Set up PIC
   pic_init();
   // Enable keyboard interrupt
   pic_unmask_irq(1);
@@ -98,7 +103,7 @@ void _start(struct stivale2_struct* hdr) {
   term_write("Hello Kernel!\n", 14);
   kprint_mem_usage();
   kprint_c('\n');
-  translate(NULL);
+  translate(_start);
 
   // We're done, just hang...
   halt();
