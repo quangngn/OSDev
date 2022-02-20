@@ -8,13 +8,18 @@
 #include "stivale2.h"
 #include "util.h"
 
+// Define struct tag pointer to hold information about memory section. These
+// pointers will be init by reading provided struct tag from the bootloader.
+struct stivale2_struct_tag_memmap* mmap_struct_tag = NULL;
+struct stivale2_struct_tag_hhdm* hhdm_struct_tag = NULL;
+
 // Function to write to terminal is defined in stivale2 source
 extern term_write_t term_write;
 
 // Reserve space for the stack
 static uint8_t stack[8192];
 
-// Tell booloader to unmap the lower part 
+// Tell booloader to unmap the lower part
 static struct stivale2_tag unmap_null_hdr_tag = {
     .identifier = STIVALE2_HEADER_TAG_UNMAP_NULL_ID, .next = 0};
 
@@ -74,22 +79,16 @@ void term_setup(struct stivale2_struct* hdr) {
   kset_term_write((term_write_t)tag->term_write);
 }
 
-void memmap_setup(struct stivale2_struct* hdr) {
+void mem_struct_setup(struct stivale2_struct* hdr) {
   // Look for memmap struct tag and hhdm struct tag to get the physical memmory
-  struct stivale2_struct_tag_memmap* mmap_struct_tag =
-      find_tag(hdr, STIVALE2_STRUCT_TAG_MEMMAP_ID);
-  struct stivale2_struct_tag_hhdm* hhdm_struct_tag =
-      find_tag(hdr, STIVALE2_STRUCT_TAG_HHDM_ID);
-
-  // Init value for the mempry tag pointers in kprint.c, used for print mem
-  // usage
-  kset_mem_struct_tags(mmap_struct_tag, hhdm_struct_tag);
+  mmap_struct_tag = find_tag(hdr, STIVALE2_STRUCT_TAG_MEMMAP_ID);
+  hhdm_struct_tag = find_tag(hdr, STIVALE2_STRUCT_TAG_HHDM_ID);
 }
 
 void _start(struct stivale2_struct* hdr) {
   // We've booted! Let's start processing tags passed to use from the bootloader
   term_setup(hdr);
-  memmap_setup(hdr);
+  mem_struct_setup(hdr);
 
   // Set up the IDT to handler interruption
   idt_setup();

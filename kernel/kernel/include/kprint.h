@@ -13,6 +13,9 @@
 // Type of function to print to stivale2's terminal
 typedef void (*term_write_t)(const char*, size_t);
 
+// Set function to term_write
+void kset_term_write(term_write_t fn);
+
 // Count the number of character in the input string
 size_t kstrlen(const char* str);
 // Print a single character to the terminal
@@ -39,13 +42,6 @@ void kprintf(const char* format, ...);
 // "[P. Addr start]-[P. Addr end] mapped at [Vir. Addr start] - [Vir. Addr end]
 void kprint_mem_usage();
 
-// Set function to term_write
-void kset_term_write(term_write_t fn);
-// Set value to mmap_struct_tag and hhdm_struct_tag
-void kset_mem_struct_tags(
-    struct stivale2_struct_tag_memmap* new_mmap_struct_tag,
-    struct stivale2_struct_tag_hhdm* new_hhdm_struct_tag);
-
 /*
  * Read one character from the keyboard buffer. If the keyboard buffer is empty
  * this function will block until a key is pressed.
@@ -53,7 +49,6 @@ void kset_mem_struct_tags(
  * \returns the next character input from the keyboard
  */
 char kgetc();
-
 /**
  * Read a line of characters from the keyboard. Read characters until the buffer
  * fills or a newline character is read. If input ends with a newline, the

@@ -8,8 +8,8 @@ char buffer_hex_uint64[NUM_DIGIT_HEX_UINT64 + 1];
 
 // Pointers to memmap struct tag and hhdm struct tag to help with printing
 // memory usage
-struct stivale2_struct_tag_memmap* mmap_struct_tag = NULL;
-struct stivale2_struct_tag_hhdm* hhdm_struct_tag = NULL;
+extern struct stivale2_struct_tag_memmap* mmap_struct_tag;
+extern struct stivale2_struct_tag_hhdm* hhdm_struct_tag;
 
 // Function to write to terminal. Init as NULL. Set after read terminal
 // structure tag
@@ -24,6 +24,9 @@ keyboard_t keyboard = {.buffer = {.read = 0, .write = 0, .size = 0},
                        .ctrl = 0,
                        .shift = 0,
                        .capslock = 0};
+
+// Set value to term_write
+void kset_term_write(term_write_t fn) { term_write = fn; }
 
 // count the number of character in the input string
 size_t kstrlen(const char* str) {
@@ -190,18 +193,6 @@ void kprint_mem_usage() {
               mmap_entry->base + mmap_entry->length + hhdm_addr);
     }
   }
-}
-
-// Set value to term_write
-void kset_term_write(term_write_t fn) { term_write = fn; }
-
-// Set mmap_struct_tag and hhdm_struct_tag to the address of these structs. This
-// help with printing mem usage
-void kset_mem_struct_tags(
-    struct stivale2_struct_tag_memmap* new_mmap_struct_tag,
-    struct stivale2_struct_tag_hhdm* new_hhdm_struct_tag) {
-  mmap_struct_tag = new_mmap_struct_tag;
-  hhdm_struct_tag = new_hhdm_struct_tag;
 }
 
 /**

@@ -7,6 +7,14 @@
 #include "stivale2.h"
 #include "util.h"
 
+#define MAGIC_NUM 0x234ab234
+
+#define NUM_PT_ENTRIES 512
+// This is also the size of pml4 entry, pdpt entry, pd entry
+#define BYTE_SIZE_OF_PT_ENTRY 64
+// PAGE_SIZE = NUM_PT_ENTRIES * BYTE_SIZE_OF_PT_ENTRY
+#define PAGE_SIZE 4094
+
 // CR3 for Ordinary 4-level mapping with CR4.PCIDE = 0
 // Notice that PCIDE is the bit 17 of CR4
 typedef struct REG_CR3_CR4_PCIDE0 {
@@ -125,6 +133,55 @@ typedef struct pt_4kb_entry {
   // bit 63
   uint64_t exe_disable : 1;
 } __attribute__((packed)) pt_4kb_entry_t;
+
+// Define a struct type that can hold 4Kb data.
+// This is going to be used as page frame or entry for other page structure.
+typedef struct page_4kb {
+  uint64_t elems[NUM_PT_ENTRIES];
+} page_4kb_t;
+
+/**
+ * Initialized the free list structure in USABLE memory sections. Each block of
+ * this list would be 4kb.
+ *
+ * The fist
+ */
+bool init_free_list();
+
+/**
+ * Allocate a page of physical memory.
+ * \returns the physical address of the allocated physical memory or 0 on error.
+ */
+uintptr_t pmem_alloc();
+
+/**
+ * Free a page of physical memory.
+ * \param p is the physical address of the page to free, which must be
+ * page-aligned.
+ */
+void pmem_free(uintptr_t p);
+
+/**
+ * Map a single page of memory into a virtual address space.
+ * \param root The physical address of the top-level page table structure
+ * \param address The virtual address to map into the address space, must be
+ * page-aligned
+ * \param user Should the page be user-accessible?
+ * \param writable
+ * Should the page be writable?
+ * \param executable Should the page be executable?
+ * \returns true if the mapping succeeded, or false if there was an error
+ */
+bool vm_map(uintptr_t root, uintptr_t address, bool user, bool writable,
+            bool executable);
+
+/**
+ * Unmap a single page of memory from the virtual address space.
+ * \param root The physical address of the top-level page table structure
+ * \param address The virtual address to map into the address space, must be
+ * page-aligned
+ */
+bool vm_unmap(uintptr_t root, uintptr_t address);
 
 /**
  * Translate a virtual address to its mapped physical address
