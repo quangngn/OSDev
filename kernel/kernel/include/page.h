@@ -144,18 +144,27 @@ typedef struct page_4kb {
  * Initialized the free list structure in USABLE memory sections. Each block of
  * this list would be 4kb.
  *
- * The fist
+ * Each list element is one page_4kb_t element. The address to the next page
+ * would be stored in elems[0] (see the struct definition in page.h). The
+ * address is virtual address.
+ *
+ * We imagine that each free memory section is an array of page_4kb_t element.
+ * We will loop through them and add them to the top of the free list structure.
  */
 bool init_free_list();
 
 /**
- * Allocate a page of physical memory.
+ * Allocate a page of physical memory. We get the page on the top of the free
+ * list.
+ *
  * \returns the physical address of the allocated physical memory or 0 on error.
  */
 uintptr_t pmem_alloc();
 
 /**
- * Free a page of physical memory.
+ * Free a page of physical memory. The free list is put back the top of the free
+ * list.
+ *
  * \param p is the physical address of the page to free, which must be
  * page-aligned.
  */
@@ -163,8 +172,8 @@ void pmem_free(uintptr_t p);
 
 /**
  * Map a single page of memory into a virtual address space.
- * \param root The physical address of the top-level page table structure
- * \param address The virtual address to map into the address space, must be
+ * \param proot The physical address of the top-level page table structure
+ * \param vaddress The virtual address to map into the address space, must be
  * page-aligned
  * \param user Should the page be user-accessible?
  * \param writable
@@ -172,20 +181,20 @@ void pmem_free(uintptr_t p);
  * \param executable Should the page be executable?
  * \returns true if the mapping succeeded, or false if there was an error
  */
-bool vm_map(uintptr_t root, uintptr_t address, bool user, bool writable,
+bool vm_map(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
             bool executable);
 
 /**
  * Unmap a single page of memory from the virtual address space.
- * \param root The physical address of the top-level page table structure
- * \param address The virtual address to map into the address space, must be
+ * \param proot The physical address of the top-level page table structure
+ * \param vaddress The virtual address to map into the address space, must be
  * page-aligned
  */
-bool vm_unmap(uintptr_t root, uintptr_t address);
+bool vm_unmap(uintptr_t proot, uintptr_t vaddress);
 
 /**
  * Translate a virtual address to its mapped physical address
  *
- * \param address The virtual address to translate
+ * \param vaddress The virtual address to translate
  */
-void translate(void* address);
+void translate(void* vaddress);

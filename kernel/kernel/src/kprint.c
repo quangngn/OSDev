@@ -206,8 +206,7 @@ char kgetc() {
   char ret;
   // kb_read_c would return false if it failed to read character off the buffer
   // and true otherwise. The read character is put in ret variable.
-  while (!kb_read_c(&keyboard, &ret)) {
-  };
+  while (!kb_read_c(&keyboard, &ret)) {};
   // Return the read character
   return ret;
 }
@@ -220,12 +219,11 @@ char kgetc() {
  *
  * \param output A pointer to the beginning of an array where this function
  * should store characters. This function will write a null terminator into the
- * output array unless it fails. 
- * 
- * \param capacity The number of characters that
- * can safely be written to the output array including the final null
- * termiantor. 
- * 
+ * output array unless it fails.
+ *
+ * \param capacity The number of characters that can safely be written to the
+ * output array including the final null termiantor.
+ *
  * \returns The number of characters read, or zero if no characters
  * were read due to an error.
  */

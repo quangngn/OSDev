@@ -6,18 +6,23 @@ extern struct stivale2_struct_tag_hhdm* hhdm_struct_tag;
 extern struct stivale2_struct_tag_memmap* mmap_struct_tag;
 
 // Pointer that point to the head of the page structure
-page_4kb_t* freelist_header = NULL;
+page_4kb_t* vfree_list_header = NULL;
 
 /**
  * Initialized the free list structure in USABLE memory sections. Each block of
  * this list would be 4kb.
  *
- * The fist
+ * Each list element is one page_4kb_t element. The address to the next page
+ * would be stored in elems[0] (see the struct definition in page.h). The
+ * address is virtual address.
+ *
+ * We imagine that each free memory section is an array of page_4kb_t element.
+ * We will loop through them and add them to the top of the free list structure.
  */
 bool init_free_list() {
   // If the struct tags are not found, we return false
   if (mmap_struct_tag == NULL || hhdm_struct_tag == NULL) {
-    kprints("<Failed to read memory struct tags>\n");
+    kprints("[ERROR] init_free_list: failed to read memory struct tags\n");
     return false;
   } else {
     // Get base virtual address of hhdm
@@ -32,32 +37,19 @@ bool init_free_list() {
     for (int i = 0; i < mmap_struct_tag->entries; i++) {
       mmap_entry = &(mmap_struct_tag->memmap[i]);
       if (mmap_entry->type == STIVALE2_MMAP_TYPE_USABLE) {
-        // Init the value for block_header if the block_header is NULL
-        if (freelist_header == NULL) {
-          freelist_header = (page_4kb_t*)(mmap_entry->base + based_vir_addr);
-        }
+        // Virtual address pointing to the base of the memory section. This is
+        // also the address of the first page in the section.
+        uintptr_t vbase_section = mmap_entry->base + based_vir_addr;
 
-        // Init the cursor value. If the cursor is NULL (meaning this is the
-        // first section), cursor = base address of the section. If cursor is
-        // not NULL, (meaning it is pointing to the end of the previous cursor),
-        // we set the next pointer (aka the first element of block array) to the
-        // address of current section base and advance the cursor.
-        if (cursor == NULL) {
-          cursor = freelist_header;
-        } else {
-          cursor->elems[0] = mmap_entry->base + based_vir_addr;
-          cursor = (page_4kb_t*)(mmap_entry->base + based_vir_addr);
-        }
+        // Cursor that go through the usable memory section in page size
+        page_4kb_t* vcursor = (page_4kb_t*)vbase_section;
 
-        // Set up free list in the current usable memory section
-        while ((uintptr_t)(cursor + 1) <
-               mmap_entry->base + mmap_entry->length) {
-          // elems[0] of the freelist stores the address of the next block
-          cursor->elems[0] = (uintptr_t)(cursor + 1);
-          // elems[1] of the freelist stores the magic number
-          cursor->elems[1] = MAGIC_NUM;
-          // Advance cursor to the next block
-          cursor++;
+        // Add new page to the free list
+        while ((uintptr_t)vcursor < vbase_section + mmap_entry->length) {
+          // Store the next pointer in elems[0]
+          vcursor->elems[0] = (uint64_t)vfree_list_header;
+          vfree_list_header = vcursor;
+          vcursor++;
         }
       }
     }
@@ -65,68 +57,70 @@ bool init_free_list() {
 }
 
 /**
- * Allocate a page of physical memory.
+ * Allocate a page of physical memory. We get the page on the top of the free
+ * list.
+ *
  * \returns the physical address of the allocated physical memory or 0 on error.
  */
 uintptr_t pmem_alloc() {
-  if (freelist_header == NULL) {
-    return NULL;
+  if (vfree_list_header == NULL) {
+    return 0;
   } else {
-    uintptr_t ret = (uintptr_t)(&freelist_header);
-    freelist_header = (page_4kb_t*)(freelist_header->elems[0]);
-    // Overwrite the MAGIC NUM
-    ((page_4kb_t*)ret)->elems[1] = 0;
-    return ret;
+    // Get the virtual addr of the new allocated page
+    uintptr_t vret_addr = (uintptr_t)vfree_list_header;
+    // Advance the free list header to the next page
+    vfree_list_header = (page_4kb_t*)(vfree_list_header->elems[0]);
+    // Subtract vret_addr to hhdm base addr to get physical address
+    return vret_addr - hhdm_struct_tag->addr;
   }
 }
 
 /**
- * Free a page of physical memory.
+ * Free a page of physical memory. The free list is put back the top of the free
+ * list.
+ *
  * \param p is the physical address of the page to free, which must be
  * page-aligned.
  */
 void pmem_free(uintptr_t p) {
   // Early return of p is NULL
-  if (p == NULL || p % PAGE_SIZE != 0) {
-    kprint_s("The pointer p is either NULL or not page aligned!\n");
+  if (p == 0 || p % PAGE_SIZE != 0) {
+    kprint_s(
+        "[ERROR] pmem_free: the freed page pointer p is either NULL or not "
+        "page aligned!\n");
     return;
   }
-
   // Treat p as a pointer to the block_4kb_t. Put this block at the top of the
   // free list.
-  page_4kb_t* temp = (page_4kb_t*)p;
-  // Avoiding double free by checking the magic num;
-  if (temp->elems[1] == MAGIC_NUM) {
-    return;
-  }
-  // Update the free list' new header
-  temp->elems[0] = (uintptr_t)freelist_header;
-  temp->elems[1] = MAGIC_NUM;
-  freelist_header = temp;
+  page_4kb_t* vfree_addr = (page_4kb_t*)(p + hhdm_struct_tag->addr);
+
+  // Update the free list' new header by first set the next of vfree_addr to
+  // vfree_list_header
+  vfree_addr->elems[0] = (uint64_t)vfree_list_header;
+  // Make freed page to be the top of the free list
+  vfree_list_header = vfree_addr;
 }
 
 /**
  * Map a single page of memory into a virtual address space.
  * \param root The physical address of the top-level page table structure
- * \param address The virtual address to map into the address space, must be
+ * \param vaddress The virtual address to map into the address space, must be
  * page-aligned
  * \param user Should the page be user-accessible?
- * \param writable
- * Should the page be writable?
+ * \param writable Should the page be writable?
  * \param executable Should the page be executable?
  * \returns true if the mapping succeeded, or false if there was an error
  */
-bool vm_map(uintptr_t root, uintptr_t address, bool user, bool writable,
+bool vm_map(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
             bool executable) {
   // Early exit if root address = 0
-  if (root == 0) {
-    kprint_s("[vm_map FAILED] root is NULL\n");
+  if (proot == 0) {
+    kprint_s("[ERROR] vm_map: root is NULL\n");
     return false;
   }
-
   // Early exit if address is not page aligned
-  if (address & 0x7 != 0) {
-    kprints("[vm_map FAILED] address is not page aligned\n");
+  if (vaddress % PAGE_SIZE != 0) {
+    kprints("[ERROR] vm_map: address is not page aligned\n");
     return false;
   }
 
@@ -136,78 +130,82 @@ bool vm_map(uintptr_t root, uintptr_t address, bool user, bool writable,
 
   // Make an array of paging structure's entries indices from input address
   uint16_t indices[] = {
-      (uint64_t)address & 0xFFF, ((uint64_t)address >> 12) & 0x1FF,
-      ((uint64_t)address >> 21) & 0x1FF, ((uint64_t)address >> 30) & 0x1FF,
-      ((uint64_t)address >> 39) & 0x1FF};
+      (uint64_t)vaddress & 0xFFF, ((uint64_t)vaddress >> 12) & 0x1FF,
+      ((uint64_t)vaddress >> 21) & 0x1FF, ((uint64_t)vaddress >> 30) & 0x1FF,
+      ((uint64_t)vaddress >> 39) & 0x1FF};
 
   // Declare paging structure pointers
-  pml4_entry_t* pml4e;
-  pdpt_entry_t* pdpte;
-  pd_entry_t* pde;
-  pt_4kb_entry_t* pte;
+  pml4_entry_t* vpml4e;
+  pdpt_entry_t* vpdpte;
+  pd_entry_t* vpde;
+  pt_4kb_entry_t* vpte;
 
-  // Access pml4
-  pml4e = (pml4_entry_t*)((root << 12) + indices[4] + base_viraddr);
+  // Access pml4 entry
+  vpml4e = (pml4_entry_t*)((proot << 12) + base_viraddr);
+  vpml4e += indices[3];
 
-  // Access pdpte
-  if (pml4e->present == 0) {
+  // Access pdpt entry
+  if (vpml4e->present == 0) {
     // Allocate place for new pdpt and set its entries to 0
-    pdpte = (pdpt_entry_t*)pmem_alloc();
-    if (pdpte == NULL) return false;
-    pml4e->pdpt_phyaddr = (uint64_t)pdpte >> 12;
-    for (int i = 0; i < NUM_PT_ENTRIES; i++) ((uint64_t*)pdpte)[i] = 0;
-    pdpte += indices[3];
+    vpdpte = (pdpt_entry_t*)(pmem_alloc() + base_viraddr);
+    if (vpdpte == NULL) return false;
+    vpml4e->pdpt_phyaddr = (uint64_t)vpdpte >> 12;
+    for (int i = 0; i < NUM_PT_ENTRIES; i++) ((uint64_t*)vpdpte)[i] = 0;
+    vpdpte += indices[3];
     // Update pml4e
-    pml4e->present = 1;
-    pml4e->user_access = 1;
-    pml4e->writable = 1;
-    pml4e->exe_disable = 0;
+    vpml4e->present = 1;
+    vpml4e->user_access = 1;
+    vpml4e->writable = 1;
+    vpml4e->exe_disable = 0;
   } else {
-    pdpte = (pdpt_entry_t*)((pml4e->pdpt_phyaddr << 12) + indices[3] +
-                            base_viraddr);
+    vpdpte = (pdpt_entry_t*)((vpml4e->pdpt_phyaddr << 12) + base_viraddr);
+    vpdpte += indices[3];
   }
 
-  // Access pd
-  if (pdpte->present == 0) {
+  // Access pd entry
+  if (vpdpte->present == 0) {
     // Allocate place for new pd and set its entries to 0
-    pde = (pd_entry_t*)pmem_alloc();
-    if (pde == NULL) return false;
-    pdpte->pd_phyaddr = (uint64_t)pde >> 12;
-    for (int i = 0; i < NUM_PT_ENTRIES; i++) ((uint64_t*)pde)[i] = 0;
-    pde += indices[2];
+    vpde = (pd_entry_t*)(pmem_alloc() + base_viraddr);
+    if (vpde == NULL) return false;
+    vpdpte->pd_phyaddr = (uint64_t)vpde >> 12;
+    for (int i = 0; i < NUM_PT_ENTRIES; i++) ((uint64_t*)vpde)[i] = 0;
+    vpde += indices[2];
     // Update pdpte
-    pdpte->present = 1;
-    pdpte->user_access = 1;
-    pdpte->writable = 1;
-    pdpte->exe_disable = 0;
+    vpdpte->present = 1;
+    vpdpte->user_access = 1;
+    vpdpte->writable = 1;
+    vpdpte->exe_disable = 0;
   } else {
-    pde = (pd_entry_t*)((pdpte->pd_phyaddr << 12) + indices[2] + base_viraddr);
+    vpde = (pd_entry_t*)((vpdpte->pd_phyaddr << 12) + base_viraddr);
+    vpde += indices[2];
   }
 
-  // Access pt
-  if (pde->present == 0) {
+  // Access pt entry
+  if (vpde->present == 0) {
     // Allocate place for new pt and set its entries to 0
-    pte = (pt_4kb_entry_t*)pmem_alloc();
-    if (pte == NULL) return false;
-    pde->pt_phyaddr = (uint64_t)pte >> 12;
-    for (int i = 0; i < NUM_PT_ENTRIES; i++) ((uint64_t*)pte)[i] = 0;
-    pte += indices[1];
+    vpte = (pt_4kb_entry_t*)(pmem_alloc() + base_viraddr);
+    if (vpte == NULL) return false;
+    vpde->pt_phyaddr = (uint64_t)vpte >> 12;
+    for (int i = 0; i < NUM_PT_ENTRIES; i++) ((uint64_t*)vpte)[i] = 0;
+    vpte += indices[1];
     // Update pde
-    pde->present = 1;
-    pde->user_access = 1;
-    pde->writable = 1;
-    pde->exe_disable = 0;
+    vpde->present = 1;
+    vpde->user_access = 1;
+    vpde->writable = 1;
+    vpde->exe_disable = 0;
   } else {
-    pte =
-        (pt_4kb_entry_t*)((pde->pt_phyaddr << 12) + indices[1] + base_viraddr);
+    vpte = (pt_4kb_entry_t*)((vpde->pt_phyaddr << 12) + base_viraddr);
+    vpte += indices[1];
   }
 
   // Map the page to address space
-  if (pte->present == 0) {
-    pte->user_access = user ? 1 : 0;
-    pte->writable = writable ? 1 : 0;
-    pte->exe_disable = executable ? 0 : 1;
-    pte->phyaddr = indices[0];
+  if (vpte->present == 0) {
+    vpte->user_access = user ? 1 : 0;
+    vpte->writable = writable ? 1 : 0;
+    vpte->exe_disable = executable ? 0 : 1;
+
+    uintptr_t pnew_page_addr = pmem_alloc();
+    vpte->phyaddr = pnew_page_addr >> 12;
     return true;
   } else {
     kprints("[vm_map FAILED]Page is already mapped\n");
@@ -217,16 +215,18 @@ bool vm_map(uintptr_t root, uintptr_t address, bool user, bool writable,
 
 /**
  * Unmap the page from the memory address space
+ * \param proot The physical address of the top-level page table structure.
+ * \param vaddress The virtual address to map into the address space, must be
+ * page-aligned.
  */
-bool vm_map(uintptr_t root, uintptr_t address) {
+bool vm_unmap(uintptr_t proot, uintptr_t vaddress) {
   // Early exit if root address = 0
-  if (root == 0) {
+  if (proot == 0) {
     kprint_s("[vm_map FAILED] root is NULL\n");
     return false;
   }
-
   // Early exit if address is not page aligned
-  if (address & 0x7 != 0) {
+  if (vaddress % PAGE_SIZE != 0) {
     kprints("[vm_map FAILED] address is not page aligned\n");
     return false;
   }
@@ -237,9 +237,9 @@ bool vm_map(uintptr_t root, uintptr_t address) {
 
   // Make an array of paging structure's entries indices from input address
   uint16_t indices[] = {
-      (uint64_t)address & 0xFFF, ((uint64_t)address >> 12) & 0x1FF,
-      ((uint64_t)address >> 21) & 0x1FF, ((uint64_t)address >> 30) & 0x1FF,
-      ((uint64_t)address >> 39) & 0x1FF};
+      (uint64_t)vaddress & 0xFFF, ((uint64_t)vaddress >> 12) & 0x1FF,
+      ((uint64_t)vaddress >> 21) & 0x1FF, ((uint64_t)vaddress >> 30) & 0x1FF,
+      ((uint64_t)vaddress >> 39) & 0x1FF};
 
   // Declare paging structure pointers
   pml4_entry_t* pml4e;
@@ -251,7 +251,7 @@ bool vm_map(uintptr_t root, uintptr_t address) {
   pt_4kb_entry_t* pt;
 
   // Access pml4
-  pml4e = (pml4_entry_t*)((root << 12) + indices[4] + base_viraddr);
+  pml4e = (pml4_entry_t*)((proot << 12) + (indices[4] << 3) + base_viraddr);
 
   // Access pdpt
   if (pml4e->present == 1) {
@@ -272,12 +272,13 @@ bool vm_map(uintptr_t root, uintptr_t address) {
   // Access pt
   if (pde->present == 1) {
     pt = (pt_4kb_entry_t*)((pd->pt_phyaddr << 12) + base_viraddr);
-    pte = pt + indices[0];
+    pte = pt + indices[1];
   } else {
     return true;
   }
 
   // Unmap page
+  pmem_free(pte->phyaddr << 12);
   pte->present = 0;
   // Check if all pt entries are not present, if so free the higher level table
   // entry
@@ -305,11 +306,11 @@ bool vm_map(uintptr_t root, uintptr_t address) {
 /**
  * Translate a virtual address to its mapped physical address
  *
- * \param address The virtual address to translate
+ * \param vaddress The virtual address to translate
  */
-void translate(void* address) {
+void translate(void* vaddress) {
   // Print address to be translated
-  kprintf("Translating %p\n", address);
+  kprintf("Translating %p\n", vaddress);
 
   // Get the based address given by hhdm. In this case we assume that it is in
   // section 0
@@ -317,9 +318,9 @@ void translate(void* address) {
 
   // Make an array of paging structure's entries indices from input address
   uint16_t indices[] = {
-      (uint64_t)address & 0xFFF, ((uint64_t)address >> 12) & 0x1FF,
-      ((uint64_t)address >> 21) & 0x1FF, ((uint64_t)address >> 30) & 0x1FF,
-      ((uint64_t)address >> 39) & 0x1FF};
+      (uint64_t)vaddress & 0xFFF, ((uint64_t)vaddress >> 12) & 0x1FF,
+      ((uint64_t)vaddress >> 21) & 0x1FF, ((uint64_t)vaddress >> 30) & 0x1FF,
+      ((uint64_t)vaddress >> 39) & 0x1FF};
 
   // Get CR3 value
   // Since we cannot cast directly from uint64_t to REG_CR3_CR4_PCIDE0_t, we
@@ -332,101 +333,102 @@ void translate(void* address) {
   // pml4[0:2] = 000
   // pml4[3:11] = address[39:47]
   // pml4[12:51] = cr3[12:51]
-  pml4_entry_t* pml4 = (pml4_entry_t*)((cr3->pml4_phyaddr << 12) +
-                                       (indices[4] << 3) + base_viraddr);
+  pml4_entry_t* vpml4 = (pml4_entry_t*)((cr3->pml4_phyaddr << 12) +
+                                        (indices[4] << 3) + base_viraddr);
 
   // Get address to the Page Dir Pointer Table entry
   // pdpt[0:2] = 000
   // pdpt[3:11] = address[30:38]
   // pdpt[12:51] = pml4[12:51]
-  pdpt_entry_t* pdpt = (pdpt_entry_t*)((pml4->pdpt_phyaddr << 12) +
-                                       (indices[3] << 3) + base_viraddr);
+  pdpt_entry_t* vpdpt = (pdpt_entry_t*)((vpml4->pdpt_phyaddr << 12) +
+                                        (indices[3] << 3) + base_viraddr);
 
   // Get address to the Page Dir entry
   // pd[0:2] = 000
   // pd[3:11] = address[21:29]
   // pd[12:51] = pdpt[12:51]
-  pd_entry_t* pd = (pd_entry_t*)((pdpt->pd_phyaddr << 12) + (indices[2] << 3) +
-                                 base_viraddr);
+  pd_entry_t* vpd = (pd_entry_t*)((vpdpt->pd_phyaddr << 12) +
+                                  (indices[2] << 3) + base_viraddr);
 
   // Get address to the Page Table
   // pt[0:2] = 000
   // pt[3:11] = address[12:20]
   // pt[12:51] = pd[12:51]
-  pt_4kb_entry_t* pt = (pt_4kb_entry_t*)((pd->pt_phyaddr << 12) +
-                                         (indices[1] << 3) + base_viraddr);
-  kprintf("address present %d\n", pt->present);
+  pt_4kb_entry_t* vpt = (pt_4kb_entry_t*)((vpd->pt_phyaddr << 12) +
+                                          (indices[1] << 3) + base_viraddr);
+  kprintf("address present %d\n", vpt->present);
 
   // Physical Address
   // phyaddr[0:11] = address[0:11]
   // phyaddr[12:51] = pt[12:51]
-  uint64_t phy_page_num = pt->phyaddr;
+  uint64_t phy_page_num = vpt->phyaddr;
   uint64_t phyaddr = (phy_page_num << 12) + indices[0];
 
   // Print Level 4
   kprintf("  Level 4 (index %d of %p)\n", indices[4], cr3->pml4_phyaddr << 12);
-  if (pml4->user_access == 1) {
+  if (vpml4->user_access == 1) {
     kprint_s("    User ");
   } else {
     kprint_s("    Kernel ");
   }
-  if (pml4->writable == 1) {
+  if (vpml4->writable == 1) {
     kprint_s("Writable ");
   }
-  if (pml4->exe_disable == 0) {
+  if (vpml4->exe_disable == 0) {
     kprint_s("Executable ");
   }
-  kprintf(" -> %p\n", pdpt);
+  kprintf(" -> %p\n", vpdpt);
 
   // Print Level 3
-  kprintf("  Level 3 (index %d of %p)\n", indices[3], pml4->pdpt_phyaddr << 12);
-  if (pdpt->user_access == 1) {
+  kprintf("  Level 3 (index %d of %p)\n", indices[3],
+          vpml4->pdpt_phyaddr << 12);
+  if (vpdpt->user_access == 1) {
     kprint_s("    User ");
   } else {
     kprint_s("    Kernel ");
   }
-  if (pdpt->writable == 1) {
+  if (vpdpt->writable == 1) {
     kprint_s("Writable ");
   }
-  if (pdpt->exe_disable == 0) {
+  if (vpdpt->exe_disable == 0) {
     kprint_s("Executable ");
   }
-  kprintf(" -> %p\n", pd);
+  kprintf(" -> %p\n", vpd);
 
   // Print Level 2
-  kprintf("  Level 2 (index %d of %p)\n", indices[2], pdpt->pd_phyaddr << 12);
-  if (pd->user_access == 1) {
+  kprintf("  Level 2 (index %d of %p)\n", indices[2], vpdpt->pd_phyaddr << 12);
+  if (vpd->user_access == 1) {
     kprint_s("    User ");
   } else {
     kprint_s("    Kernel ");
   }
-  if (pd->writable == 1) {
+  if (vpd->writable == 1) {
     kprint_s("Writable ");
   }
-  if (pd->exe_disable == 0) {
+  if (vpd->exe_disable == 0) {
     kprint_s("Executable ");
   }
-  kprintf(" -> %p\n", pt);
+  kprintf(" -> %p\n", vpt);
 
   // Print Level 1
-  kprintf("  Level 1 (index %d of %p)\n", indices[1], pd->pt_phyaddr << 12);
-  if (pt->present == 0) {
+  kprintf("  Level 1 (index %d of %p)\n", indices[1], vpd->pt_phyaddr << 12);
+  if (vpt->present == 0) {
     kprint_s("Not present\n");
     return;
   }
-  if (pt->user_access == 1) {
+  if (vpt->user_access == 1) {
     kprint_s("    User ");
   } else {
     kprint_s("    Kernel ");
   }
-  if (pt->writable == 1) {
+  if (vpt->writable == 1) {
     kprint_s("Writable ");
   }
-  if (pt->exe_disable == 0) {
+  if (vpt->exe_disable == 0) {
     kprint_s("Executable ");
   }
   kprintf(" -> %p\n", phy_page_num);
 
   // Print conclusion
-  kprintf("%p maps to %p\n", address, phyaddr);
+  kprintf("%p maps to %p\n", vaddress, phyaddr);
 }
