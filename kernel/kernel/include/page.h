@@ -11,9 +11,9 @@
 
 #define NUM_PT_ENTRIES 512
 // This is also the size of pml4 entry, pdpt entry, pd entry
-#define BYTE_SIZE_OF_PT_ENTRY 64
+#define BYTE_SIZE_OF_PT_ENTRY 8
 // PAGE_SIZE = NUM_PT_ENTRIES * BYTE_SIZE_OF_PT_ENTRY
-#define PAGE_SIZE 4094
+#define PAGE_SIZE 4096
 
 // CR3 for Ordinary 4-level mapping with CR4.PCIDE = 0
 // Notice that PCIDE is the bit 17 of CR4

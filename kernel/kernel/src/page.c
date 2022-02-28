@@ -22,7 +22,7 @@ page_4kb_t* vfree_list_header = NULL;
 bool init_free_list() {
   // If the struct tags are not found, we return false
   if (mmap_struct_tag == NULL || hhdm_struct_tag == NULL) {
-    kprints("[ERROR] init_free_list: failed to read memory struct tags\n");
+    kprint_s("[ERROR] init_free_list: failed to read memory struct tags\n");
     return false;
   } else {
     // Get base virtual address of hhdm
@@ -30,7 +30,6 @@ bool init_free_list() {
 
     // Find USABLE memory section
     struct stivale2_mmap_entry* mmap_entry;
-    page_4kb_t* cursor = NULL;
 
     // Loop through each mem map section in mmap struct tag to find usable
     // section
@@ -46,7 +45,7 @@ bool init_free_list() {
 
         // Add new page to the free list
         while ((uintptr_t)vcursor < vbase_section + mmap_entry->length) {
-          // Store the next pointer in elems[0]
+          // Store the next node's address in elems[0]
           vcursor->elems[0] = (uint64_t)vfree_list_header;
           vfree_list_header = vcursor;
           vcursor++;
@@ -120,7 +119,7 @@ bool vm_map(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
   }
   // Early exit if address is not page aligned
   if (vaddress % PAGE_SIZE != 0) {
-    kprints("[ERROR] vm_map: address is not page aligned\n");
+    kprint_s("[ERROR] vm_map: address is not page aligned\n");
     return false;
   }
 
@@ -130,8 +129,10 @@ bool vm_map(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
 
   // Make an array of paging structure's entries indices from input address
   uint16_t indices[] = {
-      (uint64_t)vaddress & 0xFFF, ((uint64_t)vaddress >> 12) & 0x1FF,
-      ((uint64_t)vaddress >> 21) & 0x1FF, ((uint64_t)vaddress >> 30) & 0x1FF,
+      (uint64_t)vaddress & 0xFFF, 
+      ((uint64_t)vaddress >> 12) & 0x1FF,
+      ((uint64_t)vaddress >> 21) & 0x1FF, 
+      ((uint64_t)vaddress >> 30) & 0x1FF,
       ((uint64_t)vaddress >> 39) & 0x1FF};
 
   // Declare paging structure pointers
@@ -141,8 +142,8 @@ bool vm_map(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
   pt_4kb_entry_t* vpte;
 
   // Access pml4 entry
-  vpml4e = (pml4_entry_t*)((proot << 12) + base_viraddr);
-  vpml4e += indices[3];
+  vpml4e = (pml4_entry_t*)(proot + base_viraddr);
+  vpml4e += indices[4];
 
   // Access pdpt entry
   if (vpml4e->present == 0) {
@@ -208,7 +209,7 @@ bool vm_map(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
     vpte->phyaddr = pnew_page_addr >> 12;
     return true;
   } else {
-    kprints("[vm_map FAILED]Page is already mapped\n");
+    kprint_s("[vm_map FAILED]Page is already mapped\n");
     return false;
   }
 }
@@ -227,7 +228,7 @@ bool vm_unmap(uintptr_t proot, uintptr_t vaddress) {
   }
   // Early exit if address is not page aligned
   if (vaddress % PAGE_SIZE != 0) {
-    kprints("[vm_map FAILED] address is not page aligned\n");
+    kprint_s("[vm_map FAILED] address is not page aligned\n");
     return false;
   }
 

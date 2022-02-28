@@ -85,7 +85,14 @@ void mem_struct_setup(struct stivale2_struct* hdr) {
   hhdm_struct_tag = find_tag(hdr, STIVALE2_STRUCT_TAG_HHDM_ID);
 }
 
-void _start(struct stivale2_struct* hdr) {
+inline void enable_write_protection() {
+  // Enable write protection
+  uint64_t cr0 = read_cr0();
+  cr0 |= 0x10000;
+  write_cr0(cr0);
+}
+
+void setup_kernel(struct stivale2_struct* hdr) {
   // We've booted! Let's start processing tags passed to use from the bootloader
   term_setup(hdr);
   mem_struct_setup(hdr);
@@ -98,11 +105,22 @@ void _start(struct stivale2_struct* hdr) {
   // Enable keyboard interrupt
   pic_unmask_irq(1);
 
-  // Print a greeting
-  term_write("Hello Kernel!\n", 14);
-  kprint_mem_usage();
-  kprint_c('\n');
-  translate(_start);
+  // Enable write protection
+  enable_write_protection();
+}
+
+void _start(struct stivale2_struct* hdr) {
+  setup_kernel(hdr);
+
+  uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
+  int* p = (int*)0x50004000;
+  bool result = vm_map(root, (uintptr_t)p, false, true, false);
+  if (result) {
+    *p = 123;
+    kprintf("Stored %d at %p\n", *p, p);
+  } else {
+    kprintf("vm_map failed with an error\n");
+  }
 
   // We're done, just hang...
   halt();

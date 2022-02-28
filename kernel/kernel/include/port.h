@@ -25,4 +25,14 @@ static inline uintptr_t read_cr3() {
   return value;
 }
 
+static inline uint64_t read_cr0() {
+  uintptr_t value;
+  __asm__("mov %%cr0, %0" : "=r" (value));
+  return value;
+}
+
+static inline void write_cr0(uint64_t value) {
+  __asm__("mov %0, %%cr0" : : "r" (value));
+}
+
 static inline void io_wait() { outb(0x80, 0); }
