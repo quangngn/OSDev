@@ -5,11 +5,20 @@
 #include "pic.h"
 #include "port.h"
 #include "util.h"
+#include "syscall.h"
 
 #define KB_IN_PORT 0x60
 
 // keyboard is initialized in kprint.c
 extern keyboard_t keyboard;
+
+// External functions for system call handler
+//   syscall is defined in asm/syscall.s
+//   syscall_entry is defined in asm/syscall_entry.s.
+// The idea is that:
+// syscall(uint64_t nr, ...) -> trigger int 0x80 -> evoke syscall_entry()
+// which is an idt handler for system call interrupt, INT 0x80.
+extern void syscall_entry();
 
 // Make an IDT
 idt_entry_t idt[IDT_NUM_ENTRIES] __attribute__((aligned(8)));
@@ -140,6 +149,7 @@ __attribute__((interrupt)) void idt_handler_ctrl_proc_exception(
   halt();
 }
 
+// KEYBOARD INTERRUPT
 __attribute__((interrupt)) void idt_handler_keyboard(interrupt_context_t* ctx) {
   // Read the input value from keyboard and pass it to the keyboard obj
   kb_input_scan_code(&keyboard, inb(KB_IN_PORT));
@@ -201,7 +211,11 @@ void idt_setup() {
   idt_set_handler(20, idt_handler_vir_exception, IDT_TYPE_TRAP);
   idt_set_handler(21, idt_handler_ctrl_proc_exception, IDT_TYPE_TRAP);
 
+  // Setup keyboard system handler
   idt_set_handler(IRQ1_INTERRUPT, idt_handler_keyboard, IDT_TYPE_INTERRUPT);
+
+  // Setup system call handler
+  idt_set_handler(0x80, syscall_entry, IDT_TYPE_TRAP);
 
   // Step 3: Install the IDT
   idt_record_t record = {.size = sizeof(idt), .base = idt};

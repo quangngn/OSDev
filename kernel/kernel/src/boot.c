@@ -6,6 +6,7 @@
 #include "page.h"
 #include "pic.h"
 #include "stivale2.h"
+#include "syscall.h"
 #include "util.h"
 
 // Define struct tag pointer to hold information about memory section. These
@@ -15,6 +16,7 @@ struct stivale2_struct_tag_hhdm* hhdm_struct_tag = NULL;
 
 // Function to write to terminal is defined in stivale2 source
 extern term_write_t term_write;
+extern int64_t syscall(uint64_t nr, ...);
 
 // Reserve space for the stack
 static uint8_t stack[8192];
@@ -112,15 +114,7 @@ void setup_kernel(struct stivale2_struct* hdr) {
 void _start(struct stivale2_struct* hdr) {
   setup_kernel(hdr);
 
-  uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
-  int* p = (int*)0x50004000;
-  bool result = vm_map(root, (uintptr_t)p, false, true, false);
-  if (result) {
-    *p = 123;
-    kprintf("Stored %d at %p\n", *p, p);
-  } else {
-    kprintf("vm_map failed with an error\n");
-  }
+  syscall(1);
 
   // We're done, just hang...
   halt();
