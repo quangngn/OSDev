@@ -114,18 +114,6 @@ void setup_kernel(struct stivale2_struct* hdr) {
 void _start(struct stivale2_struct* hdr) {
   setup_kernel(hdr);
 
-  char buf[10];
-  long rc = read(STD_IN, buf, 5);
-  if (rc <= 0) {
-    kprintf("read failed\n");
-  } else {
-    buf[rc] = '\0';
-    kprintf("read '%s'\n", buf);
-  }
-
-  char x[] = "Quangasdfadfadfadfdf";
-  kprint_d(write(STD_OUT, x, 7));
-
   // We're done, just hang...
   halt();
 }
