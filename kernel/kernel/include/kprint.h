@@ -48,7 +48,7 @@ void kprint_mem_usage();
  *
  * \returns the next character input from the keyboard
  */
-char kgetc();
+char kget_c();
 /**
  * Read a line of characters from the keyboard. Read characters until the buffer
  * fills or a newline character is read. If input ends with a newline, the
@@ -66,4 +66,4 @@ char kgetc();
  * \returns The number of characters read, or zero if no characters
  * were read due to an error.
  */
-size_t kgets(char* output, size_t capacity);
+size_t kget_s(char* output, size_t capacity);

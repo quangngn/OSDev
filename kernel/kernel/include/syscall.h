@@ -30,7 +30,7 @@ int64_t read_handler(uint64_t f_descriptor, char* buff, size_t read_size);
  * Handler for write system call. Function prints characters in str up to the
  * write_size amount of characters. If the characters is null terminate, we
  * return immediately. The functions return -1 if error occurs, otherwise, we
- * return the number of written characters.
+ * return the number of written characters (exclude null terminate).
  */
 int64_t write_handler(uint64_t f_descriptor, const char* str,
                       size_t write_size);

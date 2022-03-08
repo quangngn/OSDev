@@ -17,7 +17,7 @@ term_write_t term_write = NULL;
 
 // Keyboard to handle the input. The input would trigger the interrupt handler
 // defined in idt.h. Then, the handler would write to circular buffer of
-// keyboard object. Function such as kgetc can utilize this buffer to read input
+// keyboard object. Function such as kget_c can utilize this buffer to read input
 // from keyboard
 keyboard_t keyboard = {.buffer = {.read = 0, .write = 0, .size = 0},
                        .alt = 0,
@@ -201,7 +201,7 @@ void kprint_mem_usage() {
  *
  * \returns the next character input from the keyboard
  */
-char kgetc() {
+char kget_c() {
   // Read from the keyboard buffer...
   char ret;
   // kb_read_c would return false if it failed to read character off the buffer
@@ -227,10 +227,10 @@ char kgetc() {
  * \returns The number of characters read, or zero if no characters
  * were read due to an error.
  */
-size_t kgets(char* output, size_t capacity) {
+size_t kget_s(char* output, size_t capacity) {
   char input_char;
   for (int i = 0; i < capacity; i++) {
-    input_char = kgetc();
+    input_char = kget_c();
     if (input_char == '\n') {
       output[i] = '\0';
       return i;

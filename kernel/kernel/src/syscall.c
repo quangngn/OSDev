@@ -50,7 +50,7 @@ int64_t read_handler(uint64_t f_descriptor, char* buff, size_t read_size) {
     int read_char_counter = 0;
     char c = '\0';
     while (read_char_counter < read_size) {
-      c = kgetc();
+      c = kget_c();
       if (c == '\n') {
         // Stop reading uppon getting newline character
         return read_char_counter;
@@ -77,7 +77,7 @@ int64_t read_handler(uint64_t f_descriptor, char* buff, size_t read_size) {
 int64_t write_handler(uint64_t f_descriptor, const char* str,
                       size_t write_size) {
   // Exit early if we do not write to the supported file descriptors
-  if (f_descriptor != STD_OUT || f_descriptor != STD_ERR) {
+  if (f_descriptor != STD_OUT && f_descriptor != STD_ERR) {
     return -1;
   }
 
