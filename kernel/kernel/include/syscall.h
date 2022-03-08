@@ -36,5 +36,5 @@ int64_t write_handler(uint64_t f_descriptor, const char* str,
                       size_t write_size);
 
 // Syscall wrappers: function that invoke the syscall() functions
-int64_t read(uint64_t f_descriptor, char* buff, size_t read_size);
-int64_t write(uint64_t f_descriptor, const char* str, size_t write_size);
+int64_t sys_read(uint64_t f_descriptor, char* buff, size_t read_size);
+int64_t sys_write(uint64_t f_descriptor, const char* str, size_t write_size);

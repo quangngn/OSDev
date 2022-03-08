@@ -96,11 +96,11 @@ int64_t write_handler(uint64_t f_descriptor, const char* str,
 
 // Syscall wrappers: function that invoke the syscall() functions
 // Wrapper to call read system call
-int64_t read(uint64_t f_descriptor, char* buff, size_t read_size) {
+int64_t sys_read(uint64_t f_descriptor, char* buff, size_t read_size) {
   return syscall(SYSCALL_READ, f_descriptor, (uint64_t)buff, read_size);
 }
 
 // Wrapper to call write system call
-int64_t write(uint64_t f_descriptor, const char* str, size_t write_size) {
+int64_t sys_write(uint64_t f_descriptor, const char* str, size_t write_size) {
   return syscall(SYSCALL_WRITE, f_descriptor, (uint64_t)str, write_size);
 }
