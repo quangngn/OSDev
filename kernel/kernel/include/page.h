@@ -12,7 +12,7 @@
 #define NUM_PT_ENTRIES 512
 // This is also the size of pml4 entry, pdpt entry, pd entry
 #define BYTE_SIZE_OF_PT_ENTRY 8
-// PAGE_SIZE = NUM_PT_ENTRIES * BYTE_SIZE_OF_PT_ENTRY
+// PAGE_SIZE = NUM_PT_ENTRIES * BYTE_SIZE_OF_PT_ENTRY = 4KB
 #define PAGE_SIZE 4096
 
 // CR3 for Ordinary 4-level mapping with CR4.PCIDE = 0
@@ -191,6 +191,13 @@ bool vm_map(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
  * page-aligned
  */
 bool vm_unmap(uintptr_t proot, uintptr_t vaddress);
+
+/**
+ * Change the protection mode of the mapped page. If the virtual address is not
+ * mapped, we return false. Return true if mode change success.
+ */
+bool vm_protect(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
+                bool executable);
 
 /**
  * Translate a virtual address to its mapped physical address

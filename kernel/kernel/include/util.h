@@ -35,3 +35,33 @@ static void* kmemset(void* ptr, int value, size_t num) {
   }
   return ptr;
 }
+
+// Copy memory from src to dest. Size is in byte
+static void kmemcpy(void* dst, void* src, size_t size) {
+  char* d = (char*) dst;
+  char* s = (char*) src;
+
+  for (int i = 0; i < size; i++) {
+    *d++ = *s++;
+  }
+}
+
+/**
+ * Function to call string comparison. In case 1 string is the prefix of the
+ * other string, the prefix is consider less than the other string.
+ */
+static int strcmp(const char* str1, const char* str2) {
+  int idx = 0;
+  while (true) {
+    if (str1[idx] < str2[idx]) {
+      return -1;
+    } else if (str1[idx] > str2[idx]) {
+      return 1;
+    } else if (str1[idx] == '\0' && str2[idx] == '\0') {
+      // We reach the end of both strings and all characters are checked to be
+      // the same
+      return 0;
+    }
+    idx++;
+  }
+}

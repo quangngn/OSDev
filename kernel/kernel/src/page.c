@@ -22,7 +22,7 @@ page_4kb_t* vfree_list_header = NULL;
 bool init_free_list() {
   // If the struct tags are not found, we return false
   if (mmap_struct_tag == NULL || hhdm_struct_tag == NULL) {
-    kprint_s("[ERROR] init_free_list: failed to read memory struct tags\n");
+    kprint_s("[ERROR] init_free_list: Failed to read memory struct tags\n");
     return false;
   } else {
     // Get base virtual address of hhdm
@@ -52,6 +52,7 @@ bool init_free_list() {
         }
       }
     }
+    return true;
   }
 }
 
@@ -114,12 +115,12 @@ bool vm_map(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
             bool executable) {
   // Early exit if root address = 0
   if (proot == 0) {
-    kprint_s("[ERROR] vm_map: root is NULL\n");
+    kprint_s("[ERROR] vm_map: proot is NULL\n");
     return false;
   }
   // Early exit if address is not page aligned
   if (vaddress % PAGE_SIZE != 0) {
-    kprint_s("[ERROR] vm_map: address is not page aligned\n");
+    kprint_s("[ERROR] vm_map: vaddress is not page aligned\n");
     return false;
   }
 
@@ -129,10 +130,8 @@ bool vm_map(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
 
   // Make an array of paging structure's entries indices from input address
   uint16_t indices[] = {
-      (uint64_t)vaddress & 0xFFF, 
-      ((uint64_t)vaddress >> 12) & 0x1FF,
-      ((uint64_t)vaddress >> 21) & 0x1FF, 
-      ((uint64_t)vaddress >> 30) & 0x1FF,
+      (uint64_t)vaddress & 0xFFF, ((uint64_t)vaddress >> 12) & 0x1FF,
+      ((uint64_t)vaddress >> 21) & 0x1FF, ((uint64_t)vaddress >> 30) & 0x1FF,
       ((uint64_t)vaddress >> 39) & 0x1FF};
 
   // Declare paging structure pointers
@@ -207,11 +206,10 @@ bool vm_map(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
 
     uintptr_t pnew_page_addr = pmem_alloc();
     vpte->phyaddr = pnew_page_addr >> 12;
-    return true;
   } else {
-    kprint_s("[vm_map FAILED]Page is already mapped\n");
-    return false;
+    kprint_s("[WARNING] vm_map: Page is already mapped\n");
   }
+  return true;
 }
 
 /**
@@ -223,12 +221,12 @@ bool vm_map(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
 bool vm_unmap(uintptr_t proot, uintptr_t vaddress) {
   // Early exit if root address = 0
   if (proot == 0) {
-    kprint_s("[vm_map FAILED] root is NULL\n");
+    kprint_s("[ERROR] vm_unmap: proot is NULL\n");
     return false;
   }
   // Early exit if address is not page aligned
   if (vaddress % PAGE_SIZE != 0) {
-    kprint_s("[vm_map FAILED] address is not page aligned\n");
+    kprint_s("[ERROR] vm_unmap: vaddress is not page aligned\n");
     return false;
   }
 
@@ -302,6 +300,82 @@ bool vm_unmap(uintptr_t proot, uintptr_t vaddress) {
   }
   pml4e->present = 0;
   return true;
+}
+
+/**
+ * Change the protection mode of the mapped page. If the virtual address is not
+ * mapped, we return false. Return true if mode change success.
+ */
+bool vm_protect(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
+                bool executable) {
+  // Early exit if root address = 0
+  if (proot == 0) {
+    kprint_s("[ERROR] vm_protect: proot is NULL\n");
+    return false;
+  }
+  // Early exit if address is not page aligned
+  if (vaddress % PAGE_SIZE != 0) {
+    kprint_s("[ERROR] vm_protect: vaddress is not page aligned\n");
+    return false;
+  }
+
+  // Get the based address given by hhdm. In this case we assume that it is in
+  // section 0
+  uint64_t base_viraddr = hhdm_struct_tag->addr;
+
+  // Make an array of paging structure's entries indices from input address
+  uint16_t indices[] = {
+      (uint64_t)vaddress & 0xFFF, ((uint64_t)vaddress >> 12) & 0x1FF,
+      ((uint64_t)vaddress >> 21) & 0x1FF, ((uint64_t)vaddress >> 30) & 0x1FF,
+      ((uint64_t)vaddress >> 39) & 0x1FF};
+
+  // Declare paging structure pointers
+  pml4_entry_t* vpml4e;
+  pdpt_entry_t* vpdpte;
+  pd_entry_t* vpde;
+  pt_4kb_entry_t* vpte;
+
+  // Access pml4 entry
+  vpml4e = (pml4_entry_t*)(proot + base_viraddr);
+  vpml4e += indices[4];
+
+  // Access pdpt entry
+  if (vpml4e->present == 0) {
+    kprint_s("[ERROR] vm_protect: PML4 entry not present\n");
+    return false;
+  } else {
+    vpdpte = (pdpt_entry_t*)((vpml4e->pdpt_phyaddr << 12) + base_viraddr);
+    vpdpte += indices[3];
+  }
+
+  // Access pd entry
+  if (vpdpte->present == 0) {
+    kprint_s("[ERROR] vm_protect: page dir pointer entry not present\n");
+    return false;
+  } else {
+    vpde = (pd_entry_t*)((vpdpte->pd_phyaddr << 12) + base_viraddr);
+    vpde += indices[2];
+  }
+
+  // Access pt entry
+  if (vpde->present == 0) {
+    kprint_s("[ERROR] vm_protect: page dir entry not present\n");
+    return false;
+  } else {
+    vpte = (pt_4kb_entry_t*)((vpde->pt_phyaddr << 12) + base_viraddr);
+    vpte += indices[1];
+  }
+
+  // Map the page to address space
+  if (vpte->present == 0) {
+    kprint_s("[ERROR] vm_protect: page table entry not present\n");
+    return false;
+  } else {
+    vpte->accessed = user;
+    vpte->writable = writable;
+    vpte->exe_disable = !executable;
+    return true;
+  }
 }
 
 /**

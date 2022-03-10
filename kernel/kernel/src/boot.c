@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "executable.h"
 #include "idt.h"
 #include "kprint.h"
 #include "page.h"
@@ -13,6 +14,7 @@
 // pointers will be init by reading provided struct tag from the bootloader.
 struct stivale2_struct_tag_memmap* mmap_struct_tag = NULL;
 struct stivale2_struct_tag_hhdm* hhdm_struct_tag = NULL;
+struct stivale2_struct_tag_modules* modules_struct_tag = NULL;
 
 // Function to write to terminal is defined in stivale2 source
 extern term_write_t term_write;
@@ -87,6 +89,10 @@ void mem_struct_setup(struct stivale2_struct* hdr) {
   hhdm_struct_tag = find_tag(hdr, STIVALE2_STRUCT_TAG_HHDM_ID);
 }
 
+void modules_struct_setup(struct stivale2_struct* hdr) {
+  modules_struct_tag = find_tag(hdr, STIVALE2_STRUCT_TAG_MODULES_ID);
+}
+
 inline void enable_write_protection() {
   // Enable write protection
   uint64_t cr0 = read_cr0();
@@ -95,9 +101,11 @@ inline void enable_write_protection() {
 }
 
 void setup_kernel(struct stivale2_struct* hdr) {
-  // We've booted! Let's start processing tags passed to use from the bootloader
+  // We've booted! Let's start processing tags passed to kernel from the
+  // bootloader
   term_setup(hdr);
   mem_struct_setup(hdr);
+  modules_struct_setup(hdr);
 
   // Set up the IDT to handler interruption
   idt_setup();
@@ -113,6 +121,12 @@ void setup_kernel(struct stivale2_struct* hdr) {
 
 void _start(struct stivale2_struct* hdr) {
   setup_kernel(hdr);
+
+  exe_entry_fn_t entry_func = NULL;
+  load_executatble("init", &entry_func);
+
+  // Call entry function
+  entry_func();
 
   // We're done, just hang...
   halt();
