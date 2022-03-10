@@ -24,6 +24,7 @@ bool load_segment(uintptr_t vaddr_seg, uint64_t size,
               vaddr_cur_page);
       return false;
     }
+    kprintf("Map segment address %p\n", vaddr_cur_page);
 
     // Copy content from the file image to the newly mapped page
     kmemcpy((void*)vaddr_cur_page, (void*)vaddr_seg_file_location, PAGE_SIZE);
@@ -78,7 +79,7 @@ bool load_executatble(const char* exe_name, exe_entry_fn_t* entry_func) {
       prog_hdr_t* cur_prog_hdr_entry = NULL;
       for (int seg_idx = 0; seg_idx < numb_segment; seg_idx++) {
         // Offset to the table entry
-        cur_prog_hdr_entry = &(prog_hdr_tbl_base[seg_idx]);
+        cur_prog_hdr_entry = &prog_hdr_tbl_base[seg_idx];
 
         // We only look for loadable segment for now
         if (cur_prog_hdr_entry->p_type != PT_LOAD) continue;
@@ -87,6 +88,7 @@ bool load_executatble(const char* exe_name, exe_entry_fn_t* entry_func) {
         uintptr_t vaddr_seg = cur_prog_hdr_entry->p_vaddr;
         uint64_t size = cur_prog_hdr_entry->p_mem_size;
         uint32_t flags = cur_prog_hdr_entry->p_flags;
+
         bool executable = (flags & PF_X) != 0;
         bool writable = (flags & PF_W) != 0;
         bool readable = (flags & PF_R) != 0;
@@ -98,10 +100,12 @@ bool load_executatble(const char* exe_name, exe_entry_fn_t* entry_func) {
         // Map and copy segment to a new address
         if (!load_segment(vaddr_seg, size, vaddr_seg_file_location, readable,
                           writable, executable)) {
-          kprintf("[ERROR] load_executatble: Load Segment failed, vaddr = %p\n",
+          kprintf("[ERROR] load_executatble: Load Segment failed, vaddr = % p\n",
                   vaddr_seg);
           return false;
         }
+        kprintf("Seg type %d, size %d, vaddress %p, flags %d\n",
+                cur_prog_hdr_entry->p_type, size, vaddr_seg, flags);
       }
 
       // 5. Set entry function address and return

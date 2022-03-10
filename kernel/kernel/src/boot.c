@@ -125,9 +125,6 @@ void _start(struct stivale2_struct* hdr) {
   exe_entry_fn_t entry_func = NULL;
   load_executatble("init", &entry_func);
 
-  // Call entry function
-  entry_func();
-
   // We're done, just hang...
   halt();
 }

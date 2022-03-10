@@ -207,7 +207,7 @@ bool vm_map(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
     uintptr_t pnew_page_addr = pmem_alloc();
     vpte->phyaddr = pnew_page_addr >> 12;
   } else {
-    kprint_s("[WARNING] vm_map: Page is already mapped\n");
+    kprintf("[WARNING] vm_map: Page is already mapped, vaddr = %p\n", vaddress);
   }
   return true;
 }
@@ -276,6 +276,10 @@ bool vm_unmap(uintptr_t proot, uintptr_t vaddress) {
     return true;
   }
 
+  if (pte->present == 0) {
+    return true;
+  }
+
   // Unmap page
   pmem_free(pte->phyaddr << 12);
   pte->present = 0;
@@ -284,6 +288,7 @@ bool vm_unmap(uintptr_t proot, uintptr_t vaddress) {
   for (int i = 0; i < NUM_PT_ENTRIES; i++) {
     if (pt[i].present == 1) return true;
   }
+  pmem_free(pt);
   pde->present = 0;
 
   // Check if all pd entries are not present, if so free the higher level table
@@ -291,6 +296,7 @@ bool vm_unmap(uintptr_t proot, uintptr_t vaddress) {
   for (int i = 0; i < NUM_PT_ENTRIES; i++) {
     if (pd[i].present == 1) return true;
   }
+  pmem_free(pd);
   pdpte->present = 0;
 
   // Check if all pdpt entries are not present, if so free the higher level
@@ -298,6 +304,7 @@ bool vm_unmap(uintptr_t proot, uintptr_t vaddress) {
   for (int i = 0; i < NUM_PT_ENTRIES; i++) {
     if (pdpt[i].present == 1) return true;
   }
+  pmem_free(pdpt);
   pml4e->present = 0;
   return true;
 }
