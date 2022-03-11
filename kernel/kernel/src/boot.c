@@ -115,6 +115,9 @@ void setup_kernel(struct stivale2_struct* hdr) {
   // Enable keyboard interrupt
   pic_unmask_irq(1);
 
+  // Init free list for mapping paging
+  init_free_list();
+
   // Enable write protection
   enable_write_protection();
 }
@@ -122,8 +125,12 @@ void setup_kernel(struct stivale2_struct* hdr) {
 void _start(struct stivale2_struct* hdr) {
   setup_kernel(hdr);
 
-  exe_entry_fn_t entry_func = NULL;
-  load_executatble("init", &entry_func);
+  // exe_entry_fn_t entry_func = NULL;
+  // load_executatble("init", &entry_func);
+  kprint_mem_usage();
+  uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
+  vm_map(root, (uintptr_t)0x500000000, false, true, false);
+  translate((void*)0x500000000);
 
   // We're done, just hang...
   halt();

@@ -41,6 +41,7 @@ size_t kstrlen(const char* str) {
   return len;
 }
 
+/******************************************************************************/
 // Print a single character to the terminal
 void kprint_c(char c) { term_write(&c, 1); }
 
@@ -195,6 +196,7 @@ void kprint_mem_usage() {
   }
 }
 
+/******************************************************************************/
 /**
  * Read one character from the keyboard buffer. If the keyboard buffer is empty
  * this function will block until a key is pressed.

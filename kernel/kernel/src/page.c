@@ -102,6 +102,11 @@ void pmem_free(uintptr_t p) {
 }
 
 /**
+ * Similar to pmem_free but the input is expected to be virtual memory.
+ */
+inline void vmem_free(uintptr_t v) { pmem_free(v - hhdm_struct_tag->addr); }
+
+/**
  * Map a single page of memory into a virtual address space.
  * \param root The physical address of the top-level page table structure
  * \param vaddress The virtual address to map into the address space, must be
@@ -126,13 +131,16 @@ bool vm_map(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
 
   // Get the based address given by hhdm. In this case we assume that it is in
   // section 0
-  uint64_t base_viraddr = hhdm_struct_tag->addr;
+  uint64_t base_vaddr = hhdm_struct_tag->addr;
 
   // Make an array of paging structure's entries indices from input address
   uint16_t indices[] = {
-      (uint64_t)vaddress & 0xFFF, ((uint64_t)vaddress >> 12) & 0x1FF,
-      ((uint64_t)vaddress >> 21) & 0x1FF, ((uint64_t)vaddress >> 30) & 0x1FF,
+      (uint64_t)vaddress & 0xFFF, 
+      ((uint64_t)vaddress >> 12) & 0x1FF,
+      ((uint64_t)vaddress >> 21) & 0x1FF, 
+      ((uint64_t)vaddress >> 30) & 0x1FF,
       ((uint64_t)vaddress >> 39) & 0x1FF};
+  kprintf("%x - %x - %x - %x - %x\n", indices[4], indices[3], indices[2], indices[1], indices[0]);
 
   // Declare paging structure pointers
   pml4_entry_t* vpml4e;
@@ -141,15 +149,16 @@ bool vm_map(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
   pt_4kb_entry_t* vpte;
 
   // Access pml4 entry
-  vpml4e = (pml4_entry_t*)(proot + base_viraddr);
-  vpml4e += indices[4];
+  vpml4e = (pml4_entry_t*)(proot + base_vaddr) + indices[4];
 
   // Access pdpt entry
   if (vpml4e->present == 0) {
     // Allocate place for new pdpt and set its entries to 0
-    vpdpte = (pdpt_entry_t*)(pmem_alloc() + base_viraddr);
-    if (vpdpte == NULL) return false;
+    vpdpte = (pdpt_entry_t*)pmem_alloc();
+    if ((uintptr_t)vpdpte == 0) return false;
     vpml4e->pdpt_phyaddr = (uint64_t)vpdpte >> 12;
+
+    vpdpte = (uintptr_t)vpdpte + base_vaddr;
     for (int i = 0; i < NUM_PT_ENTRIES; i++) ((uint64_t*)vpdpte)[i] = 0;
     vpdpte += indices[3];
     // Update pml4e
@@ -158,16 +167,18 @@ bool vm_map(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
     vpml4e->writable = 1;
     vpml4e->exe_disable = 0;
   } else {
-    vpdpte = (pdpt_entry_t*)((vpml4e->pdpt_phyaddr << 12) + base_viraddr);
+    vpdpte = (pdpt_entry_t*)((vpml4e->pdpt_phyaddr << 12) + base_vaddr);
     vpdpte += indices[3];
   }
 
   // Access pd entry
   if (vpdpte->present == 0) {
     // Allocate place for new pd and set its entries to 0
-    vpde = (pd_entry_t*)(pmem_alloc() + base_viraddr);
-    if (vpde == NULL) return false;
+    vpde = (pd_entry_t*)pmem_alloc();
+    if ((uintptr_t)vpde == 0) return false;
     vpdpte->pd_phyaddr = (uint64_t)vpde >> 12;
+
+    vpde = (uintptr_t)vpde + base_vaddr;
     for (int i = 0; i < NUM_PT_ENTRIES; i++) ((uint64_t*)vpde)[i] = 0;
     vpde += indices[2];
     // Update pdpte
@@ -176,16 +187,18 @@ bool vm_map(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
     vpdpte->writable = 1;
     vpdpte->exe_disable = 0;
   } else {
-    vpde = (pd_entry_t*)((vpdpte->pd_phyaddr << 12) + base_viraddr);
+    vpde = (pd_entry_t*)((vpdpte->pd_phyaddr << 12) + base_vaddr);
     vpde += indices[2];
   }
 
   // Access pt entry
   if (vpde->present == 0) {
     // Allocate place for new pt and set its entries to 0
-    vpte = (pt_4kb_entry_t*)(pmem_alloc() + base_viraddr);
-    if (vpte == NULL) return false;
+    vpte = (pt_4kb_entry_t*)pmem_alloc();
+    if ((uintptr_t)vpte == 0) return false;
     vpde->pt_phyaddr = (uint64_t)vpte >> 12;
+
+    vpte = (uintptr_t)vpte + base_vaddr;
     for (int i = 0; i < NUM_PT_ENTRIES; i++) ((uint64_t*)vpte)[i] = 0;
     vpte += indices[1];
     // Update pde
@@ -194,18 +207,19 @@ bool vm_map(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
     vpde->writable = 1;
     vpde->exe_disable = 0;
   } else {
-    vpte = (pt_4kb_entry_t*)((vpde->pt_phyaddr << 12) + base_viraddr);
+    vpte = (pt_4kb_entry_t*)((vpde->pt_phyaddr << 12) + base_vaddr);
     vpte += indices[1];
   }
 
   // Map the page to address space
   if (vpte->present == 0) {
+    uintptr_t pnew_page_addr = pmem_alloc();
+    if (pnew_page_addr == 0) return false;
+    vpte->phyaddr = pnew_page_addr >> 12;
     vpte->user_access = user ? 1 : 0;
     vpte->writable = writable ? 1 : 0;
     vpte->exe_disable = executable ? 0 : 1;
-
-    uintptr_t pnew_page_addr = pmem_alloc();
-    vpte->phyaddr = pnew_page_addr >> 12;
+    vpte->present = 1;
   } else {
     kprintf("[WARNING] vm_map: Page is already mapped, vaddr = %p\n", vaddress);
   }
@@ -241,71 +255,71 @@ bool vm_unmap(uintptr_t proot, uintptr_t vaddress) {
       ((uint64_t)vaddress >> 39) & 0x1FF};
 
   // Declare paging structure pointers
-  pml4_entry_t* pml4e;
-  pdpt_entry_t* pdpte;
-  pdpt_entry_t* pdpt;
-  pd_entry_t* pde;
-  pd_entry_t* pd;
-  pt_4kb_entry_t* pte;
-  pt_4kb_entry_t* pt;
+  pml4_entry_t* vpml4e;
+  pdpt_entry_t* vpdpte;
+  pdpt_entry_t* vpdpt;
+  pd_entry_t* vpde;
+  pd_entry_t* vpd;
+  pt_4kb_entry_t* vpte;
+  pt_4kb_entry_t* vpt;
 
   // Access pml4
-  pml4e = (pml4_entry_t*)((proot << 12) + (indices[4] << 3) + base_viraddr);
+  vpml4e = (pml4_entry_t*)((proot << 12) + (indices[4] << 3) + base_viraddr);
 
   // Access pdpt
-  if (pml4e->present == 1) {
-    pdpt = (pdpt_entry_t*)((pml4e->pdpt_phyaddr << 12) + base_viraddr);
-    pdpte = pdpt + indices[3];
+  if (vpml4e->present == 1) {
+    vpdpt = (pdpt_entry_t*)((vpml4e->pdpt_phyaddr << 12) + base_viraddr);
+    vpdpte = vpdpt + indices[3];
   } else {
     return true;
   }
 
   // Access pd
-  if (pdpte->present == 1) {
-    pd = (pd_entry_t*)((pdpte->pd_phyaddr << 12) + base_viraddr);
-    pde = pd + indices[2];
+  if (vpdpte->present == 1) {
+    vpd = (pd_entry_t*)((vpdpte->pd_phyaddr << 12) + base_viraddr);
+    vpde = vpd + indices[2];
   } else {
     return true;
   }
 
   // Access pt
-  if (pde->present == 1) {
-    pt = (pt_4kb_entry_t*)((pd->pt_phyaddr << 12) + base_viraddr);
-    pte = pt + indices[1];
+  if (vpde->present == 1) {
+    vpt = (pt_4kb_entry_t*)((vpd->pt_phyaddr << 12) + base_viraddr);
+    vpte = vpt + indices[1];
   } else {
     return true;
   }
 
-  if (pte->present == 0) {
+  if (vpte->present == 0) {
     return true;
   }
 
   // Unmap page
-  pmem_free(pte->phyaddr << 12);
-  pte->present = 0;
+  pmem_free(vpte->phyaddr << 12);
+  vpte->present = 0;
   // Check if all pt entries are not present, if so free the higher level table
   // entry
   for (int i = 0; i < NUM_PT_ENTRIES; i++) {
-    if (pt[i].present == 1) return true;
+    if (vpt[i].present == 1) return true;
   }
-  pmem_free(pt);
-  pde->present = 0;
+  vmem_free((uintptr_t)vpt);
+  vpde->present = 0;
 
   // Check if all pd entries are not present, if so free the higher level table
   // entry
   for (int i = 0; i < NUM_PT_ENTRIES; i++) {
-    if (pd[i].present == 1) return true;
+    if (vpd[i].present == 1) return true;
   }
-  pmem_free(pd);
-  pdpte->present = 0;
+  vmem_free((uintptr_t)vpd);
+  vpdpte->present = 0;
 
   // Check if all pdpt entries are not present, if so free the higher level
   // table entry
   for (int i = 0; i < NUM_PT_ENTRIES; i++) {
-    if (pdpt[i].present == 1) return true;
+    if (vpdpt[i].present == 1) return true;
   }
-  pmem_free(pdpt);
-  pml4e->present = 0;
+  vmem_free((uintptr_t)vpdpt);
+  vpml4e->present = 0;
   return true;
 }
 
@@ -385,6 +399,7 @@ bool vm_protect(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
   }
 }
 
+/******************************************************************************/
 /**
  * Translate a virtual address to its mapped physical address
  *
@@ -408,15 +423,17 @@ void translate(void* vaddress) {
   // Since we cannot cast directly from uint64_t to REG_CR3_CR4_PCIDE0_t, we
   // have to temporarily store the value in temp_cr3. After that we can use
   // pointer cast to treat temp_cr3 as REG_CR3_CR4_PCIDE0_t.
-  uint64_t temp_cr3 = (uint64_t)read_cr3();
-  REG_CR3_CR4_PCIDE0_t* cr3 = (REG_CR3_CR4_PCIDE0_t*)(&temp_cr3);
+  uint64_t proot = (uint64_t)read_cr3() & 0xFFFFFFFFFFFFF000;
 
   // Get address to the Page Map Level 4 entry
   // pml4[0:2] = 000
   // pml4[3:11] = address[39:47]
   // pml4[12:51] = cr3[12:51]
-  pml4_entry_t* vpml4 = (pml4_entry_t*)((cr3->pml4_phyaddr << 12) +
-                                        (indices[4] << 3) + base_viraddr);
+  pml4_entry_t* vpml4 = (pml4_entry_t*)(proot + base_viraddr) + indices[4];
+  if (vpml4->present == 0) {
+    kprintf("Memory not mapped: %p\n", vaddress);
+    return;
+  }
 
   // Get address to the Page Dir Pointer Table entry
   // pdpt[0:2] = 000
@@ -424,6 +441,10 @@ void translate(void* vaddress) {
   // pdpt[12:51] = pml4[12:51]
   pdpt_entry_t* vpdpt = (pdpt_entry_t*)((vpml4->pdpt_phyaddr << 12) +
                                         (indices[3] << 3) + base_viraddr);
+  if (vpdpt->present == 0) {
+    kprintf("Memory not mapped: %p\n", vaddress);
+    return;
+  }
 
   // Get address to the Page Dir entry
   // pd[0:2] = 000
@@ -431,6 +452,10 @@ void translate(void* vaddress) {
   // pd[12:51] = pdpt[12:51]
   pd_entry_t* vpd = (pd_entry_t*)((vpdpt->pd_phyaddr << 12) +
                                   (indices[2] << 3) + base_viraddr);
+  if (vpd->present == 0) {
+    kprintf("Memory not mapped: %p\n", vaddress);
+    return;
+  }
 
   // Get address to the Page Table
   // pt[0:2] = 000
@@ -438,6 +463,10 @@ void translate(void* vaddress) {
   // pt[12:51] = pd[12:51]
   pt_4kb_entry_t* vpt = (pt_4kb_entry_t*)((vpd->pt_phyaddr << 12) +
                                           (indices[1] << 3) + base_viraddr);
+  if (vpt->present == 0) {
+    kprintf("Memory not mapped: %p\n", vaddress);
+    return;
+  }
   kprintf("address present %d\n", vpt->present);
 
   // Physical Address
@@ -447,7 +476,7 @@ void translate(void* vaddress) {
   uint64_t phyaddr = (phy_page_num << 12) + indices[0];
 
   // Print Level 4
-  kprintf("  Level 4 (index %d of %p)\n", indices[4], cr3->pml4_phyaddr << 12);
+  kprintf("  Level 4 (index %d of %p)\n", indices[4], proot);
   if (vpml4->user_access == 1) {
     kprint_s("    User ");
   } else {
