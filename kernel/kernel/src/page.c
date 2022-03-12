@@ -135,12 +135,9 @@ bool vm_map(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
 
   // Make an array of paging structure's entries indices from input address
   uint16_t indices[] = {
-      (uint64_t)vaddress & 0xFFF, 
-      ((uint64_t)vaddress >> 12) & 0x1FF,
-      ((uint64_t)vaddress >> 21) & 0x1FF, 
-      ((uint64_t)vaddress >> 30) & 0x1FF,
+      (uint64_t)vaddress & 0xFFF, ((uint64_t)vaddress >> 12) & 0x1FF,
+      ((uint64_t)vaddress >> 21) & 0x1FF, ((uint64_t)vaddress >> 30) & 0x1FF,
       ((uint64_t)vaddress >> 39) & 0x1FF};
-  kprintf("%x - %x - %x - %x - %x\n", indices[4], indices[3], indices[2], indices[1], indices[0]);
 
   // Declare paging structure pointers
   pml4_entry_t* vpml4e;
@@ -154,12 +151,13 @@ bool vm_map(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
   // Access pdpt entry
   if (vpml4e->present == 0) {
     // Allocate place for new pdpt and set its entries to 0
+    // vpdpte is currently pointing to first entry of the pdpt
     vpdpte = (pdpt_entry_t*)pmem_alloc();
     if ((uintptr_t)vpdpte == 0) return false;
     vpml4e->pdpt_phyaddr = (uint64_t)vpdpte >> 12;
-
-    vpdpte = (uintptr_t)vpdpte + base_vaddr;
+    vpdpte = (pdpt_entry_t*)((uintptr_t)vpdpte + base_vaddr);
     for (int i = 0; i < NUM_PT_ENTRIES; i++) ((uint64_t*)vpdpte)[i] = 0;
+    // vpdpte is currently pointing to entry leading to target page table
     vpdpte += indices[3];
     // Update pml4e
     vpml4e->present = 1;
@@ -167,19 +165,20 @@ bool vm_map(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
     vpml4e->writable = 1;
     vpml4e->exe_disable = 0;
   } else {
-    vpdpte = (pdpt_entry_t*)((vpml4e->pdpt_phyaddr << 12) + base_vaddr);
-    vpdpte += indices[3];
+    vpdpte =
+        (pdpt_entry_t*)((vpml4e->pdpt_phyaddr << 12) + base_vaddr) + indices[3];
   }
 
   // Access pd entry
   if (vpdpte->present == 0) {
     // Allocate place for new pd and set its entries to 0
+    // vpde is currently pointing to first entry of the pd
     vpde = (pd_entry_t*)pmem_alloc();
     if ((uintptr_t)vpde == 0) return false;
     vpdpte->pd_phyaddr = (uint64_t)vpde >> 12;
-
-    vpde = (uintptr_t)vpde + base_vaddr;
+    vpde = (pd_entry_t*)((uintptr_t)vpde + base_vaddr);
     for (int i = 0; i < NUM_PT_ENTRIES; i++) ((uint64_t*)vpde)[i] = 0;
+    // vpde is currently pointing to entry leading to target page table
     vpde += indices[2];
     // Update pdpte
     vpdpte->present = 1;
@@ -187,19 +186,19 @@ bool vm_map(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
     vpdpte->writable = 1;
     vpdpte->exe_disable = 0;
   } else {
-    vpde = (pd_entry_t*)((vpdpte->pd_phyaddr << 12) + base_vaddr);
-    vpde += indices[2];
+    vpde = (pd_entry_t*)((vpdpte->pd_phyaddr << 12) + base_vaddr) + indices[2];
   }
 
   // Access pt entry
   if (vpde->present == 0) {
     // Allocate place for new pt and set its entries to 0
+    // vpte is currently pointing to first entry of the pd
     vpte = (pt_4kb_entry_t*)pmem_alloc();
     if ((uintptr_t)vpte == 0) return false;
     vpde->pt_phyaddr = (uint64_t)vpte >> 12;
-
-    vpte = (uintptr_t)vpte + base_vaddr;
+    vpte = (pt_4kb_entry_t*)((uintptr_t)vpte + base_vaddr);
     for (int i = 0; i < NUM_PT_ENTRIES; i++) ((uint64_t*)vpte)[i] = 0;
+    // vpte is currently pointing to of target page table entry
     vpte += indices[1];
     // Update pde
     vpde->present = 1;
@@ -207,8 +206,8 @@ bool vm_map(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
     vpde->writable = 1;
     vpde->exe_disable = 0;
   } else {
-    vpte = (pt_4kb_entry_t*)((vpde->pt_phyaddr << 12) + base_vaddr);
-    vpte += indices[1];
+    vpte =
+        (pt_4kb_entry_t*)((vpde->pt_phyaddr << 12) + base_vaddr) + indices[1];
   }
 
   // Map the page to address space
@@ -264,7 +263,7 @@ bool vm_unmap(uintptr_t proot, uintptr_t vaddress) {
   pt_4kb_entry_t* vpt;
 
   // Access pml4
-  vpml4e = (pml4_entry_t*)((proot << 12) + (indices[4] << 3) + base_viraddr);
+  vpml4e = (pml4_entry_t*)(proot + base_viraddr) + indices[4];
 
   // Access pdpt
   if (vpml4e->present == 1) {
@@ -294,7 +293,7 @@ bool vm_unmap(uintptr_t proot, uintptr_t vaddress) {
     return true;
   }
 
-  // Unmap page
+  // Unmap page and free allocated page
   pmem_free(vpte->phyaddr << 12);
   vpte->present = 0;
   // Check if all pt entries are not present, if so free the higher level table
@@ -431,7 +430,7 @@ void translate(void* vaddress) {
   // pml4[12:51] = cr3[12:51]
   pml4_entry_t* vpml4 = (pml4_entry_t*)(proot + base_viraddr) + indices[4];
   if (vpml4->present == 0) {
-    kprintf("Memory not mapped: %p\n", vaddress);
+    kprintf("Memory not mapped at lv4: %p\n", vaddress);
     return;
   }
 
@@ -442,7 +441,7 @@ void translate(void* vaddress) {
   pdpt_entry_t* vpdpt = (pdpt_entry_t*)((vpml4->pdpt_phyaddr << 12) +
                                         (indices[3] << 3) + base_viraddr);
   if (vpdpt->present == 0) {
-    kprintf("Memory not mapped: %p\n", vaddress);
+    kprintf("Memory not mapped at lv3: %p\n", vaddress);
     return;
   }
 
@@ -453,7 +452,7 @@ void translate(void* vaddress) {
   pd_entry_t* vpd = (pd_entry_t*)((vpdpt->pd_phyaddr << 12) +
                                   (indices[2] << 3) + base_viraddr);
   if (vpd->present == 0) {
-    kprintf("Memory not mapped: %p\n", vaddress);
+    kprintf("Memory not mapped at lv2: %p\n", vaddress);
     return;
   }
 
@@ -464,7 +463,7 @@ void translate(void* vaddress) {
   pt_4kb_entry_t* vpt = (pt_4kb_entry_t*)((vpd->pt_phyaddr << 12) +
                                           (indices[1] << 3) + base_viraddr);
   if (vpt->present == 0) {
-    kprintf("Memory not mapped: %p\n", vaddress);
+    kprintf("Memory not mapped at page table: %p\n", vaddress);
     return;
   }
   kprintf("address present %d\n", vpt->present);

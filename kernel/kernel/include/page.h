@@ -171,6 +171,11 @@ uintptr_t pmem_alloc();
 void pmem_free(uintptr_t p);
 
 /**
+ * Similar to pmem_free but the input is expected to be virtual memory.
+ */
+inline void vmem_free(uintptr_t v);
+
+/**
  * Map a single page of memory into a virtual address space.
  * \param proot The physical address of the top-level page table structure
  * \param vaddress The virtual address to map into the address space, must be

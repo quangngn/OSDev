@@ -5,6 +5,9 @@ void print_module_info(struct stivale2_module* module) {
           module->end);
 }
 
+/**
+ * 
+ */ 
 bool load_segment(uintptr_t vaddr_seg, uint64_t size,
                   uintptr_t vaddr_seg_file_location, bool readable,
                   bool writable, bool executable) {
@@ -24,7 +27,6 @@ bool load_segment(uintptr_t vaddr_seg, uint64_t size,
               vaddr_cur_page);
       return false;
     }
-    kprintf("Map segment address %p\n", vaddr_cur_page);
 
     // Copy content from the file image to the newly mapped page
     kmemcpy((void*)vaddr_cur_page, (void*)vaddr_seg_file_location, PAGE_SIZE);
