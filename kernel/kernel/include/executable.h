@@ -18,7 +18,7 @@
 #define PF_W 0x2
 #define PF_R 0x4
 
-typedef void (*exe_entry_fn_t)();
+typedef void (*exe_entry_fn_ptr_t)();
 
 // Extern modules struct tag defined in boot.c
 extern struct stivale2_struct_tag_modules* modules_struct_tag;
@@ -95,4 +95,4 @@ typedef struct sec_hdr {
 // Functions
 
 // Return the memory address of the executable's entry
-bool load_executatble(const char* exe_name, exe_entry_fn_t* entry_func);
+bool load_executatble(const char* exe_name, exe_entry_fn_ptr_t* entry_func);

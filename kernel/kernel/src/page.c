@@ -289,11 +289,10 @@ bool vm_unmap(uintptr_t proot, uintptr_t vaddress) {
     return true;
   }
 
+  // Unmap page and free allocated page
   if (vpte->present == 0) {
     return true;
   }
-
-  // Unmap page and free allocated page
   pmem_free(vpte->phyaddr << 12);
   vpte->present = 0;
   // Check if all pt entries are not present, if so free the higher level table

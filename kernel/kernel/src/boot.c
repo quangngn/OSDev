@@ -127,17 +127,20 @@ void _start(struct stivale2_struct* hdr) {
 
   // exe_entry_fn_t entry_func = NULL;
   // load_executatble("init", &entry_func);
-  kprint_mem_usage();
-  uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
-  vm_map(root, (uintptr_t)0x500000000, false, true, false);
-  translate((void*)0x500000000);
-  vm_map(root,(uintptr_t)0x500001000, false, true, false );
-  vm_map(root,(uintptr_t)0x500002000, false, true, false );
-  vm_map(root,(uintptr_t)0x500201000, false, true, false );
-  vm_unmap(root,0x500001000);
-  vm_unmap(root,0x500002000);
-  vm_unmap(root,0x500000000);
-  translate((void*)0x500000000);
+  // kprint_mem_usage();
+  // uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
+  // vm_map(root, (uintptr_t)0x500000000, false, true, false);
+  // translate((void*)0x500000000);
+  // vm_map(root,(uintptr_t)0x500001000, false, true, false );
+  // vm_map(root,(uintptr_t)0x500002000, false, true, false );
+  // vm_map(root,(uintptr_t)0x500201000, false, true, false );
+  // vm_unmap(root,0x500001000);
+  // vm_unmap(root,0x500002000);
+  // vm_unmap(root,0x500000000);
+  // translate((void*)0x500000000);
+  exe_entry_fn_ptr_t fn;
+  load_executatble("init", &fn);
+  fn();
 
   // We're done, just hang...
   halt();

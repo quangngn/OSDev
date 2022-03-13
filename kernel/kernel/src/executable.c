@@ -6,14 +6,13 @@ void print_module_info(struct stivale2_module* module) {
 }
 
 /**
- * 
- */ 
-bool load_segment(uintptr_t vaddr_seg, uint64_t size,
-                  uintptr_t vaddr_seg_file_location, bool readable,
-                  bool writable, bool executable) {
+ *
+ */
+bool load_segment(uintptr_t vaddr_seg, uint64_t size, uintptr_t vaddr_seg_file,
+                  bool readable, bool writable, bool executable) {
   // The segment might be bigger than a page size. As result, we need to map
   // multiple page
-  uintptr_t vaddr_cur_page = vaddr_seg;
+  uintptr_t vaddr_cur_page = vaddr_seg & 0xFFFFFFFFFFFFF000;
   uintptr_t vadd_end_seg = vaddr_seg + size;
 
   // Get top table physical root address
@@ -27,25 +26,31 @@ bool load_segment(uintptr_t vaddr_seg, uint64_t size,
               vaddr_cur_page);
       return false;
     }
+    // Advance address to the next page
+    vaddr_cur_page += PAGE_SIZE;
+  }
 
-    // Copy content from the file image to the newly mapped page
-    kmemcpy((void*)vaddr_cur_page, (void*)vaddr_seg_file_location, PAGE_SIZE);
+  // Copy content from the file image to the newly mapped page
+  kmemcpy((void*)vaddr_seg, (void*)vaddr_seg_file, size);
 
-    // After copying content to the newly mapped page, we set its protection
-    // mode according to defined in ELF program header table entry
+  // After copying content to the newly mapped page, we set its protection
+  // mode according to defined in ELF program header table entry
+  vaddr_cur_page = vaddr_seg & 0xFFFFFFFFFFFFF000;
+  while (vaddr_cur_page < vadd_end_seg) {
+    // Map the segment address to address space
     if (!vm_protect(proot, vaddr_cur_page, readable, writable, executable)) {
       kprintf("[ERROR] load_segment: Change protection failed, vaddr = %p\n",
               vaddr_cur_page);
       return false;
     }
-
     // Advance address to the next page
     vaddr_cur_page += PAGE_SIZE;
   }
+
   return true;
 }
 
-bool load_executatble(const char* exe_name, exe_entry_fn_t* entry_func) {
+bool load_executatble(const char* exe_name, exe_entry_fn_ptr_t* entry_func) {
   if (modules_struct_tag == NULL) {
     kprint_s("[Error] load_executatble: Unable to identify modules tag\n");
     return false;
@@ -96,23 +101,24 @@ bool load_executatble(const char* exe_name, exe_entry_fn_t* entry_func) {
         bool readable = (flags & PF_R) != 0;
         // Address of the segment in the image file. This is used for copying
         // the segment to new address
-        uint64_t vaddr_seg_file_location =
+        uint64_t vaddr_seg_file =
             cur_prog_hdr_entry->p_offset + (uintptr_t)e_hdr;
 
         // Map and copy segment to a new address
-        if (!load_segment(vaddr_seg, size, vaddr_seg_file_location, readable,
-                          writable, executable)) {
-          kprintf("[ERROR] load_executatble: Load Segment failed, vaddr = % p\n",
+        if (!load_segment(vaddr_seg, size, vaddr_seg_file, readable, writable,
+                          executable)) {
+          kprintf("[ERROR] load_executatble: Load Segment failed, vaddr = %p\n",
                   vaddr_seg);
           return false;
         }
-        kprintf("Seg type %d, size %d, vaddress %p, flags %d\n",
-                cur_prog_hdr_entry->p_type, size, vaddr_seg, flags);
+        kprintf(
+            "Numb segment %d, seg type %d, size %d, vaddress %p, flags %d\n",
+            numb_segment, cur_prog_hdr_entry->p_type, size, vaddr_seg, flags);
       }
 
       // 5. Set entry function address and return
       // Set entry function address
-      *entry_func = (exe_entry_fn_t)e_hdr->e_entry;
+      *entry_func = (exe_entry_fn_ptr_t)e_hdr->e_entry;
       return true;
     }
   }
