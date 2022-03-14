@@ -93,6 +93,9 @@ typedef struct sec_hdr {
 } sec_hdr_t;
 
 // Functions
-
-// Return the memory address of the executable's entry
+/**
+ * Function loads the first executable with matching name exe_name from stivale2
+ * module. The entry_func is going to be set to the entry address of the
+ * executable.
+ */
 bool load_executatble(const char* exe_name, exe_entry_fn_ptr_t* entry_func);

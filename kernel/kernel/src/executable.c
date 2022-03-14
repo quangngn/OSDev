@@ -6,7 +6,17 @@ void print_module_info(struct stivale2_module* module) {
 }
 
 /**
+ * This function handles mapping memory for the segment and copy data from the
+ * file image to the mapped memory region.
  *
+ * \param vaddr_seg: virtual address of the segment in the address space. This
+ * might not be page aligned. This is the destination of the copied segment
+ * \param size: size of the segment.
+ * \param vaddr_seg_file: virtual address of the segment in the file image. This
+ * is the source of the copying segment to newly mapped memory region.
+ * \param readable: read permission.
+ * \param writable: write permission.
+ * \param executable: execute permission.
  */
 bool load_segment(uintptr_t vaddr_seg, uint64_t size, uintptr_t vaddr_seg_file,
                   bool readable, bool writable, bool executable) {
@@ -50,6 +60,11 @@ bool load_segment(uintptr_t vaddr_seg, uint64_t size, uintptr_t vaddr_seg_file,
   return true;
 }
 
+/**
+ * Function loads the first executable with matching name exe_name from stivale2
+ * module. The entry_func is going to be set to the entry address of the
+ * executable.
+ */
 bool load_executatble(const char* exe_name, exe_entry_fn_ptr_t* entry_func) {
   if (modules_struct_tag == NULL) {
     kprint_s("[Error] load_executatble: Unable to identify modules tag\n");
@@ -111,9 +126,6 @@ bool load_executatble(const char* exe_name, exe_entry_fn_ptr_t* entry_func) {
                   vaddr_seg);
           return false;
         }
-        kprintf(
-            "Numb segment %d, seg type %d, size %d, vaddress %p, flags %d\n",
-            numb_segment, cur_prog_hdr_entry->p_type, size, vaddr_seg, flags);
       }
 
       // 5. Set entry function address and return
