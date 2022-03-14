@@ -78,7 +78,7 @@ void term_putchar(char c, uint8_t fg, uint8_t bg) {
   // Scroll if needed
   if (term_row == VGA_HEIGHT) {
     // Shift characters up a row
-    kmemcpy(term, &term[VGA_WIDTH],
+    kmemcpy((void*)term, (void*)(&term[VGA_WIDTH]),
             sizeof(vga_entry_t) * VGA_WIDTH * (VGA_HEIGHT - 1));
     term_row--;
 

@@ -101,6 +101,12 @@ inline void enable_write_protection() {
   write_cr0(cr0);
 }
 
+
+
+void invalidate_tlb(uintptr_t virtual_address) {
+   __asm__("invlpg (%0)" :: "r" (virtual_address) : "memory");
+}
+
 void setup_kernel(struct stivale2_struct* hdr) {
   // We've booted! Let's start processing tags passed to kernel from the
   // bootloader
@@ -122,6 +128,10 @@ void setup_kernel(struct stivale2_struct* hdr) {
   // Enable write protection
   enable_write_protection();
 
+  // Unmap lower half
+  uintptr_t proot = read_cr3() & 0xFFFFFFFFFFFFF000;
+  unmap_lower_half(proot);
+
   // Init terminal
   term_init();
 }
@@ -131,7 +141,7 @@ void _start(struct stivale2_struct* hdr) {
 
   sys_write(STD_ERR, "Error!\n", kstrlen("Error!\n"));
 
-  exe_entry_fn_ptr_t fn;
+  // exe_entry_fn_ptr_t fn;
   // load_executatble("init", &fn);
   // fn();
 

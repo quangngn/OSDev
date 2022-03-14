@@ -134,6 +134,21 @@ typedef struct pt_4kb_entry {
   uint64_t exe_disable : 1;
 } __attribute__((packed)) pt_4kb_entry_t;
 
+typedef struct page_table_entry {
+  bool present : 1;
+  bool writable : 1;
+  bool user : 1;
+  bool write_through : 1;
+  bool cache_disable : 1;
+  bool accessed : 1;
+  bool dirty : 1;
+  bool page_size : 1;
+  uint8_t _unused0 : 4;
+  uintptr_t address : 40;
+  uint16_t _unused1 : 11;
+  bool no_execute : 1;
+} __attribute__((packed)) pt_entry_t;
+
 // Define a struct type that can hold 4Kb data.
 // This is going to be used as page frame or entry for other page structure.
 typedef struct page_4kb {
@@ -203,6 +218,12 @@ bool vm_unmap(uintptr_t proot, uintptr_t vaddress);
  */
 bool vm_protect(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
                 bool executable);
+
+/**
+ * Unmap everything in the lower half of an address space with level 4 page
+ * table at address root
+ */
+void unmap_lower_half(uintptr_t root);
 
 /**
  * Translate a virtual address to its mapped physical address
