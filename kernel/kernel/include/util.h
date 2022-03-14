@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -38,8 +39,8 @@ static void* kmemset(void* ptr, int value, size_t num) {
 
 // Copy memory from src to dest. Size is in byte
 static void kmemcpy(void* dst, void* src, size_t size) {
-  char* d = (char*) dst;
-  char* s = (char*) src;
+  char* d = (char*)dst;
+  char* s = (char*)src;
 
   for (int i = 0; i < size; i++) {
     *d++ = *s++;

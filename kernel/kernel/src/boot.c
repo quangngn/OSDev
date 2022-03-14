@@ -8,6 +8,7 @@
 #include "pic.h"
 #include "stivale2.h"
 #include "syscall.h"
+#include "term.h"
 #include "util.h"
 
 // Define struct tag pointer to hold information about memory section. These
@@ -80,7 +81,7 @@ void term_setup(struct stivale2_struct* hdr) {
   if (tag == NULL) halt();
 
   // Save the term_write function pointer
-  kset_term_write((term_write_t)tag->term_write);
+  kset_term_write((term_write_t)term_puts);
 }
 
 void mem_struct_setup(struct stivale2_struct* hdr) {
@@ -120,14 +121,19 @@ void setup_kernel(struct stivale2_struct* hdr) {
 
   // Enable write protection
   enable_write_protection();
+
+  // Init terminal
+  term_init();
 }
 
 void _start(struct stivale2_struct* hdr) {
   setup_kernel(hdr);
-  
+
+  sys_write(STD_ERR, "Error!\n", kstrlen("Error!\n"));
+
   exe_entry_fn_ptr_t fn;
-  load_executatble("init", &fn);
-  fn();
+  // load_executatble("init", &fn);
+  // fn();
 
   // We're done, just hang...
   halt();

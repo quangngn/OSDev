@@ -1,7 +1,5 @@
 #include "syscall.h"
 
-#include "keyboard.h"
-
 // External functions for system call handler. syscall(uint64_t nr, ...) is
 // defined in asm/syscall.s
 extern int64_t syscall(uint64_t nr, ...);
@@ -81,11 +79,14 @@ int64_t write_handler(uint64_t f_descriptor, const char* str,
     return -1;
   }
 
+  uint8_t fg = (f_descriptor == STD_ERR) ? VGA_COLOR_RED : VGA_COLOR_WHITE;
+  uint8_t bg = VGA_COLOR_BLACK;
+
   // Repeat printing characters one by one. If we print null terminate, we 
   int i = 0;
   while (i < write_size) {
     if (str[i] != '\0') {
-      kprint_c(str[i]);
+      term_putchar(str[i], fg, bg);
       i++;
     } else {
       return i;

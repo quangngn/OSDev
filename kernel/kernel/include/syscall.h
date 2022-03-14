@@ -2,7 +2,9 @@
 
 #include <stdint.h>
 
+#include "keyboard.h"
 #include "kprint.h"
+#include "term.h"
 
 #define SYSCALL_READ 0
 #define SYSCALL_WRITE 1

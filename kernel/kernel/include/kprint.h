@@ -6,12 +6,13 @@
 
 #include "keyboard.h"
 #include "stivale2.h"
+#include "term.h"
 
 #define NUM_DIGIT_DEC_UINT64 20
 #define NUM_DIGIT_HEX_UINT64 16
 
 // Type of function to print to stivale2's terminal
-typedef void (*term_write_t)(const char*, size_t);
+typedef void (*term_write_t)(const char*, size_t, uint8_t fg, uint8_t bg);
 
 // Set function to term_write
 void kset_term_write(term_write_t fn);

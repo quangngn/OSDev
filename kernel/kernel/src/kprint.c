@@ -1,7 +1,5 @@
 #include "kprint.h"
 
-#include "keyboard.h"
-
 // Buffers being used to store digit characters when printing number
 char buffer_dec_uint64[NUM_DIGIT_DEC_UINT64 + 1];
 char buffer_hex_uint64[NUM_DIGIT_HEX_UINT64 + 1];
@@ -17,8 +15,8 @@ term_write_t term_write = NULL;
 
 // Keyboard to handle the input. The input would trigger the interrupt handler
 // defined in idt.h. Then, the handler would write to circular buffer of
-// keyboard object. Function such as kget_c can utilize this buffer to read input
-// from keyboard
+// keyboard object. Function such as kget_c can utilize this buffer to read
+// input from keyboard
 keyboard_t keyboard = {.buffer = {.read = 0, .write = 0, .size = 0},
                        .alt = 0,
                        .ctrl = 0,
@@ -43,10 +41,12 @@ size_t kstrlen(const char* str) {
 
 /******************************************************************************/
 // Print a single character to the terminal
-void kprint_c(char c) { term_write(&c, 1); }
+void kprint_c(char c) { term_write(&c, 1, VGA_COLOR_WHITE, VGA_COLOR_BLACK); }
 
 // Print a string to the terminal
-void kprint_s(const char* str) { term_write(str, kstrlen(str)); }
+void kprint_s(const char* str) {
+  term_write(str, kstrlen(str), VGA_COLOR_WHITE, VGA_COLOR_BLACK);
+}
 
 // Print an unsigned 64-bit integer value to the terminal in decimal notation
 // (no leading zeros please!)
@@ -71,7 +71,7 @@ void kprint_d(uint64_t value) {
       num_digit++;
     }
 
-    term_write(cursor, num_digit);
+    term_write(cursor, num_digit, VGA_COLOR_WHITE, VGA_COLOR_BLACK);
   }
 }
 
@@ -99,7 +99,7 @@ void kprint_x(uint64_t value) {
       num_digit++;
     }
 
-    term_write(cursor, num_digit);
+    term_write(cursor, num_digit, VGA_COLOR_WHITE, VGA_COLOR_BLACK);
   }
 }
 
@@ -208,7 +208,8 @@ char kget_c() {
   char ret;
   // kb_read_c would return false if it failed to read character off the buffer
   // and true otherwise. The read character is put in ret variable.
-  while (!kb_read_c(&keyboard, &ret)) {};
+  while (!kb_read_c(&keyboard, &ret)) {
+  };
   // Return the read character
   return ret;
 }
