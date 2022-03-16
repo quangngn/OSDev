@@ -1,9 +1,8 @@
 CC := clang -target x86_64-elf
 LD := x86_64-elf-ld
 
-CFLAGS := --std=c17 -Wall -O2 -I. -ffreestanding -nostdlib -fno-stack-protector -fno-pic -mno-80387 -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-red-zone -mcmodel=medium -MMD -MP
-
-LDFLAGS := -nostdlib -static
+CFLAGS := --std=c17 -Wall -O2 -I. -isystem ../stdlib -ffreestanding -nostdlib -fno-stack-protector -fno-pic -mno-80387 -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-red-zone -mcmodel=medium -MMD -MP
+LDFLAGS := -nostdlib -static -L../stdlib -lc
 
 OUT := obj
 
@@ -20,8 +19,8 @@ all: init
 clean:
 	rm -rf init $(OUT)
 
-init: $(C_OBJ) $(S_OBJ) linker.ld
-	$(LD) $(LDFLAGS) -T linker.ld -o $@ $(C_OBJ) $(S_OBJ)
+init: $(C_OBJ) $(S_OBJ) linker.ld ../stdlib/libc.a
+	$(LD) -T linker.ld -o $@ $(C_OBJ) $(S_OBJ) $(LDFLAGS)
 
 $(C_OBJ): $(OUT)/%.o: %.c
 	@mkdir -p `dirname $@`

@@ -8,15 +8,20 @@ run: boot.iso
 .PHONY: clean
 clean:
 	rm -f iso_root boot.iso
+	$(MAKE) -C stdlib clean
 	$(MAKE) -C kernel clean
 	$(MAKE) -C init clean
 
+.PHONY: stdlib
+stdlib:
+	$(MAKE) -C stdlib
+
 .PHONY: kernel
-kernel:
+kernel: stdlib
 	$(MAKE) -C kernel
 
 .PHONY: init
-init:
+init: stdlib
 	$(MAKE) -C init
 
 limine:

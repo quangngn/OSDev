@@ -4,7 +4,8 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/kernel/kernel/include"
+                "${workspaceFolder}/kernel/kernel/include",
+                "${workspaceFolder}/kernel/stdlib/include"
             ],
             "defines": [],
             "macFrameworkPath": [
