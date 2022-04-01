@@ -3,14 +3,11 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
-
+#include "syscall.h"
 #include "string.h"
 
 #define NUM_DIGIT_DEC_UINT64 20
 #define NUM_DIGIT_HEX_UINT64 16
-
-#define SYSCALL_READ 0
-#define SYSCALL_WRITE 1
 
 #define STD_IN 0
 #define STD_OUT 1

@@ -143,7 +143,6 @@ int printf(const char* format, ...) {
 }
 
 /******************************************************************************/
-
 /**
  * Read the entire line from stream. The buffer is malloc, null-terminated, and
  * include new line character if it read one. If the buffer is not large enough,

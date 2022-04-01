@@ -106,6 +106,7 @@ void pmem_free(uintptr_t p) {
  */
 inline void vmem_free(uintptr_t v) { pmem_free(v - hhdm_struct_tag->addr); }
 
+/******************************************************************************/
 /**
  * Map a single page of memory into a virtual address space.
  * \param root The physical address of the top-level page table structure
@@ -121,11 +122,6 @@ bool vm_map(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
   // Early exit if root address = 0
   if (proot == 0) {
     kprint_s("[ERROR] vm_map: proot is NULL\n");
-    return false;
-  }
-  // Early exit if address is not page aligned
-  if (vaddress % PAGE_SIZE != 0) {
-    kprint_s("[ERROR] vm_map: vaddress is not page aligned\n");
     return false;
   }
 
@@ -237,11 +233,6 @@ bool vm_unmap(uintptr_t proot, uintptr_t vaddress) {
     kprint_s("[ERROR] vm_unmap: proot is NULL\n");
     return false;
   }
-  // Early exit if address is not page aligned
-  if (vaddress % PAGE_SIZE != 0) {
-    kprint_s("[ERROR] vm_unmap: vaddress is not page aligned\n");
-    return false;
-  }
 
   // Get the based address given by hhdm. In this case we assume that it is in
   // section 0
@@ -330,11 +321,6 @@ bool vm_protect(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
   // Early exit if root address = 0
   if (proot == 0) {
     kprint_s("[ERROR] vm_protect: proot is NULL\n");
-    return false;
-  }
-  // Early exit if address is not page aligned
-  if (vaddress % PAGE_SIZE != 0) {
-    kprint_s("[ERROR] vm_protect: vaddress is not page aligned\n");
     return false;
   }
 

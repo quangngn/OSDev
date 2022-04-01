@@ -25,11 +25,36 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1,
        * arg2: write size
        */
       return write_handler(arg0, (const char*)arg1, arg2);
+    case SYSCALL_MMAP:
+      uintptr_t proot = read_cr3() & 0xFFFFFFFFFFFFF000;
+      /**
+       * arg0: vaddress
+       * arg1: user permission (currently same with readable)
+       * arg2: write permission
+       * arg3: execute permission
+       */
+      return vm_map(proot, (uintptr_t)arg0, (bool)arg1, (bool)arg2, (bool)arg3);
+    case SYSCALL_MPROTECT:
+      uintptr_t proot = read_cr3() & 0xFFFFFFFFFFFFF000;
+      /**
+       * arg0: vaddress
+       * arg1: user permission (currently same with readable)
+       * arg2: write permission
+       * arg3: execute permission
+       */
+      return vm_protect(proot, (uintptr_t)arg0, (bool)arg1, (bool)arg2,
+                        (bool)arg3);
+    case SYSCALL_MUNMAP:
+      uintptr_t proot = read_cr3() & 0xFFFFFFFFFFFFF000;
+      /**
+       * arg0: vaddress
+       */
+
     default:
       return -1;
   }
 }
-
+/******************************************************************************/
 // Syscall handlers: functions to process system calls
 /**
  *  Handlers for read system call. Return the number of read characters
@@ -43,8 +68,8 @@ int64_t read_handler(uint64_t f_descriptor, char* buff, size_t read_size) {
   if (f_descriptor != STD_IN) {
     return -1;
   } else {
-    // Count the number of read characters so far. This is also used as the index
-    // for the next available slot for new character to be read.
+    // Count the number of read characters so far. This is also used as the
+    // index for the next available slot for new character to be read.
     int read_char_counter = 0;
     char c = '\0';
     while (read_char_counter < read_size) {
@@ -82,7 +107,7 @@ int64_t write_handler(uint64_t f_descriptor, const char* str,
   uint8_t fg = (f_descriptor == STD_ERR) ? VGA_COLOR_RED : VGA_COLOR_WHITE;
   uint8_t bg = VGA_COLOR_BLACK;
 
-  // Repeat printing characters one by one. If we print null terminate, we 
+  // Repeat printing characters one by one. If we print null terminate, we
   int i = 0;
   while (i < write_size) {
     if (str[i] != '\0') {

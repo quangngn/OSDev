@@ -4,10 +4,15 @@
 
 #include "keyboard.h"
 #include "kprint.h"
+#include "page.h"
+#include "port.h"
 #include "term.h"
 
 #define SYSCALL_READ 0
 #define SYSCALL_WRITE 1
+#define SYSCALL_MMAP 9
+#define SYSCALL_MPROTECT 10
+#define SYSCALL_MUNMAP 11
 
 #define STD_IN 0
 #define STD_OUT 1
