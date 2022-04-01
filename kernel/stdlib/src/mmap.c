@@ -10,7 +10,7 @@ void *mmap(void *addr, size_t length, int prot, int flags, int fd,
   bool readable = (prot & PROT_READ) != 0;
   bool executable = (prot & PROT_EXEC) != 0;
 
-  uintptr_t cursor = (uintptr_t)addr;
+  uintptr_t cursor = (uintptr_t)addr & PAGE_ALIGN_MASK;
   uintptr_t end = (uintptr_t)addr + length;
 
   while (cursor < end) {
@@ -26,7 +26,7 @@ void *mmap(void *addr, size_t length, int prot, int flags, int fd,
  * Unmmap chunk of virtual memory address starting at vaddr.
  */
 int munmap(void *addr, size_t length) {
-  uintptr_t cursor = (uintptr_t)addr;
+  uintptr_t cursor = (uintptr_t)addr & PAGE_ALIGN_MASK;
   uintptr_t end = (uintptr_t)addr + length;
 
   while (cursor < end) {
@@ -47,7 +47,7 @@ int mprotect(void *addr, size_t length, int prot) {
   bool readable = (prot & PROT_READ) != 0;
   bool executable = (prot & PROT_EXEC) != 0;
 
-  uintptr_t cursor = (uintptr_t)addr;
+  uintptr_t cursor = (uintptr_t)addr & PAGE_ALIGN_MASK;
   uintptr_t end = (uintptr_t)addr + length;
 
   while (cursor < end) {

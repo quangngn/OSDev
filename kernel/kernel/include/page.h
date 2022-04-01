@@ -14,6 +14,7 @@
 #define BYTE_SIZE_OF_PT_ENTRY 8
 // PAGE_SIZE = NUM_PT_ENTRIES * BYTE_SIZE_OF_PT_ENTRY = 4KB
 #define PAGE_SIZE 4096
+#define PAGE_ALIGN_MASK 0xFFFFFFFFFFFFF000
 
 // CR3 for Ordinary 4-level mapping with CR4.PCIDE = 0
 // Notice that PCIDE is the bit 17 of CR4

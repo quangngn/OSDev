@@ -22,11 +22,11 @@ bool load_segment(uintptr_t vaddr_seg, uint64_t size, uintptr_t vaddr_seg_file,
                   bool readable, bool writable, bool executable) {
   // The segment might be bigger than a page size. As result, we need to map
   // multiple page
-  uintptr_t vaddr_cur_page = vaddr_seg & 0xFFFFFFFFFFFFF000;
+  uintptr_t vaddr_cur_page = vaddr_seg & PAGE_ALIGN_MASK;
   uintptr_t vadd_end_seg = vaddr_seg + size;
 
   // Get top table physical root address
-  uintptr_t proot = read_cr3() & 0xFFFFFFFFFFFFF000;
+  uintptr_t proot = read_cr3() & PAGE_ALIGN_MASK;
 
   // Divide segment to PAGE_SIZE chunk and map to a page in address space
   while (vaddr_cur_page < vadd_end_seg) {
@@ -45,7 +45,7 @@ bool load_segment(uintptr_t vaddr_seg, uint64_t size, uintptr_t vaddr_seg_file,
 
   // After copying content to the newly mapped page, we set its protection
   // mode according to defined in ELF program header table entry
-  vaddr_cur_page = vaddr_seg & 0xFFFFFFFFFFFFF000;
+  vaddr_cur_page = vaddr_seg & PAGE_ALIGN_MASK;
   while (vaddr_cur_page < vadd_end_seg) {
     // Map the segment address to address space
     if (!vm_protect(proot, vaddr_cur_page, readable, writable, executable)) {

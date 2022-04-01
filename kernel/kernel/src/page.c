@@ -446,7 +446,7 @@ void translate(void* vaddress) {
   // Since we cannot cast directly from uint64_t to REG_CR3_CR4_PCIDE0_t, we
   // have to temporarily store the value in temp_cr3. After that we can use
   // pointer cast to treat temp_cr3 as REG_CR3_CR4_PCIDE0_t.
-  uint64_t proot = (uint64_t)read_cr3() & 0xFFFFFFFFFFFFF000;
+  uint64_t proot = (uint64_t)read_cr3() & PAGE_ALIGN_MASK;
 
   // Get address to the Page Map Level 4 entry
   // pml4[0:2] = 000
