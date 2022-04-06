@@ -3,19 +3,17 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
-#include "syscall.h"
+
+#include "mem.h"
 #include "string.h"
+#include "system.h"
 
 #define NUM_DIGIT_DEC_UINT64 20
 #define NUM_DIGIT_HEX_UINT64 16
 
-#define STD_IN 0
-#define STD_OUT 1
-#define STD_ERR 2
-
 // Syscall wrappers: function that invoke the syscall() functions
-int64_t read(uint64_t f_descriptor, char* buff, size_t read_size);
-int64_t write(uint64_t f_descriptor, const char* str, size_t write_size);
+int64_t sys_read(uint64_t f_descriptor, char* buff, size_t read_size);
+int64_t sys_write(uint64_t f_descriptor, const char* str, size_t write_size);
 
 // Print formatted string, supporting:
 // - %s for string

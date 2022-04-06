@@ -1,7 +1,7 @@
 CC := clang -target x86_64-elf
 LD := x86_64-elf-ld
 
-CFLAGS := --std=c17 -Wall -O2 -I. -ffreestanding -nostdlib -fno-stack-protector -fno-pic -mno-80387 -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-red-zone -mcmodel=kernel -MMD -MP -Iinclude
+CFLAGS := --std=c17 -Wall -O2 -I. -Iinclude -isystem ../stdlib/include -ffreestanding -nostdlib -fno-stack-protector -fno-pic -mno-80387 -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-red-zone -mcmodel=kernel -MMD -MP 
 LDFLAGS := -nostdlib -static -L../stdlib -lc
 
 OUT := obj

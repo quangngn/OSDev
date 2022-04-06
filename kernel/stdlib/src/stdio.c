@@ -1,5 +1,9 @@
 #include "stdio.h"
 
+// External functions for system call handler. syscall(uint64_t nr, ...) is
+// defined in asm/syscall.s
+extern int64_t syscall(uint64_t nr, ...);
+
 // Buffers being used to store digit characters when printing number
 char buffer_dec_uint64[NUM_DIGIT_DEC_UINT64 + 1];
 char buffer_hex_uint64[NUM_DIGIT_HEX_UINT64 + 1];
@@ -17,18 +21,21 @@ int64_t sys_write(uint64_t f_descriptor, const char* str, size_t write_size) {
 
 /******************************************************************************/
 // Print a single character to the terminal
-void print_c(char c) { write(STD_OUT, &c, 1); }
+static void print_c(char c) { sys_write(STD_OUT, &c, 1); }
 
 // Print a string to the terminal
-void print_s(const char* str) {
-  write(STD_OUT, str, strlen(str));
+static int print_s(const char* str) {
+  int len = strlen(str);
+  sys_write(STD_OUT, str, len);
+  return len;
 }
 
 // Print an unsigned 64-bit integer value to the terminal in decimal notation
 // (no leading zeros please!)
-void print_d(uint64_t value) {
+static int print_d(uint64_t value) {
   if (value == 0) {
     print_c('0');
+    return 1;
   } else {
     uint64_t remain = 0;
     size_t num_digit = 0;
@@ -47,15 +54,17 @@ void print_d(uint64_t value) {
       num_digit++;
     }
 
-    write(STD_OUT, cursor, num_digit);
+    sys_write(STD_OUT, cursor, num_digit);
+    return num_digit;
   }
 }
 
 // Print an unsigned 64-bit integer value to the terminal in lowercase
 // hexadecimal notation (no leading zeros or “0x” please!)
-void print_x(uint64_t value) {
+static int print_x(uint64_t value) {
   if (value == 0) {
     print_c('0');
+    return 1;
   } else {
     uint64_t remain = 0;
     size_t num_digit = 0;
@@ -75,15 +84,15 @@ void print_x(uint64_t value) {
       num_digit++;
     }
 
-    write(STD_OUT, cursor, num_digit);
+    sys_write(STD_OUT, cursor, num_digit);
+    return num_digit;
   }
 }
 
 // Print the value of a pointer to the terminal in lowercase hexadecimal with
 // the prefix “0x”
-void print_p(void* ptr) {
-  print_s("0x");
-  print_x((uint64_t)ptr);
+static int print_p(void* ptr) {
+  return print_s("0x") + print_x((uint64_t)ptr);
 }
 
 // Print formatted string, supporting:
@@ -92,12 +101,14 @@ void print_p(void* ptr) {
 // - %d for decimal number
 // - %x for hex number
 // - %p for pointer address
+// Return the number of character printed
 int printf(const char* format, ...) {
     const char* cursor = format;
   // Set up va_list to read arguments
   va_list args;
   va_start(args, format);
 
+  int char_count = 0;
   // Read each character in format and handle each case when we see %
   while (*cursor != '\0') {
     if (*cursor == '%') {
@@ -107,39 +118,44 @@ int printf(const char* format, ...) {
         // case "%%" --> print '%'
         case '%':
           print_c('%');
+          char_count++;
           break;
         // case "%c" --> print next arg as a character
         case 'c':
           print_c(va_arg(args, int));
+          char_count++;
           break;
         // case "%s" --> print next arg as a string
         case 's':
-          print_s(va_arg(args, char*));
+          char_count += print_s(va_arg(args, char*));
           break;
         // case "%d" --> print next arg as a decimal number
         case 'd':
-          print_d(va_arg(args, uint64_t));
+          char_count += print_d(va_arg(args, uint64_t));
           break;
         // case "%x" --> print next arg as a hex number
         case 'x':
-          print_x(va_arg(args, uint64_t));
+          char_count += print_x(va_arg(args, uint64_t));
           break;
         // case "%p" --> print next arg as a pointer address
         case 'p':
-          print_p(va_arg(args, void*));
+          char_count += print_p(va_arg(args, void*));
           break;
         // case "%" -> print nothing, return
         case '\0':
-          return;
+          return char_count;
         // unsupported escape character
         default:
           print_s("<not supported>");
+          return 0;
       }
     } else {
       print_c(*cursor);
+      char_count++;
     }
     cursor++;
   }
+  return char_count;
 }
 
 /******************************************************************************/
@@ -161,5 +177,5 @@ size_t getline(char** str, size_t* size, int* stream) {
  * Print error
  */
 void perror(const char* str) {
-  write(STD_ERR, str, strlen(str));
+  sys_write(STD_ERR, str, strlen(str));
 }

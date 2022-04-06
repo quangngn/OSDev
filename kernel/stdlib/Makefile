@@ -1,8 +1,7 @@
 CC := clang -target x86_64-elf
 AR := x86_64-elf-ar
 
-CFLAGS := --std=c17 -Wall -O2 -I. -isystem ../stdlib -ffreestanding -nostdlib -fno-stack-protector -fno-pic -mno-80387 -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-red-zone -mcmodel=medium -MMD -MP -Iinclude
-
+CFLAGS := --std=c17 -Wall -O2 -I. -isystem ../stdlib/include -ffreestanding -nostdlib -fno-stack-protector -fno-pic -mno-80387 -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-red-zone -mcmodel=medium -MMD -MP
 OUT := obj
 
 SRC := $(wildcard src/*.c)

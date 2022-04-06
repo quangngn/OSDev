@@ -9,7 +9,7 @@ size_t strlen(const char* str) {
 }
 
 char* strchr(const char* str, char c) {
-  char* cur = str;
+  char* cur = (char*)str;
   // Exit the loop if found c or met '\0'
   while (*cur != '\0' && *cur != c) {
     cur++;
@@ -90,7 +90,7 @@ int atoi(const char* str) {
     return 0;
   }
 
-  char* start = str;
+  char* start = (char*)str;
   while (*start != '\0' && ((*start < '0' && '9' < *start) || *start == '-')) {
     start++;
   }
@@ -115,7 +115,7 @@ char* strpbrk(const char* str1, const char* str2) {
     return NULL;
   }
 
-  char* cur = str1;
+  char* cur = (char*)str1;
   for (; *cur != '\0'; cur++) {
     if (strchr(str2, *cur) != NULL) {
       return cur;

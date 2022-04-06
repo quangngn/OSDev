@@ -139,11 +139,9 @@ void setup_kernel(struct stivale2_struct* hdr) {
 void _start(struct stivale2_struct* hdr) {
   setup_kernel(hdr);
 
-  sys_write(STD_ERR, "Error!\n", kstrlen("Error!\n"));
-
-  // exe_entry_fn_ptr_t fn;
-  // load_executatble("init", &fn);
-  // fn();
+  exe_entry_fn_ptr_t fn;
+  load_executatble("init", &fn);
+  fn();
 
   // We're done, just hang...
   halt();

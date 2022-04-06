@@ -10,6 +10,7 @@ extern int64_t syscall(uint64_t nr, ...);
 int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1,
                         uint64_t arg2, uint64_t arg3, uint64_t arg4,
                         uint64_t arg5) {
+  uintptr_t proot = 0;
   switch (nr) {
     case SYSCALL_READ:
       /**
@@ -26,7 +27,7 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1,
        */
       return write_handler(arg0, (const char*)arg1, arg2);
     case SYSCALL_MMAP:
-      uintptr_t proot = read_cr3() & 0xFFFFFFFFFFFFF000;
+      proot = read_cr3() & 0xFFFFFFFFFFFFF000;
       /**
        * arg0: vaddress
        * arg1: user permission (currently same with readable)
@@ -35,7 +36,7 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1,
        */
       return vm_map(proot, (uintptr_t)arg0, (bool)arg1, (bool)arg2, (bool)arg3);
     case SYSCALL_MPROTECT:
-      uintptr_t proot = read_cr3() & 0xFFFFFFFFFFFFF000;
+      proot = read_cr3() & 0xFFFFFFFFFFFFF000;
       /**
        * arg0: vaddress
        * arg1: user permission (currently same with readable)
@@ -45,11 +46,11 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1,
       return vm_protect(proot, (uintptr_t)arg0, (bool)arg1, (bool)arg2,
                         (bool)arg3);
     case SYSCALL_MUNMAP:
-      uintptr_t proot = read_cr3() & 0xFFFFFFFFFFFFF000;
+      proot = read_cr3() & 0xFFFFFFFFFFFFF000;
       /**
        * arg0: vaddress
        */
-
+      return vm_unmap(proot, (uintptr_t)arg0);
     default:
       return -1;
   }

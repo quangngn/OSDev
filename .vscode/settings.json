@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "stdint.h": "c",
-        "memory": "c"
+        "memory": "c",
+        "port.h": "c",
+        "system.h": "c"
     }
 }
