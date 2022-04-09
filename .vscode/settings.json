@@ -3,6 +3,7 @@
         "stdint.h": "c",
         "memory": "c",
         "port.h": "c",
-        "system.h": "c"
+        "system.h": "c",
+        "executable.h": "c"
     }
 }

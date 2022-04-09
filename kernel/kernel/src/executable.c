@@ -10,20 +10,24 @@ void print_module_info(struct stivale2_module* module) {
  * file image to the mapped memory region.
  *
  * \param vaddr_seg: virtual address of the segment in the address space. This
- * might not be page aligned. This is the destination of the copied segment
- * \param size: size of the segment.
+ * might not be page aligned. This is the destination of the copied segment.
+ * \param mem_size: size of the segment in actual memory (used to request mem
+ * map).
+ * \param file_size: size of the segment in the file image (used for copying
+ * from file image to mapped memory).
  * \param vaddr_seg_file: virtual address of the segment in the file image. This
  * is the source of the copying segment to newly mapped memory region.
  * \param readable: read permission.
  * \param writable: write permission.
  * \param executable: execute permission.
  */
-bool load_segment(uintptr_t vaddr_seg, uint64_t size, uintptr_t vaddr_seg_file,
-                  bool readable, bool writable, bool executable) {
+bool load_segment(uintptr_t vaddr_seg, size_t mem_size, size_t file_size,
+                  uintptr_t vaddr_seg_file, bool readable, bool writable,
+                  bool executable) {
   // The segment might be bigger than a page size. As result, we need to map
   // multiple pages
   uintptr_t vaddr_cur_page = vaddr_seg & PAGE_ALIGN_MASK;
-  uintptr_t vadd_end_seg = vaddr_seg + size;
+  uintptr_t vadd_end_seg = vaddr_seg + mem_size;
   // Get top table physical root address
   uintptr_t proot = read_cr3() & PAGE_ALIGN_MASK;
 
@@ -40,7 +44,7 @@ bool load_segment(uintptr_t vaddr_seg, uint64_t size, uintptr_t vaddr_seg_file,
   }
 
   // Copy content from the file image to the newly mapped page
-  kmemcpy((void*)vaddr_seg, (void*)vaddr_seg_file, size);
+  kmemcpy((void*)vaddr_seg, (void*)(vaddr_seg_file), file_size);
 
   // After copying content to the newly mapped page, we set its protection
   // mode according to defined in ELF program header table entry
@@ -106,7 +110,9 @@ bool load_executatble(const char* exe_name, exe_entry_fn_ptr_t* entry_func) {
 
         // Loading and copying memory
         uintptr_t vaddr_seg = cur_prog_hdr_entry->p_vaddr;
-        uint64_t size = cur_prog_hdr_entry->p_file_size;
+        size_t mem_size = cur_prog_hdr_entry->p_mem_size;
+        size_t file_size = cur_prog_hdr_entry->p_file_size;
+
         uint32_t flags = cur_prog_hdr_entry->p_flags;
         bool executable = (flags & PF_X) != 0;
         bool writable = (flags & PF_W) != 0;
@@ -117,8 +123,8 @@ bool load_executatble(const char* exe_name, exe_entry_fn_ptr_t* entry_func) {
             cur_prog_hdr_entry->p_offset + (uintptr_t)e_hdr;
 
         // Map and copy segment to a new address
-        if (!load_segment(vaddr_seg, size, vaddr_seg_file, readable, writable,
-                          executable)) {
+        if (!load_segment(vaddr_seg, mem_size, file_size, vaddr_seg_file,
+                          readable, writable, executable)) {
           kprintf("[ERROR] load_executatble: Load Segment failed, vaddr = %p\n",
                   vaddr_seg);
           return false;
