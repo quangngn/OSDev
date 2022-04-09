@@ -29,7 +29,7 @@ void kmemcpy(void* dst, void* src, size_t size);
  * Function to call string comparison. In case 1 string is the prefix of the
  * other string, the prefix is consider less than the other string.
  */
-int strcmp(const char* str1, const char* str2);
+int kstrcmp(const char* str1, const char* str2);
 
 // Convert physical address to virtual address by adding hhdm base virtual
 // address

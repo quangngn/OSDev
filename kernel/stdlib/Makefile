@@ -10,6 +10,12 @@ C_OBJ := $(patsubst %.c, $(OUT)/%.o, $(SRC))
 S_OBJ := $(patsubst %.s, $(OUT)/%.o, $(ASM))
 DEP := $(patsubst %.c, $(OUT)/%.d, $(SRC))
 
+SRC := $(wildcard src/*.c)
+ASM := $(wildcard asm/*.s)
+C_OBJ := $(patsubst %.c, $(OUT)/%.o, $(SRC))
+S_OBJ := $(patsubst %.s, $(OUT)/%.o, $(ASM))
+DEP := $(patsubst %.c, $(OUT)/%.d, $(SRC))
+
 .PHONY: all
 all: libc.a
 

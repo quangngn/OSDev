@@ -1,20 +1,12 @@
 #pragma once
 
 #include <stdint.h>
+#include <system.h>
 
 #include "kprint.h"
 #include "port.h"
 #include "stivale2.h"
 #include "util.h"
-
-#define MAGIC_NUM 0x234ab234
-
-#define NUM_PT_ENTRIES 512
-// This is also the size of pml4 entry, pdpt entry, pd entry
-#define BYTE_SIZE_OF_PT_ENTRY 8
-// PAGE_SIZE = NUM_PT_ENTRIES * BYTE_SIZE_OF_PT_ENTRY = 4KB
-#define PAGE_SIZE 4096
-#define PAGE_ALIGN_MASK 0xFFFFFFFFFFFFF000
 
 // CR3 for Ordinary 4-level mapping with CR4.PCIDE = 0
 // Notice that PCIDE is the bit 17 of CR4

@@ -9,11 +9,14 @@
 #include "stivale2.h"
 #include "util.h"
 
+// ELF file type
 #define ET_EXEC 0x02
 
+// Program table type
 #define PT_NULL 0
 #define PT_LOAD 1
 
+// Program table flag (for permission)
 #define PF_X 0x1
 #define PF_W 0x2
 #define PF_R 0x4

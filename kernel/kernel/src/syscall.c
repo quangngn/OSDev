@@ -27,7 +27,7 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1,
        */
       return write_handler(arg0, (const char*)arg1, arg2);
     case SYSCALL_MMAP:
-      proot = read_cr3() & 0xFFFFFFFFFFFFF000;
+      proot = read_cr3() & PAGE_ALIGN_MASK;
       /**
        * arg0: vaddress
        * arg1: user permission (currently same with readable)
@@ -36,7 +36,7 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1,
        */
       return vm_map(proot, (uintptr_t)arg0, (bool)arg1, (bool)arg2, (bool)arg3);
     case SYSCALL_MPROTECT:
-      proot = read_cr3() & 0xFFFFFFFFFFFFF000;
+      proot = read_cr3() & PAGE_ALIGN_MASK;
       /**
        * arg0: vaddress
        * arg1: user permission (currently same with readable)
@@ -46,9 +46,9 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1,
       return vm_protect(proot, (uintptr_t)arg0, (bool)arg1, (bool)arg2,
                         (bool)arg3);
     case SYSCALL_MUNMAP:
-      proot = read_cr3() & 0xFFFFFFFFFFFFF000;
+      proot = read_cr3() & PAGE_ALIGN_MASK;
       /**
-       * arg0: vaddress
+       * arg0: vaddress to be unmapped
        */
       return vm_unmap(proot, (uintptr_t)arg0);
     default:
@@ -119,15 +119,4 @@ int64_t write_handler(uint64_t f_descriptor, const char* str,
     }
   }
   return i;
-}
-
-// Syscall wrappers: function that invoke the syscall() functions
-// Wrapper to call read system call
-int64_t sys_read(uint64_t f_descriptor, char* buff, size_t read_size) {
-  return syscall(SYSCALL_READ, f_descriptor, (uint64_t)buff, read_size);
-}
-
-// Wrapper to call write system call
-int64_t sys_write(uint64_t f_descriptor, const char* str, size_t write_size) {
-  return syscall(SYSCALL_WRITE, f_descriptor, (uint64_t)str, write_size);
 }

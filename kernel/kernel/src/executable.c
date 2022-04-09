@@ -21,10 +21,9 @@ void print_module_info(struct stivale2_module* module) {
 bool load_segment(uintptr_t vaddr_seg, uint64_t size, uintptr_t vaddr_seg_file,
                   bool readable, bool writable, bool executable) {
   // The segment might be bigger than a page size. As result, we need to map
-  // multiple page
+  // multiple pages
   uintptr_t vaddr_cur_page = vaddr_seg & PAGE_ALIGN_MASK;
   uintptr_t vadd_end_seg = vaddr_seg + size;
-
   // Get top table physical root address
   uintptr_t proot = read_cr3() & PAGE_ALIGN_MASK;
 
@@ -56,7 +55,6 @@ bool load_segment(uintptr_t vaddr_seg, uint64_t size, uintptr_t vaddr_seg_file,
     // Advance address to the next page
     vaddr_cur_page += PAGE_SIZE;
   }
-
   return true;
 }
 
@@ -75,7 +73,7 @@ bool load_executatble(const char* exe_name, exe_entry_fn_ptr_t* entry_func) {
 
   // Loop through each module to find the executable
   for (int mod_idx = 0; mod_idx < modules_struct_tag->module_count; mod_idx++) {
-    if (exe_name != NULL && strcmp(module[mod_idx].string, exe_name) == 0) {
+    if (exe_name != NULL && kstrcmp(module[mod_idx].string, exe_name) == 0) {
       // Loading executable:
 
       // 1. Read the ELF. e_hdr is also the vaddress of the start of the file
@@ -108,9 +106,8 @@ bool load_executatble(const char* exe_name, exe_entry_fn_ptr_t* entry_func) {
 
         // Loading and copying memory
         uintptr_t vaddr_seg = cur_prog_hdr_entry->p_vaddr;
-        uint64_t size = cur_prog_hdr_entry->p_mem_size;
+        uint64_t size = cur_prog_hdr_entry->p_file_size;
         uint32_t flags = cur_prog_hdr_entry->p_flags;
-
         bool executable = (flags & PF_X) != 0;
         bool writable = (flags & PF_W) != 0;
         bool readable = (flags & PF_R) != 0;

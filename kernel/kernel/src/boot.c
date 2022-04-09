@@ -1,5 +1,7 @@
 #include <stddef.h>
 #include <stdint.h>
+#include <system.h>
+#include <mem.h>
 
 #include "executable.h"
 #include "idt.h"
@@ -129,7 +131,7 @@ void setup_kernel(struct stivale2_struct* hdr) {
   enable_write_protection();
 
   // Unmap lower half
-  uintptr_t proot = read_cr3() & 0xFFFFFFFFFFFFF000;
+  uintptr_t proot = read_cr3() & PAGE_ALIGN_MASK;
   unmap_lower_half(proot);
 
   // Init terminal
@@ -139,10 +141,11 @@ void setup_kernel(struct stivale2_struct* hdr) {
 void _start(struct stivale2_struct* hdr) {
   setup_kernel(hdr);
 
+  // Call memtest in init program
   exe_entry_fn_ptr_t fn;
   load_executatble("init", &fn);
   fn();
-
+  
   // We're done, just hang...
   halt();
 }

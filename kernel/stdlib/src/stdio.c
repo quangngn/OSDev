@@ -5,8 +5,8 @@
 extern int64_t syscall(uint64_t nr, ...);
 
 // Buffers being used to store digit characters when printing number
-char buffer_dec_uint64[NUM_DIGIT_DEC_UINT64 + 1];
-char buffer_hex_uint64[NUM_DIGIT_HEX_UINT64 + 1];
+static char buffer_dec_uint64[NUM_DIGIT_DEC_UINT64 + 1];
+static char buffer_hex_uint64[NUM_DIGIT_HEX_UINT64 + 1];
 
 // Syscall wrappers: function that invoke the syscall() functions
 // Wrapper to call read system call

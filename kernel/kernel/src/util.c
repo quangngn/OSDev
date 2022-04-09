@@ -1,5 +1,7 @@
 #include "util.h"
 
+#include "kprint.h"
+
 // hhdm struct allow us to get the base virtual address
 extern struct stivale2_struct_tag_hhdm* hhdm_struct_tag;
 
@@ -48,7 +50,7 @@ void kmemcpy(void* dst, void* src, size_t size) {
  * Function to call string comparison. In case 1 string is the prefix of the
  * other string, the prefix is consider less than the other string.
  */
-int strcmp(const char* str1, const char* str2) {
+int kstrcmp(const char* str1, const char* str2) {
   int idx = 0;
   while (true) {
     if (str1[idx] < str2[idx]) {
