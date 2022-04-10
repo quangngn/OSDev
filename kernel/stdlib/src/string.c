@@ -1,4 +1,5 @@
 #include "string.h"
+#include "stdio.h"
 
 size_t strlen(const char* str) {
   size_t counter = 0;
@@ -90,22 +91,33 @@ int atoi(const char* str) {
     return 0;
   }
 
+  // Find the first character that is numeric or '-'
   char* start = (char*)str;
-  while (*start != '\0' && ((*start < '0' && '9' < *start) || *start == '-')) {
+  while (*start != '\0' && (*start < '0' || '9' < *start) && *start != '-') {
     start++;
   }
   // Early exit if there aren't any number to convert
   if (*start == '\0') return 0;
 
+  // Advance end pointer to the end of the supposed number
   char* end = start + 1;
-  while (*end != '\0' && *end < '0' && '9' < *end) {
+  while (*end != '\0' && '0' <= *end && *end <= '9') {
     end++;
   }
 
-  int sign = (*start == '-') ? -1 : 1;
+  // Check the sign of the number
+  int sign;
+  if (*start == '-') {
+    sign = -1;
+    start++;
+  } else {
+    sign = 1;
+  }
+
   int ret = 0;
   while ((uintptr_t)start < (uintptr_t)end) {
     ret = ret * 10 + (int)(*start - '0');
+    start++;
   }
   return ret * sign;
 }

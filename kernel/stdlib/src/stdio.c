@@ -103,7 +103,9 @@ static int print_p(void* ptr) {
 // - %p for pointer address
 // Return the number of character printed
 int printf(const char* format, ...) {
-    const char* cursor = format;
+  if (format == NULL) return 0;
+  
+  const char* cursor = format;
   // Set up va_list to read arguments
   va_list args;
   va_start(args, format);
@@ -177,5 +179,6 @@ size_t getline(char** str, size_t* size, int* stream) {
  * Print error
  */
 void perror(const char* str) {
+  if (str == NULL) return;
   sys_write(STD_ERR, str, strlen(str));
 }
