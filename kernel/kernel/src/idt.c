@@ -1,11 +1,12 @@
 #include "idt.h"
 
+#include "gdt.h"
 #include "keyboard.h"
 #include "kprint.h"
 #include "pic.h"
 #include "port.h"
-#include "util.h"
 #include "syscall.h"
+#include "util.h"
 
 #define KB_IN_PORT 0x60
 
@@ -163,12 +164,12 @@ void idt_set_handler(uint8_t index, void* fn, uint8_t type) {
   idt[index].present = 1;
   // We don't use interrupt stack
   idt[index].ist = 0;
-  // Run handler in kernel mode
-  idt[index].dpl = 0;
+  // Allow to run handler from user mode
+  idt[index].dpl = 3;
   // Set type of the handler (IDT_TYPE_INTERRUPT or IDT_TYPE_TRAP)
   idt[index].type = type;
   // Set code selector:
-  idt[index].selector = IDT_CODE_SELECTOR;
+  idt[index].selector = KERNEL_CODE_SELECTOR;
 
   // IDT entry offset_0 = bit 0 to 15;
   idt[index].offset_0 = (uint16_t)((uint64_t)fn & 0xFFFF);
