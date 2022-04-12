@@ -1,3 +1,8 @@
+/**
+ * From professor Charlie Curtsinger
+ * src:
+ * https://curtsinger.cs.grinnell.edu/teaching/2022S/CSC395/kernel/housekeeping.html
+ */
 #include "term.h"
 
 // hhdm struct allow us to get the base virtual address

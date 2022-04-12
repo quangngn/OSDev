@@ -9,16 +9,6 @@
 // Halt the CPU in an infinite loop
 void halt();
 
-/*
- * Return value from bit val[start:end]
- */
-inline uint64_t get_incl_bit(uint64_t val, uint64_t start, uint64_t end);
-
-/*
- * Return value from bit val[start:end-1]
- */
-inline uint64_t get_excl_bit(uint64_t val, uint64_t start, uint64_t end);
-
 // Set memory to a certain value
 void* kmemset(void* ptr, int value, size_t num);
 

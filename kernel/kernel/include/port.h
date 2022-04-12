@@ -1,6 +1,6 @@
 // Standard port input/output operations
 // Source: https://wiki.osdev.org/Inline_Assembly/Examples#I.2FO_access
-/*
+/**
  * By professor Charlie Curtsinger
  * src:
  * https://curtsinger.cs.grinnell.edu/teaching/2022S/CSC395/kernel/keyboard.html

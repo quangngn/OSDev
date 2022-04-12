@@ -12,22 +12,6 @@ void halt() {
   }
 }
 
-/*
- * Return value from bit val[start:end]
- */
-inline uint64_t get_incl_bit(uint64_t val, uint64_t start, uint64_t end) {
-  uint64_t mask = (((uint64_t)1 << (end - start + 1)) - 1) << start;
-  return (val & mask) >> start;
-}
-
-/*
- * Return value from bit val[start:end-1]
- */
-inline uint64_t get_excl_bit(uint64_t val, uint64_t start, uint64_t end) {
-  uint64_t mask = (((uint64_t)1 << (end - start)) - 1) << start;
-  return (val & mask) >> start;
-}
-
 // Set memory to a certain value
 void* kmemset(void* ptr, int value, size_t num) {
   for (int i = 0; i < num; i++) {
@@ -38,6 +22,8 @@ void* kmemset(void* ptr, int value, size_t num) {
 
 // Copy memory from src to dest. Size is in byte
 void kmemcpy(void* dst, void* src, size_t size) {
+  if (dst == NULL || src == NULL) return;
+
   char* d = (char*)dst;
   char* s = (char*)src;
 
