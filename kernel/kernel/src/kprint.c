@@ -20,15 +20,16 @@ keyboard_t keyboard = {.buffer = {.read = 0, .write = 0, .size = 0},
                        .shift = 0,
                        .capslock = 0};
 
+/******************************************************************************/
 /**
  * Set value to term_write
- * \param fn: function to address.
+ * \param fn Function to be set.
  */
 void kset_term_write(term_write_t fn) { term_write = fn; }
 
 /**
  * Count the number of character in the input string.
- * \param str: input string.
+ * \param str Input string.
  */
 size_t kstrlen(const char* str) {
   // Early exit if str is NULL
@@ -45,18 +46,18 @@ size_t kstrlen(const char* str) {
   return len;
 }
 
-/******************************************************************************/
 /**
  * Print a single character to the terminal.
- * \param c: character to be printed
+ * \param c Character to be printed
  */
 void kprint_c(char c) { term_write(&c, 1, VGA_COLOR_WHITE, VGA_COLOR_BLACK); }
 
 /**
  * Print a string to the terminal.
- * \param str: string to be printed.
+ * \param str String to be printed.
  */
 void kprint_s(const char* str) {
+  if (str == NULL) return;
   term_write(str, kstrlen(str), VGA_COLOR_WHITE, VGA_COLOR_BLACK);
 }
 
@@ -64,7 +65,7 @@ void kprint_s(const char* str) {
  * Print an unsigned 64-bit integer value to the terminal in decimal notation
  * (no leading zeros).
  * The function currently does not support negative number.
- * \param value: decimal to be printed.
+ * \param value Decimal to be printed.
  */
 void kprint_d(uint64_t value) {
   if (value == 0) {
@@ -94,7 +95,7 @@ void kprint_d(uint64_t value) {
 /**
  * Print an unsigned 64-bit integer value to the terminal in lowercase
  * hexadecimal notation (no leading zeros or “0x” please!)
- * \param value: the number to be printed out in hex form.
+ * \param value The number to be printed out in hex form.
  */
 void kprint_x(uint64_t value) {
   if (value == 0) {
@@ -124,8 +125,8 @@ void kprint_x(uint64_t value) {
 
 /**
  * Print the value of a pointer to the terminal in lowercase hexadecimal with
- * the prefix “0x”. 
- * \param ptr: the address to be printed.
+ * the prefix “0x”.
+ * \param ptr The address to be printed.
  */
 void kprint_p(void* ptr) {
   kprint_s("0x");
@@ -140,9 +141,11 @@ void kprint_p(void* ptr) {
  * - %x for hex number
  * - %p for pointer address
  * - %% would be character '%'.
- * \param format: the format string.
+ * \param format The format string.
  */
 void kprintf(const char* format, ...) {
+  if (format == NULL) return;
+  
   const char* cursor = format;
   // Set up va_list to read arguments
   va_list args;
@@ -230,7 +233,6 @@ void kprint_mem_usage() {
 /**
  * Read one character from the keyboard buffer. If the keyboard buffer is empty
  * this function will block until a key is pressed.
- *
  * \returns the next character input from the keyboard
  */
 char kget_c() {
@@ -255,7 +257,6 @@ char kget_c() {
  * output array unless it fails.
  * \param capacity The number of characters that can safely be written to the
  * output array including the final null char.
- *
  * \returns The number of read characters (excluding null terminate character),
  * or zero if no characters were read due to an error.
  */

@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "kprint.h"
 #include "page.h"
@@ -95,10 +96,13 @@ typedef struct sec_hdr {
                          // field contains zero.
 } sec_hdr_t;
 
-// Functions
+/******************************************************************************/
 /**
  * Function loads the first executable with matching name exe_name from stivale2
  * module. The entry_func is going to be set to the entry address of the
  * executable.
+ * \param exe_name Name of the executable.
+ * \param exe_entry_fn_ptr_t Function pointer to be set.
+ * \returns true if load successfully, else returns false.
  */
 bool load_executatble(const char* exe_name, exe_entry_fn_ptr_t* entry_func);

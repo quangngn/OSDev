@@ -78,7 +78,7 @@ uintptr_t pmem_alloc() {
 /**
  * Free a page of physical memory. The free list is put back the top of the free
  * list.
- * \param p: the physical address of the page to be freed, which must be
+ * \param p The physical address of the page to be freed, which must be
  * page-aligned.
  */
 void pmem_free(uintptr_t p) {
@@ -102,18 +102,18 @@ void pmem_free(uintptr_t p) {
 
 /**
  * Similar to pmem_free but the input is expected to be virtual memory.
- * \param v: the virtual address of the page to be freed.
+ * \param v The virtual address of the page to be freed.
  */
 inline void vmem_free(uintptr_t v) { pmem_free(v - hhdm_struct_tag->addr); }
 
 /******************************************************************************/
 /**
  * Map a single page of memory into a virtual address space.
- * \param root: the physical address of the top-level page table structure.
- * \param vaddress: the virtual address to map into the address space.
- * \param user: boolean for user-accessible (also used for read permission).
- * \param writable: boolean for write permission.
- * \param executable: boolean for execute permission.
+ * \param root The physical address of the top-level page table structure.
+ * \param vaddress The virtual address to map into the address space.
+ * \param user Boolean for user-accessible (also used for read permission).
+ * \param writable Boolean for write permission.
+ * \param executable Boolean for execute permission.
  * \returns true if the mapping succeeded, else return false.
  */
 bool vm_map(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
@@ -222,8 +222,8 @@ bool vm_map(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
 
 /**
  * Unmap the page from the memory address space.
- * \param proot: the physical address of the top-level page table structure.
- * \param vaddress: the virtual address to unmap from the address space.
+ * \param proot The physical address of the top-level page table structure.
+ * \param vaddress The virtual address to unmap from the address space.
  * \returns true if unmap successfully, else returns false.
  */
 bool vm_unmap(uintptr_t proot, uintptr_t vaddress) {
@@ -314,11 +314,11 @@ bool vm_unmap(uintptr_t proot, uintptr_t vaddress) {
 /**
  * Change the protection mode of the mapped page. If the virtual address is not
  * mapped, we return false. Return true if mode change success.
- * \param root: the physical address of the top-level page table structure.
- * \param vaddress: the virtual address. into the address space.
- * \param user: boolean for user-accessible (also used for read permission).
- * \param writable: boolean for write permission.
- * \param executable: boolean for execute permission.
+ * \param root The physical address of the top-level page table structure.
+ * \param vaddress The virtual address.
+ * \param user Boolean for user-accessible (also used for read permission).
+ * \param writable Boolean for write permission.
+ * \param executable Boolean for execute permission.
  * \returns true if the changing permission succeeded, else return false.
  */
 bool vm_protect(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
@@ -395,7 +395,7 @@ bool vm_protect(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
  *
  * Unmap everything in the lower half of an address space with level 4 page
  * table at address root.
- * \param root: the physical address of the top-level page table structure.
+ * \param root The physical address of the top-level page table structure.
  */
 void unmap_lower_half(uintptr_t root) {
   // We can reclaim memory used to hold page tables, but NOT the mapped pages
@@ -437,7 +437,7 @@ void unmap_lower_half(uintptr_t root) {
 /******************************************************************************/
 /**
  * Translate a virtual address to its mapped physical address
- * \param vaddress: the virtual address to translate.
+ * \param vaddress The virtual address to translate.
  */
 void translate(void* vaddress) {
   // Print address to be translated

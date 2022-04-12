@@ -1,25 +1,21 @@
 #include "executable.h"
 
-void print_module_info(struct stivale2_module* module) {
-  kprintf("%s: start from %p to %p.\n", module->string, module->begin,
-          module->end);
-}
-
 /**
  * This function handles mapping memory for the segment and copy data from the
  * file image to the mapped memory region.
  *
- * \param vaddr_seg: virtual address of the segment in the address space. This
+ * \param vaddr_seg Virtual address of the segment in the address space. This
  * might not be page aligned. This is the destination of the copied segment.
- * \param mem_size: size of the segment in actual memory (used to request mem
+ * \param mem_size Size of the segment in actual memory (used to request mem
  * map).
- * \param file_size: size of the segment in the file image (used for copying
+ * \param file_size Size of the segment in the file image (used for copying
  * from file image to mapped memory).
- * \param vaddr_seg_file: virtual address of the segment in the file image. This
+ * \param vaddr_seg_file Virtual address of the segment in the file image. This
  * is the source of the copying segment to newly mapped memory region.
- * \param readable: read permission.
- * \param writable: write permission.
- * \param executable: execute permission.
+ * \param readable Read permission.
+ * \param writable Write permission.
+ * \param executable Execute permission.
+ * \returns true if load successfully, else returns false.
  */
 bool load_segment(uintptr_t vaddr_seg, size_t mem_size, size_t file_size,
                   uintptr_t vaddr_seg_file, bool readable, bool writable,
@@ -35,8 +31,7 @@ bool load_segment(uintptr_t vaddr_seg, size_t mem_size, size_t file_size,
   while (vaddr_cur_page < vadd_end_seg) {
     // Map the segment address to address space
     if (!vm_map(proot, vaddr_cur_page, true, true, false)) {
-      kprintf("[ERROR] load_segment: Mapping segment failed, vaddr = %p\n",
-              vaddr_cur_page);
+      perror("[ERROR] load_segment: Mapping segment failed!\n");
       return false;
     }
     // Advance address to the next page
@@ -52,8 +47,7 @@ bool load_segment(uintptr_t vaddr_seg, size_t mem_size, size_t file_size,
   while (vaddr_cur_page < vadd_end_seg) {
     // Map the segment address to address space
     if (!vm_protect(proot, vaddr_cur_page, readable, writable, executable)) {
-      kprintf("[ERROR] load_segment: Change protection failed, vaddr = %p\n",
-              vaddr_cur_page);
+      perror("[ERROR] load_segment: Change protection failed!\n");
       return false;
     }
     // Advance address to the next page
@@ -62,14 +56,18 @@ bool load_segment(uintptr_t vaddr_seg, size_t mem_size, size_t file_size,
   return true;
 }
 
+/******************************************************************************/
 /**
  * Function loads the first executable with matching name exe_name from stivale2
  * module. The entry_func is going to be set to the entry address of the
  * executable.
+ * \param exe_name Name of the executable.
+ * \param exe_entry_fn_ptr_t Function pointer to be set.
+ * \returns true if load successfully, else returns false.
  */
 bool load_executatble(const char* exe_name, exe_entry_fn_ptr_t* entry_func) {
   if (modules_struct_tag == NULL) {
-    kprint_s("[Error] load_executatble: Unable to identify modules tag\n");
+    perror("[ERROR] load_executatble: Unable to identify modules tag\n");
     return false;
   }
 
@@ -125,8 +123,7 @@ bool load_executatble(const char* exe_name, exe_entry_fn_ptr_t* entry_func) {
         // Map and copy segment to a new address
         if (!load_segment(vaddr_seg, mem_size, file_size, vaddr_seg_file,
                           readable, writable, executable)) {
-          kprintf("[ERROR] load_executatble: Load Segment failed, vaddr = %p\n",
-                  vaddr_seg);
+          perror("[ERROR] load_executatble: Load Segment failed!\n");
           return false;
         }
       }
@@ -137,6 +134,6 @@ bool load_executatble(const char* exe_name, exe_entry_fn_ptr_t* entry_func) {
       return true;
     }
   }
-  kprintf("[ERROR] load_executatble: Cannot find executable: %s\n", exe_name);
+  perror("[ERROR] load_executatble: Cannot find executable!\n");
   return false;
 }

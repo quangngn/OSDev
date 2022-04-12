@@ -16,7 +16,7 @@ char pressed_key2[] =
  * - write = 0
  * - size = 0
  * Notice: buffer is NOT 0-init
- * \param cq: pointer of a circular queue.
+ * \param cq Pointer of a circular queue.
  */
 void cq_init(circular_queue_t* cq) {
   if (cq == NULL) return;
@@ -31,11 +31,10 @@ void cq_init(circular_queue_t* cq) {
  * - Read data pointed to by cq->read index
  * - Advance cq->read index.
  * - Reduce buffer size (number of elements not bytes).
- *
- * \param cq: pointer to the circular queue.
- * \param read_val: pointer to the variable where cq_read stores the read
+ * 
+ * \param cq Pointer to the circular queue.
+ * \param read_val Pointer to the variable where cq_read stores the read
  * character.
- *
  * \returns true if the read was successful, else returns false.
  */
 bool cq_read(circular_queue_t* cq, uint64_t* read_val) {
@@ -62,9 +61,9 @@ bool cq_read(circular_queue_t* cq, uint64_t* read_val) {
  * - Write val to the buffer at index cq->write.
  * - Advance cq->write index.
  * - Increase the buffer size (number of elements not bytes).
- *
- * \param cq: pointer to the circular queue.
- * \param write_val: value to be written.
+ * 
+ * \param cq Pointer to the circular queue.
+ * \param write_val Value to be written.
  */
 void cq_write(circular_queue_t* cq, uint64_t write_val) {
   if (cq == NULL) return;
@@ -93,7 +92,7 @@ void cq_write(circular_queue_t* cq, uint64_t write_val) {
  * - buffer.read = 0
  * - buffer.write = 0
  * - buffer.size = 0
- * \param kb: pointer of a keyboard object.
+ * \param kb Pointer to pointer of a keyboard object.
  */
 void kb_init(keyboard_t* kb) {
   if (kb == NULL) return;
@@ -119,8 +118,8 @@ void kb_init(keyboard_t* kb) {
  * We also do not record to the buffer scancode >= CAPSLOCK_DOWN_SS, which is
  * the limit between printable characters and non-printable characters.
  *
- * \param kb: pointer to keyboard object.
- * \param val: value of the scan code.
+ * \param kb Pointer to keyboard object.
+ * \param val Value of the scan code.
  */
 void kb_input_scan_code(keyboard_t* kb, uint64_t val) {
   if (kb == NULL) return;
@@ -171,9 +170,8 @@ void kb_input_scan_code(keyboard_t* kb, uint64_t val) {
 /**
  * Read one scan code off the buffer and convert to character. If the key is not
  * within the range, we return false.
- * \param kb: pointer to the keyboard object.
- * \param output_char: pointer to output character.
- * 
+ * \param kb Pointer to the keyboard object.
+ * \param output_char Pointer to output character.
  * \returns: true if the read is successful, else returns false.
  */
 bool kb_read_c(keyboard_t* kb, char* output_char) {
