@@ -57,6 +57,7 @@ typedef struct idt_record {
  *              Pass IDT_TYPE_INTERRUPT or IDT_TYPE_TRAP from above.
  */
 void idt_set_handler(uint8_t index, void* fn, uint8_t type);
+
 /**
  * Initialize an interrupt descriptor table, set handlers for standard
  * exceptions, and install the IDT.

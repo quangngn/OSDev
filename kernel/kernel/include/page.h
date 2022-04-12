@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <system.h>
+#include <stdio.h>
 
 #include "kprint.h"
 #include "port.h"
@@ -148,6 +149,7 @@ typedef struct page_4kb {
   uint64_t elems[NUM_PT_ENTRIES];
 } page_4kb_t;
 
+/******************************************************************************/
 /**
  * Initialized the free list structure in USABLE memory sections. Each block of
  * this list would be 4kb.
@@ -164,7 +166,6 @@ bool init_free_list();
 /**
  * Allocate a page of physical memory. We get the page on the top of the free
  * list.
- *
  * \returns the physical address of the allocated physical memory or 0 on error.
  */
 uintptr_t pmem_alloc();
@@ -172,55 +173,65 @@ uintptr_t pmem_alloc();
 /**
  * Free a page of physical memory. The free list is put back the top of the free
  * list.
- *
- * \param p is the physical address of the page to free, which must be
+ * \param p: the physical address of the page to be freed, which must be
  * page-aligned.
  */
 void pmem_free(uintptr_t p);
 
 /**
  * Similar to pmem_free but the input is expected to be virtual memory.
+ * \param v: the virtual address of the page to be freed.
  */
 inline void vmem_free(uintptr_t v);
 
+/******************************************************************************/
 /**
  * Map a single page of memory into a virtual address space.
- * \param proot The physical address of the top-level page table structure
- * \param vaddress The virtual address to map into the address space, must be
- * page-aligned
- * \param user Should the page be user-accessible?
- * \param writable
- * Should the page be writable?
- * \param executable Should the page be executable?
- * \returns true if the mapping succeeded, or false if there was an error
+ * \param root: the physical address of the top-level page table structure.
+ * \param vaddress: the virtual address to map into the address space.
+ * \param user: boolean for user-accessible (also used for read permission).
+ * \param writable: boolean for write permission.
+ * \param executable: boolean for execute permission.
+ * \returns true if the mapping succeeded, else return false.
  */
 bool vm_map(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
             bool executable);
 
 /**
- * Unmap a single page of memory from the virtual address space.
- * \param proot The physical address of the top-level page table structure
- * \param vaddress The virtual address to map into the address space, must be
- * page-aligned
+ * Unmap the page from the memory address space.
+ * \param proot: the physical address of the top-level page table structure.
+ * \param vaddress: the virtual address to unmap from the address space.
+ * \returns true if unmap successfully, else returns false.
  */
 bool vm_unmap(uintptr_t proot, uintptr_t vaddress);
 
 /**
  * Change the protection mode of the mapped page. If the virtual address is not
  * mapped, we return false. Return true if mode change success.
+ * \param root: the physical address of the top-level page table structure.
+ * \param vaddress: the virtual address. into the address space.
+ * \param user: boolean for user-accessible (also used for read permission).
+ * \param writable: boolean for write permission.
+ * \param executable: boolean for execute permission.
+ * \returns true if the changing permission succeeded, else return false.
  */
 bool vm_protect(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
                 bool executable);
 
 /**
+ * By professor Charlie Curtsinger
+ * src:
+ * https://curtsinger.cs.grinnell.edu/teaching/2022S/CSC395/kernel/housekeeping.html
+ *
  * Unmap everything in the lower half of an address space with level 4 page
- * table at address root
+ * table at address root.
+ * \param root: the physical address of the top-level page table structure.
  */
 void unmap_lower_half(uintptr_t root);
 
+/******************************************************************************/
 /**
  * Translate a virtual address to its mapped physical address
- *
- * \param vaddress The virtual address to translate
+ * \param vaddress: the virtual address to translate.
  */
 void translate(void* vaddress);

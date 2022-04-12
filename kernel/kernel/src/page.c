@@ -8,6 +8,7 @@ extern struct stivale2_struct_tag_memmap* mmap_struct_tag;
 // Pointer that point to the head of the page structure
 page_4kb_t* vfree_list_header = NULL;
 
+/******************************************************************************/
 /**
  * Initialized the free list structure in USABLE memory sections. Each block of
  * this list would be 4kb.
@@ -59,7 +60,6 @@ bool init_free_list() {
 /**
  * Allocate a page of physical memory. We get the page on the top of the free
  * list.
- *
  * \returns the physical address of the allocated physical memory or 0 on error.
  */
 uintptr_t pmem_alloc() {
@@ -78,14 +78,13 @@ uintptr_t pmem_alloc() {
 /**
  * Free a page of physical memory. The free list is put back the top of the free
  * list.
- *
- * \param p is the physical address of the page to free, which must be
+ * \param p: the physical address of the page to be freed, which must be
  * page-aligned.
  */
 void pmem_free(uintptr_t p) {
   // Early return of p is NULL
   if (p == 0 || p % PAGE_SIZE != 0) {
-    kprint_s(
+    perror(
         "[ERROR] pmem_free: the freed page pointer p is either NULL or not "
         "page aligned!\n");
     return;
@@ -103,25 +102,25 @@ void pmem_free(uintptr_t p) {
 
 /**
  * Similar to pmem_free but the input is expected to be virtual memory.
+ * \param v: the virtual address of the page to be freed.
  */
 inline void vmem_free(uintptr_t v) { pmem_free(v - hhdm_struct_tag->addr); }
 
 /******************************************************************************/
 /**
  * Map a single page of memory into a virtual address space.
- * \param root The physical address of the top-level page table structure
- * \param vaddress The virtual address to map into the address space, must be
- * page-aligned
- * \param user Should the page be user-accessible?
- * \param writable Should the page be writable?
- * \param executable Should the page be executable?
- * \returns true if the mapping succeeded, or false if there was an error
+ * \param root: the physical address of the top-level page table structure.
+ * \param vaddress: the virtual address to map into the address space.
+ * \param user: boolean for user-accessible (also used for read permission).
+ * \param writable: boolean for write permission.
+ * \param executable: boolean for execute permission.
+ * \returns true if the mapping succeeded, else return false.
  */
 bool vm_map(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
             bool executable) {
   // Early exit if root address = 0
   if (proot == 0) {
-    kprint_s("[ERROR] vm_map: proot is NULL\n");
+    perror("[ERROR] vm_map: proot is NULL\n");
     return false;
   }
 
@@ -222,15 +221,15 @@ bool vm_map(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
 }
 
 /**
- * Unmap the page from the memory address space
- * \param proot The physical address of the top-level page table structure.
- * \param vaddress The virtual address to map into the address space, must be
- * page-aligned.
+ * Unmap the page from the memory address space.
+ * \param proot: the physical address of the top-level page table structure.
+ * \param vaddress: the virtual address to unmap from the address space.
+ * \returns true if unmap successfully, else returns false.
  */
 bool vm_unmap(uintptr_t proot, uintptr_t vaddress) {
   // Early exit if root address = 0
   if (proot == 0) {
-    kprint_s("[ERROR] vm_unmap: proot is NULL\n");
+    perror("[ERROR] vm_unmap: proot is NULL\n");
     return false;
   }
 
@@ -315,12 +314,18 @@ bool vm_unmap(uintptr_t proot, uintptr_t vaddress) {
 /**
  * Change the protection mode of the mapped page. If the virtual address is not
  * mapped, we return false. Return true if mode change success.
+ * \param root: the physical address of the top-level page table structure.
+ * \param vaddress: the virtual address. into the address space.
+ * \param user: boolean for user-accessible (also used for read permission).
+ * \param writable: boolean for write permission.
+ * \param executable: boolean for execute permission.
+ * \returns true if the changing permission succeeded, else return false.
  */
 bool vm_protect(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
                 bool executable) {
   // Early exit if root address = 0
   if (proot == 0) {
-    kprint_s("[ERROR] vm_protect: proot is NULL\n");
+    perror("[ERROR] vm_protect: proot is NULL\n");
     return false;
   }
 
@@ -346,7 +351,7 @@ bool vm_protect(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
 
   // Access pdpt entry
   if (vpml4e->present == 0) {
-    kprint_s("[ERROR] vm_protect: PML4 entry not present\n");
+    perror("[ERROR] vm_protect: PML4 entry not present\n");
     return false;
   } else {
     vpdpte = (pdpt_entry_t*)((vpml4e->pdpt_phyaddr << 12) + base_viraddr);
@@ -355,7 +360,7 @@ bool vm_protect(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
 
   // Access pd entry
   if (vpdpte->present == 0) {
-    kprint_s("[ERROR] vm_protect: page dir pointer entry not present\n");
+    perror("[ERROR] vm_protect: page dir pointer entry not present\n");
     return false;
   } else {
     vpde = (pd_entry_t*)((vpdpte->pd_phyaddr << 12) + base_viraddr);
@@ -364,7 +369,7 @@ bool vm_protect(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
 
   // Access pt entry
   if (vpde->present == 0) {
-    kprint_s("[ERROR] vm_protect: page dir entry not present\n");
+    perror("[ERROR] vm_protect: page dir entry not present\n");
     return false;
   } else {
     vpte = (pt_4kb_entry_t*)((vpde->pt_phyaddr << 12) + base_viraddr);
@@ -373,7 +378,7 @@ bool vm_protect(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
 
   // Map the page to address space
   if (vpte->present == 0) {
-    kprint_s("[ERROR] vm_protect: page table entry not present\n");
+    perror("[ERROR] vm_protect: page table entry not present\n");
     return false;
   } else {
     vpte->accessed = user;
@@ -383,8 +388,15 @@ bool vm_protect(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
   }
 }
 
-// Unmap everything in the lower half of an address space with level 4 page
-// table at address root
+/**
+ * By professor Charlie Curtsinger
+ * src:
+ * https://curtsinger.cs.grinnell.edu/teaching/2022S/CSC395/kernel/housekeeping.html
+ *
+ * Unmap everything in the lower half of an address space with level 4 page
+ * table at address root.
+ * \param root: the physical address of the top-level page table structure.
+ */
 void unmap_lower_half(uintptr_t root) {
   // We can reclaim memory used to hold page tables, but NOT the mapped pages
   pt_entry_t* l4_table = (pt_entry_t*)ptov(root);
@@ -425,8 +437,7 @@ void unmap_lower_half(uintptr_t root) {
 /******************************************************************************/
 /**
  * Translate a virtual address to its mapped physical address
- *
- * \param vaddress The virtual address to translate
+ * \param vaddress: the virtual address to translate.
  */
 void translate(void* vaddress) {
   // Print address to be translated

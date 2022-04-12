@@ -1,6 +1,6 @@
 /**
- * Source code provided by professor Curtsinger.
- * Link:
+ * By professor Charlie Curtsinger
+ * src:
  * https://curtsinger.cs.grinnell.edu/teaching/2022S/CSC395/kernel/usermode.html
  */
 #pragma once

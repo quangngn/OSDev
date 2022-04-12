@@ -12,13 +12,14 @@
 
 // keyboard is initialized in kprint.c
 extern keyboard_t keyboard;
-
-// External functions for system call handler
-//   syscall is defined in asm/syscall.s
-//   syscall_entry is defined in asm/syscall_entry.s.
-// The idea is that:
-// syscall(uint64_t nr, ...) -> trigger int 0x80 -> evoke syscall_entry()
-// which is an idt handler for system call interrupt, INT 0x80.
+/**
+ * External functions for system call handler
+ *  syscall is defined in asm/syscall.s
+ *  syscall_entry is defined in asm/syscall_entry.s.
+ * The idea is that:
+ * syscall(uint64_t nr, ...) -> trigger int 0x80 -> evoke syscall_entry() which
+ * is an idt handler for system call interrupt, INT 0x80.
+ */
 extern void syscall_entry();
 
 // Make an IDT
@@ -152,13 +153,22 @@ __attribute__((interrupt)) void idt_handler_ctrl_proc_exception(
 
 // KEYBOARD INTERRUPT
 __attribute__((interrupt)) void idt_handler_keyboard(interrupt_context_t* ctx) {
-  // Read the input value from keyboard and pass it to the keyboard obj
+  // Read the scan code value from keyboard and pass it to the keyboard obj
   kb_input_scan_code(&keyboard, inb(KB_IN_PORT));
   // Acknowledge the interrupt
   outb(PIC1_COMMAND, PIC_EOI);
 }
 
+/******************************************************************************/
 // Set up IDT code
+/**
+ * Set an interrupt handler for the given interrupt number.
+ *
+ * \param index The interrupt number to handle
+ * \param fn    A pointer to the interrupt handler function
+ * \param type  The type of interrupt handler being installed.
+ *              Pass IDT_TYPE_INTERRUPT or IDT_TYPE_TRAP from above.
+ */
 void idt_set_handler(uint8_t index, void* fn, uint8_t type) {
   // The entry is present
   idt[index].present = 1;
@@ -177,11 +187,12 @@ void idt_set_handler(uint8_t index, void* fn, uint8_t type) {
   idt[index].offset_1 = (uint16_t)((uint64_t)fn >> 16 & 0xFFFF);
   // IDT entry offset_2 = bit 32 to 63;
   idt[index].offset_2 = (uint32_t)((uint64_t)fn >> 32 & 0xFFFFFFFF);
-
-  // kprintf("Address %p: offset0: %p, offset1: %p, offset2: %p\n", fn,
-  //         idt[index].offset_0, idt[index].offset_1, idt[index].offset_2);
 }
 
+/**
+ * Initialize an interrupt descriptor table, set handlers for standard
+ * exceptions, and install the IDT.
+ */
 void idt_setup() {
   // Zero out IDT
   kmemset(idt, 0, IDT_NUM_ENTRIES * sizeof(idt_entry_t));
