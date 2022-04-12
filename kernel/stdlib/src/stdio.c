@@ -10,8 +10,10 @@ static char buffer_hex_uint64[NUM_DIGIT_HEX_UINT64 + 1];
 
 // Syscall wrappers: function that invoke the syscall() functions
 // Wrapper to call read system call
-int64_t sys_read(uint64_t f_descriptor, char* buff, size_t read_size) {
-  return syscall(SYSCALL_READ, f_descriptor, (uint64_t)buff, read_size);
+int64_t sys_read(uint64_t f_descriptor, char* buff, size_t read_size,
+                 bool incl_newln, bool echo_char) {
+  return syscall(SYSCALL_READ, f_descriptor, (uint64_t)buff, read_size,
+                 incl_newln, echo_char);
 }
 
 // Wrapper to call write system call
@@ -91,9 +93,7 @@ static int print_x(uint64_t value) {
 
 // Print the value of a pointer to the terminal in lowercase hexadecimal with
 // the prefix “0x”
-static int print_p(void* ptr) {
-  return print_s("0x") + print_x((uint64_t)ptr);
-}
+static int print_p(void* ptr) { return print_s("0x") + print_x((uint64_t)ptr); }
 
 // Print formatted string, supporting:
 // - %s for string
@@ -104,7 +104,7 @@ static int print_p(void* ptr) {
 // Return the number of character printed
 int printf(const char* format, ...) {
   if (format == NULL) return 0;
-  
+
   const char* cursor = format;
   // Set up va_list to read arguments
   va_list args;
@@ -164,19 +164,91 @@ int printf(const char* format, ...) {
 /**
  * Read the entire line from stream. The buffer is malloc, null-terminated, and
  * include new line character if it read one. If the buffer is not large enough,
- * then it would be realloc.
+ * then it would be realloc. *size would be set to the allocated size of *str.
  *
  * The function update str and size if the read is correct. If the read is
  * successful, the function returns the number of read characters (excluding the
- * null terminate). Else return -1.
+ * null terminate but include delimiter such as new line). Else return -1.
+ *
+ * The read is done when we read a newline character. This character is also
+ * included the *str buffer.
  */
-size_t getline(char** str, size_t* size, int* stream) {
-  // We need to implement malloc
-  return 0;
+int64_t getline(char** str, size_t* size, int* stream) {
+  // Check for NULL pointers from params
+  if (str == NULL || size == NULL || stream == NULL) {
+    return -1;
+  }
+
+  // If *str == NULL, *size is supposed to be 0
+  if (*str == NULL) {
+    *str = (char*)malloc(sizeof(char) * GETLINE_BUFF_SIZE);
+    (*str)[0] = '\0';
+    *size = GETLINE_BUFF_SIZE;
+  }
+  // We read to buffer before copying from buffer to str
+  char buffer[GETLINE_BUFF_SIZE];
+  // Count the total number of readed character (excluding the null-terminate)
+  int64_t str_len = 0;
+
+  while (true) {
+    // 1. Read to temp_buff from stream. buffer_len store number of readed
+    // characters (excluding null-terminate char)
+    int64_t buffer_len = sys_read(*stream, buffer, GETLINE_BUFF_SIZE, true, true);
+    buffer[buffer_len] = '\0';
+
+    // 2. If we does not read any character, break from the loop
+    if (buffer_len == 0) break;
+
+    // 3. If *str does not have enough space to copy from buffer to *str
+    if (buffer_len + str_len + 1 > *size) {
+      // 3.1 Allocate new string buffer. Copy from old string buffer to new one
+      char* new_str = (char*)malloc(sizeof(char) * (*size + GETLINE_BUFF_SIZE));
+      strcpy(new_str, *str);
+
+      // 3.2 Update *str and *size. Free the old string buffer.
+      char* old_str = *str;
+      *str = new_str;
+      *size += GETLINE_BUFF_SIZE;
+      free(old_str);
+    }
+    // 4. Copy from buffer to *str and increase the string length
+    strcpy(&(*str)[str_len], buffer);
+    str_len += buffer_len;
+
+    // 5. If buffer has newline character, we break from the loop
+    if (strchr(buffer, '\n') != NULL) break;
+  }
+  return str_len;
 }
 
 /**
- * Print error
+ * Read one character from the stdin file descriptor.
+ * Return the read character.
+ */
+char getc(uint64_t f_descriptor) {
+  char ret_c = 0;
+  sys_read(f_descriptor, &ret_c, 1, true, true);
+  return ret_c;
+}
+
+/**
+ * Read a string from the given file descriptor. The read stop when:
+ * - Reach null-terminate character or newline.
+ * - Reach read_size.
+ *
+ * Note: read_size also include null character. Hence the size of buff should be
+ * read_size.
+ */
+char* fgets(char* buff, size_t read_size, uint64_t f_descriptor) {
+  // Call read system call (which does not null-terminate the string for us)
+  int64_t len = sys_read(f_descriptor, buff, read_size, true, true);
+  // Null-terminate buffer
+  buff[len] = '\0';
+  return buff;
+}
+
+/**
+ * Print error message str to STD_ERR
  */
 void perror(const char* str) {
   if (str == NULL) return;

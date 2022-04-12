@@ -225,7 +225,7 @@ char kget_c() {
  * output array unless it fails.
  *
  * \param capacity The number of characters that can safely be written to the
- * output array including the final null termiantor.
+ * output array including the final null char.
  *
  * \returns The number of characters read, or zero if no characters
  * were read due to an error.

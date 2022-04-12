@@ -51,6 +51,9 @@ void kmemcpy(void* dst, void* src, size_t size) {
  * other string, the prefix is consider less than the other string.
  */
 int kstrcmp(const char* str1, const char* str2) {
+  if (str1 == NULL && str2 != NULL) return -1;
+  if (str1 != NULL && str2 == NULL) return 1;
+  if (str1 == NULL && str2 == NULL) return 0;
   int idx = 0;
   while (true) {
     if (str1[idx] < str2[idx]) {

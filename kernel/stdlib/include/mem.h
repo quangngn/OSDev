@@ -30,6 +30,7 @@ int munmap(void* vaddr, size_t length);
 int mprotect(void* vaddr, size_t len, int prot);
 
 void* malloc(size_t size);
-void memcpy(void* dst, void* src, size_t size);
 void* memset(void* dst, int value, size_t size);
+void memcpy(void* dst, void* src, size_t size);
+void free(void* p);
 void memtest();

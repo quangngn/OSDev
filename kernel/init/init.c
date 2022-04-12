@@ -15,19 +15,6 @@ int sum(int* arr, size_t len) {
 
 void _start() {
   test_stdio();
-  test_string();
-  // Issue a write system call
-  // printf("Hi, my name is %s, I am %d yo. My fav hex number is %p\n", "Quang",
-  //        22, 0x232433);
-
-  // size_t len = 50000;
-  // int* arr = (int*)malloc(sizeof(int) * len);
-  // for (int i = 0; i < len; i++) {
-  //   arr[i] = i;
-  // }
-
-  // printf("Sum is %d\n", sum(arr, len));
- 
 
   // Loop forever
   for (;;) {}

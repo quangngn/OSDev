@@ -17,8 +17,10 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1,
        * arg0: file descriptor
        * arg1: pointer to buffer
        * arg2: read size
+       * arg3: boolean include newline or not
+       * arg4: boolean echo input char to terminal or not
        */
-      return read_handler(arg0, (char*)arg1, arg2);
+      return read_handler(arg0, (char*)arg1, arg2, (bool)arg3, (bool)arg4);
     case SYSCALL_WRITE:
       /**
        * arg0: file descriptor
@@ -55,30 +57,58 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1,
       return -1;
   }
 }
+
 /******************************************************************************/
 // Syscall handlers: functions to process system calls
 /**
- *  Handlers for read system call. Return the number of read characters
- * (excluding the backspace). Reading stops when the user hit enter (this
- * newline character is not added to buffer). The function is not responsible
- * for adding null terminate. If the function failed to read any characters,
- * return -1.
+ * Handlers for read system call. Return the number of read characters
+ * (excluding the null-terminate AND backspace). The function is not responsible
+ * for adding null terminate. If the function reads backspace, it would remove
+ * the previously read character from the buffer and decrease the character
+ * count by 1.
+ *
+ * The read stopped when:
+ * - Read null terminate character '\0'.
+ * - Reach the read_size.
+ * - Read a newline character.
+ *
+ * Note: read_size also take into account null-terminated. Hence, the size of
+ * buff should be read_size.
+ *
+ * Return value is the number of read bytes (excluding null-terminated). Return
+ * -1 if the read failed.
+ *
+ * \param f_descriptor: currently only support stdin (aka 0).
+ * \param buff: buffer to be read to.
+ * \param read_size: the size of buffer.
+ * \param incl_newln: boolean to decide whether to include newline character.
+ * \param echo_char: boolean to decide whether to printout read character to
+ * terminal.
  */
-int64_t read_handler(uint64_t f_descriptor, char* buff, size_t read_size) {
+int64_t read_handler(uint64_t f_descriptor, char* buff, size_t read_size,
+                     bool incl_newln, bool echo_char) {
   // Exit if reading from unsupported file descriptors
-  if (f_descriptor != STD_IN) {
+  if (f_descriptor != STD_IN || buff == NULL) {
     return -1;
   } else {
-    // Count the number of read characters so far. This is also used as the
-    // index for the next available slot for new character to be read.
+    // Count the number of read characters so far.
+    // This variable is also used as the index for the next available slot for
+    // new character to be read.
     int read_char_counter = 0;
     char c = '\0';
-    while (read_char_counter < read_size) {
+    while (read_char_counter < read_size - 1) {
       c = kget_c();
+      // If c is delim (in this case new line), break out of loop
       if (c == '\n') {
-        // Stop reading uppon getting newline character
-        return read_char_counter;
-      } else if (c == ASCII_BACKSPACE) {
+        // Add newline to buffer
+        if (incl_newln) buff[read_char_counter++] = c;
+        // Print newline character and exit loop
+        if (echo_char) term_putchar(c, VGA_COLOR_LIGHT_GREEN, VGA_COLOR_BLACK);
+        break;
+      }
+
+      // Else, Handle input character
+      if (c == ASCII_BACKSPACE) {
         // Delete the last character and decrease the read_char_counter
         read_char_counter = read_char_counter == 0 ? 0 : read_char_counter - 1;
         buff[read_char_counter] = '\0';
@@ -86,8 +116,9 @@ int64_t read_handler(uint64_t f_descriptor, char* buff, size_t read_size) {
         // Put the valid character into the buffer
         buff[read_char_counter++] = c;
       }
+      if (echo_char) term_putchar(c, VGA_COLOR_LIGHT_GREEN, VGA_COLOR_BLACK);
     }
-    // If we finished reading, return the number of read characters
+    // If we finished reading return the number of read characters
     return read_char_counter;
   }
 }
@@ -97,11 +128,15 @@ int64_t read_handler(uint64_t f_descriptor, char* buff, size_t read_size) {
  * write_size amount of characters. If the characters is null terminate, we
  * return immediately. The functions return -1 if error occurs, otherwise, we
  * return the number of written characters (exclude null terminate).
+ *
+ * \param f_descriptor: currently support stdout and stderr (aka 1 and 2).
+ * \param str: buffer to be written out.
+ * \param write_size: number of byte to be written out.
  */
 int64_t write_handler(uint64_t f_descriptor, const char* str,
                       size_t write_size) {
-  // Exit early if we do not write to the supported file descriptors
-  if (f_descriptor != STD_OUT && f_descriptor != STD_ERR) {
+  // Exit early if we do not write to the supported file descriptors or NULL str
+  if ((f_descriptor != STD_OUT && f_descriptor != STD_ERR) || str == NULL) {
     return -1;
   }
 

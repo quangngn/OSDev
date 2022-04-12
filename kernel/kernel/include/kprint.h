@@ -60,9 +60,8 @@ char kget_c();
  * should store characters. This function will write a null terminator into the
  * output array unless it fails. 
  * 
- * \param capacity The number of characters that
- * can safely be written to the output array including the final null
- * termiantor. 
+ * \param capacity The number of characters that can safely be written to the
+ * output array including the final null char.
  * 
  * \returns The number of characters read, or zero if no characters
  * were read due to an error.

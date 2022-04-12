@@ -8,6 +8,13 @@ void test_stdio() {
   printf("Print formatted string:\n");
   printf("String: %s, Dec: %d, Hex: %x, Pointer: %p, %%\n", "H3||0",
          23499823984, 0x1232908AB, &test_stdio);
+
+  char* s = NULL;
+  size_t size = 0;
+  int stream = STD_IN;
+  getline(&s, &size, &stream);
+  printf(s);
+
   printf("\n");
 }
 

@@ -2,6 +2,8 @@
 #include "stdio.h"
 
 size_t strlen(const char* str) {
+  if (str == NULL) return 0;
+
   size_t counter = 0;
   while (str[counter] != '\0') {
     counter++;
@@ -10,6 +12,8 @@ size_t strlen(const char* str) {
 }
 
 char* strchr(const char* str, char c) {
+  if (str == NULL) return NULL;
+
   char* cur = (char*)str;
   // Exit the loop if found c or met '\0'
   while (*cur != '\0' && *cur != c) {
@@ -78,6 +82,8 @@ char* strtok(char* str, const char* delim) {
 }
 
 char* strcpy(char* dest, const char* src) {
+  if (dest == NULL || src == NULL) return NULL;
+
   char* ret = dest;
   while (*src != '\0') {
     *dest++ = *src++;
@@ -137,6 +143,9 @@ char* strpbrk(const char* str1, const char* str2) {
 }
 
 int strcmp(const char* str1, const char* str2) {
+  if (str1 == NULL && str2 != NULL) return -1;
+  if (str1 != NULL && str2 == NULL) return 1;
+  if (str1 == NULL && str2 == NULL) return 0;
   int idx = 0;
   while (true) {
     if (str1[idx] < str2[idx]) {
