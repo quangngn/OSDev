@@ -9,22 +9,45 @@ char pressed_key1[] =
 char pressed_key2[] =
     "\e!@#$%^&*()_+\b\tQWERTYUIOP{}\n%ASDFGHJKL:\"~%|ZXCVBNM<>\?    ";
 
-// Function for circular queue
-void cq_init(circular_queue_t** cq) {
-  circular_queue_t* new_cq = *cq;
-  new_cq->size = 0;
-  new_cq->read = 0;
-  new_cq->write = 0;
+/******************************************************************************/
+/**
+ * Init the circular queue with default value:
+ * - read = 0
+ * - write = 0
+ * - size = 0
+ * Notice: buffer is NOT 0-init
+ * \param cq: pointer of a circular queue.
+ */
+void cq_init(circular_queue_t* cq) {
+  if (cq == NULL) return;
+
+  cq->size = 0;
+  cq->read = 0;
+  cq->write = 0;
 }
 
-bool cq_read(circular_queue_t* cq, uint64_t* dest_val) {
+/**
+ * Read the data from the buffer. If the queue is empty, we return false, else:
+ * - Read data pointed to by cq->read index
+ * - Advance cq->read index.
+ * - Reduce buffer size (number of elements not bytes).
+ *
+ * \param cq: pointer to the circular queue.
+ * \param read_val: pointer to the variable where cq_read stores the read
+ * character.
+ *
+ * \returns true if the read was successful, else returns false.
+ */
+bool cq_read(circular_queue_t* cq, uint64_t* read_val) {
+  if (cq == NULL || read_val == NULL) return false;
+
   if (cq_is_empty(cq)) {
     // If the buffer is empty, we return false
     return false;
   } else {
     // If the buffer is not empty ...
     // Read the value from pointed to by read pointer
-    *dest_val = (cq->buffer)[(cq->read)];
+    *read_val = (cq->buffer)[(cq->read)];
     // Advance the read pointer (wrap around if possible)
     cq->read = (cq->read + 1) % KEYBOARD_BUFFER_SIZE;
     // Decrease the size of buffer
@@ -33,17 +56,29 @@ bool cq_read(circular_queue_t* cq, uint64_t* dest_val) {
   }
 }
 
-void cq_write(circular_queue_t* cq, uint64_t val) {
+/**
+ * Write the data to the buffer. If the queue is full, we overwrite the oldest
+ * value, else:
+ * - Write val to the buffer at index cq->write.
+ * - Advance cq->write index.
+ * - Increase the buffer size (number of elements not bytes).
+ *
+ * \param cq: pointer to the circular queue.
+ * \param write_val: value to be written.
+ */
+void cq_write(circular_queue_t* cq, uint64_t write_val) {
+  if (cq == NULL) return;
+
   if (cq_is_full(cq)) {
     // If the buffer is full, we overwrite value to buffer
-    (cq->buffer)[cq->write] = val;
+    (cq->buffer)[cq->write] = write_val;
     // Advance the write index (wrap around if possible)
     cq->write = (cq->write + 1) % KEYBOARD_BUFFER_SIZE;
     // Advance the read index (wrap around if possible)
     cq->read = (cq->read + 1) % KEYBOARD_BUFFER_SIZE;
   } else {
     // If the buffer is not full, we write value to buffer
-    (cq->buffer)[cq->write] = val;
+    (cq->buffer)[cq->write] = write_val;
     // Advance the write index (wrap around if possible)
     cq->write = (cq->write + 1) % KEYBOARD_BUFFER_SIZE;
     // Increase the size of buffer
@@ -51,40 +86,44 @@ void cq_write(circular_queue_t* cq, uint64_t val) {
   }
 }
 
-// Functions for keyboard
-/*
+/******************************************************************************/
+/**
  * Init keyboard object with default value:
  * - shift = false
  * - buffer.read = 0
  * - buffer.write = 0
  * - buffer.size = 0
+ * \param kb: pointer of a keyboard object.
  */
-void kb_init(keyboard_t** kb) {
-  keyboard_t* new_kb = *kb;
+void kb_init(keyboard_t* kb) {
+  if (kb == NULL) return;
+
   // Set key states = false
-  new_kb->alt = 0;
-  new_kb->ctrl = 0;
-  new_kb->shift = 0;
-  new_kb->capslock = 0;
+  kb->alt = 0;
+  kb->ctrl = 0;
+  kb->shift = 0;
+  kb->capslock = 0;
 
   // Set buffer:
-  new_kb->buffer.read = 0;
-  new_kb->buffer.write = 0;
-  new_kb->buffer.size = 0;
+  kb->buffer.read = 0;
+  kb->buffer.write = 0;
+  kb->buffer.size = 0;
 }
 
-/*
- * This function is called by the keyboard interrupt handler. The scan code
- * being passed to the keyboard to be processed accordingly. For now, we record
+/**
+ * This function is called by the keyboard interrupt handler in idt.h. The scan
+ * code being passed to the keyboard to be processed accordingly. We record
  * input when the key is down.
  *
- * For now we do not support left and right Alt/Shift/CTRL key yet. We also does
- * not record to the buffer scancode >= CAPSLOCK_DOWN_SS. This is the limit
- * between printable characters and non-printable characters
+ * We do not differentiate left and right Alt/Shift/CTRL key yet.
+ * We also do not record to the buffer scancode >= CAPSLOCK_DOWN_SS, which is
+ * the limit between printable characters and non-printable characters.
+ *
+ * \param kb: pointer to keyboard object.
+ * \param val: value of the scan code.
  */
 void kb_input_scan_code(keyboard_t* kb, uint64_t val) {
-  // Special case for tab pressed scancode on Mac, which is 0x40000017 instead
-  // of 0x0F
+  if (kb == NULL) return;
 
   switch (val) {
     // If the Alt key is pressed, we set alt variable to ALT_ON_MASK
@@ -129,11 +168,17 @@ void kb_input_scan_code(keyboard_t* kb, uint64_t val) {
   }
 }
 
-/*
- * Read one key off the buffer.
- * If the key is not within the range, we return 0
+/**
+ * Read one scan code off the buffer and convert to character. If the key is not
+ * within the range, we return false.
+ * \param kb: pointer to the keyboard object.
+ * \param output_char: pointer to output character.
+ * 
+ * \returns: true if the read is successful, else returns false.
  */
 bool kb_read_c(keyboard_t* kb, char* output_char) {
+  if (kb == NULL || output_char == NULL) return false;
+
   uint64_t scancode_key;
   if (!cq_read(&kb->buffer, &scancode_key)) {
     *output_char = 0;
