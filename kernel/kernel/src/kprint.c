@@ -1,36 +1,42 @@
 #include "kprint.h"
 
-// Buffers being used to store digit characters when printing number
-char buffer_dec_uint64[NUM_DIGIT_DEC_UINT64 + 1];
-char buffer_hex_uint64[NUM_DIGIT_HEX_UINT64 + 1];
-
 // Pointers to memmap struct tag and hhdm struct tag to help with printing
 // memory usage
 extern struct stivale2_struct_tag_memmap* mmap_struct_tag;
 extern struct stivale2_struct_tag_hhdm* hhdm_struct_tag;
 
+// Buffers being used to store digit characters when printing number
+char buffer_dec_uint64[NUM_DIGIT_DEC_UINT64 + 1];
+char buffer_hex_uint64[NUM_DIGIT_HEX_UINT64 + 1];
 // Function to write to terminal. Init as NULL. Set after read terminal
 // structure tag
 term_write_t term_write = NULL;
-
 // Keyboard to handle the input. The input would trigger the interrupt handler
 // defined in idt.h. Then, the handler would write to circular buffer of
-// keyboard object. Function such as kget_c can utilize this buffer to read
-// input from keyboard
+// keyboard object. Function such as kget_c can read character from this buffer.
 keyboard_t keyboard = {.buffer = {.read = 0, .write = 0, .size = 0},
                        .alt = 0,
                        .ctrl = 0,
                        .shift = 0,
                        .capslock = 0};
 
-// Set value to term_write
+/**
+ * Set value to term_write
+ * \param fn: function to address.
+ */
 void kset_term_write(term_write_t fn) { term_write = fn; }
 
-// count the number of character in the input string
+/**
+ * Count the number of character in the input string.
+ * \param str: input string.
+ */
 size_t kstrlen(const char* str) {
+  // Early exit if str is NULL
+  if (str == NULL) return 0;
+
+  // Count the number of character before seeing '\0'
   const char* cursor = str;
   size_t len = 0;
-  // Count the number of character before seeing '\0'
   while (*cursor != '\0') {
     len++;
     cursor++;
@@ -40,16 +46,26 @@ size_t kstrlen(const char* str) {
 }
 
 /******************************************************************************/
-// Print a single character to the terminal
+/**
+ * Print a single character to the terminal.
+ * \param c: character to be printed
+ */
 void kprint_c(char c) { term_write(&c, 1, VGA_COLOR_WHITE, VGA_COLOR_BLACK); }
 
-// Print a string to the terminal
+/**
+ * Print a string to the terminal.
+ * \param str: string to be printed.
+ */
 void kprint_s(const char* str) {
   term_write(str, kstrlen(str), VGA_COLOR_WHITE, VGA_COLOR_BLACK);
 }
 
-// Print an unsigned 64-bit integer value to the terminal in decimal notation
-// (no leading zeros please!)
+/**
+ * Print an unsigned 64-bit integer value to the terminal in decimal notation
+ * (no leading zeros).
+ * The function currently does not support negative number.
+ * \param value: decimal to be printed.
+ */
 void kprint_d(uint64_t value) {
   if (value == 0) {
     kprint_c('0');
@@ -75,8 +91,11 @@ void kprint_d(uint64_t value) {
   }
 }
 
-// Print an unsigned 64-bit integer value to the terminal in lowercase
-// hexadecimal notation (no leading zeros or “0x” please!)
+/**
+ * Print an unsigned 64-bit integer value to the terminal in lowercase
+ * hexadecimal notation (no leading zeros or “0x” please!)
+ * \param value: the number to be printed out in hex form.
+ */
 void kprint_x(uint64_t value) {
   if (value == 0) {
     kprint_c('0');
@@ -103,19 +122,26 @@ void kprint_x(uint64_t value) {
   }
 }
 
-// Print the value of a pointer to the terminal in lowercase hexadecimal with
-// the prefix “0x”
+/**
+ * Print the value of a pointer to the terminal in lowercase hexadecimal with
+ * the prefix “0x”. 
+ * \param ptr: the address to be printed.
+ */
 void kprint_p(void* ptr) {
   kprint_s("0x");
   kprint_x((uint64_t)ptr);
 }
 
-// Print formatted string, supporting:
-// - %s for string
-// - %c for character
-// - %d for decimal number
-// - %x for hex number
-// - %p for pointer address
+/**
+ * Print formatted string, supporting:
+ * - %s for string
+ * - %c for character
+ * - %d for decimal number
+ * - %x for hex number
+ * - %p for pointer address
+ * - %% would be character '%'.
+ * \param format: the format string.
+ */
 void kprintf(const char* format, ...) {
   const char* cursor = format;
   // Set up va_list to read arguments
@@ -166,8 +192,12 @@ void kprintf(const char* format, ...) {
   }
 }
 
-// Print usable memory in format:
-// "[P. Addr start]-[P. Addr end] mapped at [Vir. Addr start]-[Vir. Addr end]
+/**
+ * Print usable memory in format:
+ * "[P. Addr start]-[P. Addr end] mapped at [Vir. Addr start]-[Vir. Addr end]"
+ * The function uses mmap and hhdm struct tags provided by the bootloader. Their
+ * values are declared in boot.c.
+ */
 void kprint_mem_usage() {
   // Check for null tag pointers
   if (mmap_struct_tag == NULL) {
@@ -223,14 +253,15 @@ char kget_c() {
  * \param output A pointer to the beginning of an array where this function
  * should store characters. This function will write a null terminator into the
  * output array unless it fails.
- *
  * \param capacity The number of characters that can safely be written to the
  * output array including the final null char.
  *
- * \returns The number of characters read, or zero if no characters
- * were read due to an error.
+ * \returns The number of read characters (excluding null terminate character),
+ * or zero if no characters were read due to an error.
  */
 size_t kget_s(char* output, size_t capacity) {
+  if (output == NULL) return 0;
+
   char input_char;
   for (int i = 0; i < capacity; i++) {
     input_char = kget_c();
