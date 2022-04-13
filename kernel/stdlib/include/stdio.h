@@ -15,7 +15,7 @@
 
 // Syscall wrappers: function that invoke the syscall() functions
 int64_t sys_read(uint64_t f_descriptor, char* buff, size_t read_size,
-                 bool incl_newln, bool echo_char);
+                 bool incl_newln, bool echo_char, int64_t read_char_counter);
 int64_t sys_write(uint64_t f_descriptor, const char* str, size_t write_size);
 
 /**
@@ -24,7 +24,7 @@ int64_t sys_write(uint64_t f_descriptor, const char* str, size_t write_size);
  * \param str The string to be printed.
  * \returns number of characters being printed.
  */
-int fprint_s(int f_descriptor, const char* str);
+int fprint_s(uint64_t f_descriptor, const char* str);
 
 /**
  * Print formatted string, supporting:
@@ -37,6 +37,18 @@ int fprint_s(int f_descriptor, const char* str);
  * \param format The format string.
  */
 int printf(const char* format, ...);
+
+/**
+ * Print formatted error message, supporting:
+ * - %s for string
+ * - %c for character
+ * - %d for decimal number
+ * - %x for hex number
+ * - %p for pointer address
+ * - %% would be character '%'.
+ * \param format The format string.
+ */
+void perror(const char* format, ...);
 
 /**
  * Read the entire line from stream to str. The *str is malloc, null-terminated,
@@ -68,15 +80,3 @@ char getc(uint64_t f_descriptor);
  * read_size.
  */
 char* fgets(char* buff, size_t read_size, uint64_t f_descriptor);
-
-/**
- * Print formatted error message, supporting:
- * - %s for string
- * - %c for character
- * - %d for decimal number
- * - %x for hex number
- * - %p for pointer address
- * - %% would be character '%'.
- * \param format The format string.
- */
-void perror(const char* format, ...);

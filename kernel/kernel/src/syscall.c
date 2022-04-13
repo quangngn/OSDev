@@ -20,9 +20,11 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1,
        * arg1: pointer to buffer
        * arg2: read size
        * arg3: boolean include newline or not
-       * arg4: boolean echo input char to terminal or not
+       * arg4: boolean echo input char to terminal or not.
+       * arg5: the number of read character so far.
        */
-      return read_handler(arg0, (char*)arg1, arg2, (bool)arg3, (bool)arg4);
+      return read_handler(arg0, (char*)arg1, arg2, (bool)arg3, (bool)arg4,
+                          (int64_t)arg5);
     case SYSCALL_WRITE:
       /**
        * arg0: file descriptor
@@ -83,11 +85,17 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1,
  * \param incl_newln Boolean to decide whether to include newline character.
  * \param echo_char Boolean to decide whether to printout read character to
  * terminal.
+ * \param read_char_counter The number of character has been read to str before
+ * this function is called. The function would continue at reading to
+ * buff[read_char_counter]. The use case is when we are reading to str, str run
+ * out of space and get realloc. read_handler is called again and continue from
+ * the end of str using read_char_counter value.
  * \returns the number of read bytes (excluding null-terminated). Return -1 if
  * the read failed.
  */
 int64_t read_handler(uint64_t f_descriptor, char* buff, size_t read_size,
-                     bool incl_newln, bool echo_char) {
+                     bool incl_newln, bool echo_char,
+                     int64_t read_char_counter) {
   // Exit if reading from unsupported file descriptors
   if (f_descriptor != STD_IN || buff == NULL) {
     return -1;
@@ -95,7 +103,6 @@ int64_t read_handler(uint64_t f_descriptor, char* buff, size_t read_size,
     // Count the number of read characters so far.
     // This variable is also used as the index for the next available slot for
     // new character to be read.
-    int read_char_counter = 0;
     char c = '\0';
     while (read_char_counter < read_size - 1) {
       c = kget_c();

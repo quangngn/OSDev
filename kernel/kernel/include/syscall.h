@@ -41,11 +41,17 @@ int64_t syscall_entry_handler(uint64_t nr, uint64_t arg0, uint64_t arg1,
  * \param incl_newln Boolean to decide whether to include newline character.
  * \param echo_char Boolean to decide whether to printout read character to
  * terminal.
+ * \param read_char_counter The number of character has been read to str before
+ * this function is called. The function would continue at reading to
+ * buff[read_char_counter]. The use case is when we are reading to str, str run
+ * out of space and get realloc. read_handler is called again and continue from
+ * the end of str using read_char_counter value.
  * \returns the number of read bytes (excluding null-terminated). Return -1 if
  * the read failed.
  */
 int64_t read_handler(uint64_t f_descriptor, char* buff, size_t read_size,
-                     bool incl_newln, bool echo_char);
+                     bool incl_newln, bool echo_char,
+                     int64_t read_char_counter);
 
 /**
  * Handler for write system call. Function prints characters in str up to the
