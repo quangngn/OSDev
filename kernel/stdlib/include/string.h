@@ -31,7 +31,7 @@ char *strchr(const char *str, char c);
  * \returns first token seperated by delim. Return NULL if pstr or *pstr is
  * NULL.
  */
-char *strsep(char **stringp, const char *delim);
+char *strsep(char **pstr, const char *delim);
 
 /**
  * Function returns the pointer to the first token in the string. A null pointer

@@ -23,18 +23,25 @@ int64_t sys_write(uint64_t f_descriptor, const char* str, size_t write_size) {
 
 /******************************************************************************/
 // Print a single character to the terminal
-static void print_c(char c) { sys_write(STD_OUT, &c, 1); }
+static void fprint_c(int f_descriptor, char c) {
+  sys_write(f_descriptor, &c, 1);
+}
 
-// Print a string to the terminal
-int print_s(const char* str) {
+/**
+ * Print unformatted string str.
+ * \param f_descriptor The file descriptor to be printed to.
+ * \param str The string to be printed.
+ * \returns number of characters being printed.
+ */
+int fprint_s(int f_descriptor, const char* str) {
   int len = strlen(str);
-  sys_write(STD_OUT, str, len);
+  sys_write(f_descriptor, str, len);
   return len;
 }
 
 // Print an unsigned 64-bit integer value to the terminal in decimal notation
 // (no leading zeros please!)
-static int print_d(uint64_t value) {
+static int fprint_d(int f_descriptor, uint64_t value) {
   if (value == 0) {
     print_c('0');
     return 1;
@@ -56,14 +63,14 @@ static int print_d(uint64_t value) {
       num_digit++;
     }
 
-    sys_write(STD_OUT, cursor, num_digit);
+    sys_write(f_descriptor, cursor, num_digit);
     return num_digit;
   }
 }
 
 // Print an unsigned 64-bit integer value to the terminal in lowercase
 // hexadecimal notation (no leading zeros or “0x” please!)
-static int print_x(uint64_t value) {
+static int fprint_x(int f_descriptor, uint64_t value) {
   if (value == 0) {
     print_c('0');
     return 1;
@@ -86,22 +93,27 @@ static int print_x(uint64_t value) {
       num_digit++;
     }
 
-    sys_write(STD_OUT, cursor, num_digit);
+    sys_write(f_descriptor, cursor, num_digit);
     return num_digit;
   }
 }
 
 // Print the value of a pointer to the terminal in lowercase hexadecimal with
 // the prefix “0x”
-static int print_p(void* ptr) { return print_s("0x") + print_x((uint64_t)ptr); }
+static int fprint_p(int f_descriptor, void* ptr) {
+  return fprint_s(f_descriptor, "0x") + fprint_x(f_descriptor, (uint64_t)ptr);
+}
 
-// Print formatted string, supporting:
-// - %s for string
-// - %c for character
-// - %d for decimal number
-// - %x for hex number
-// - %p for pointer address
-// Return the number of character printed
+/**
+ * Print formatted string, supporting:
+ * - %s for string
+ * - %c for character
+ * - %d for decimal number
+ * - %x for hex number
+ * - %p for pointer address
+ * - %% would be character '%'.
+ * \param format The format string.
+ */
 int printf(const char* format, ...) {
   if (format == NULL) return 0;
 
@@ -119,40 +131,40 @@ int printf(const char* format, ...) {
       switch (*cursor) {
         // case "%%" --> print '%'
         case '%':
-          print_c('%');
+          f_print_c(STD_OUT, '%');
           char_count++;
           break;
         // case "%c" --> print next arg as a character
         case 'c':
-          print_c(va_arg(args, int));
+          fprint_c(STD_OUT, va_arg(args, int));
           char_count++;
           break;
         // case "%s" --> print next arg as a string
         case 's':
-          char_count += print_s(va_arg(args, char*));
+          char_count += fprint_s(STD_OUT, va_arg(args, char*));
           break;
         // case "%d" --> print next arg as a decimal number
         case 'd':
-          char_count += print_d(va_arg(args, uint64_t));
+          char_count += fprint_d(STD_OUT, va_arg(args, uint64_t));
           break;
         // case "%x" --> print next arg as a hex number
         case 'x':
-          char_count += print_x(va_arg(args, uint64_t));
+          char_count += fprint_x(STD_OUT, va_arg(args, uint64_t));
           break;
         // case "%p" --> print next arg as a pointer address
         case 'p':
-          char_count += print_p(va_arg(args, void*));
+          char_count += fprint_p(STD_OUT, va_arg(args, void*));
           break;
         // case "%" -> print nothing, return
         case '\0':
           return char_count;
         // unsupported escape character
         default:
-          print_s("<not supported>");
+          fprint_s(STD_OUT, "<not supported>");
           return 0;
       }
     } else {
-      print_c(*cursor);
+      fprint_c(STD_OUT, *cursor);
       char_count++;
     }
     cursor++;
@@ -162,16 +174,17 @@ int printf(const char* format, ...) {
 
 /******************************************************************************/
 /**
- * Read the entire line from stream. The buffer is malloc, null-terminated, and
- * include new line character if it read one. If the buffer is not large enough,
- * then it would be realloc. *size would be set to the allocated size of *str.
+ * Read the entire line from stream to str. The *str is malloc, null-terminated,
+ * and include new line character if it read one. If the buffer is not large
+ * enough, then it would be realloc. size would be update to match the size of
+ * the allocated buffer.
  *
- * The function update str and size if the read is correct. If the read is
- * successful, the function returns the number of read characters (excluding the
- * null terminate but include delimiter such as new line). Else return -1.
- *
- * The read is done when we read a newline character. This character is also
- * included the *str buffer.
+ * \param str String buffer to be written to. It would be reallocated if we do
+ * not have enough space. size would be update accordingly.
+ * \param size pointer to the size of the allocated string buffer.
+ * \param stream pointer to the input stream.
+ * \returns the number of read characters (excluding the null terminate). Else
+ * return -1.
  */
 int64_t getline(char** str, size_t* size, int* stream) {
   // Check for NULL pointers from params
@@ -193,7 +206,8 @@ int64_t getline(char** str, size_t* size, int* stream) {
   while (true) {
     // 1. Read to temp_buff from stream. buffer_len store number of readed
     // characters (excluding null-terminate char)
-    int64_t buffer_len = sys_read(*stream, buffer, GETLINE_BUFF_SIZE, true, true);
+    int64_t buffer_len =
+        sys_read(*stream, buffer, GETLINE_BUFF_SIZE, true, true);
     buffer[buffer_len] = '\0';
 
     // 2. If we does not read any character, break from the loop
@@ -248,9 +262,69 @@ char* fgets(char* buff, size_t read_size, uint64_t f_descriptor) {
 }
 
 /**
- * Print error message str to STD_ERR
+ * Print formatted error message, supporting:
+ * - %s for string
+ * - %c for character
+ * - %d for decimal number
+ * - %x for hex number
+ * - %p for pointer address
+ * - %% would be character '%'.
+ * \param format The format string.
  */
-void perror(const char* str) {
-  if (str == NULL) return;
-  sys_write(STD_ERR, str, strlen(str));
+void perror(const char* format, ...) {
+  if (format == NULL) return 0;
+
+  const char* cursor = format;
+  // Set up va_list to read arguments
+  va_list args;
+  va_start(args, format);
+
+  int char_count = 0;
+  // Read each character in format and handle each case when we see %
+  while (*cursor != '\0') {
+    if (*cursor == '%') {
+      // Process the character right after the '%'
+      cursor++;
+      switch (*cursor) {
+        // case "%%" --> print '%'
+        case '%':
+          f_print_c(STD_ERR, '%');
+          char_count++;
+          break;
+        // case "%c" --> print next arg as a character
+        case 'c':
+          fprint_c(STD_ERR, va_arg(args, int));
+          char_count++;
+          break;
+        // case "%s" --> print next arg as a string
+        case 's':
+          char_count += fprint_s(STD_ERR, va_arg(args, char*));
+          break;
+        // case "%d" --> print next arg as a decimal number
+        case 'd':
+          char_count += fprint_d(STD_ERR, va_arg(args, uint64_t));
+          break;
+        // case "%x" --> print next arg as a hex number
+        case 'x':
+          char_count += fprint_x(STD_ERR, va_arg(args, uint64_t));
+          break;
+        // case "%p" --> print next arg as a pointer address
+        case 'p':
+          char_count += fprint_p(STD_ERR, va_arg(args, void*));
+          break;
+        // case "%" -> print nothing, return
+        case '\0':
+          return char_count;
+        // unsupported escape character
+        default:
+          fprint_s(STD_ERR, "<not supported>");
+          return 0;
+      }
+    } else {
+      fprint_c(STD_ERR, *cursor);
+      char_count++;
+    }
+    cursor++;
+  }
+  return char_count;
 }

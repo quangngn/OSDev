@@ -18,25 +18,38 @@ int64_t sys_read(uint64_t f_descriptor, char* buff, size_t read_size,
                  bool incl_newln, bool echo_char);
 int64_t sys_write(uint64_t f_descriptor, const char* str, size_t write_size);
 
+/**
+ * Print unformatted string str.
+ * \param f_descriptor The file descriptor to be printed to.
+ * \param str The string to be printed.
+ * \returns number of characters being printed.
+ */
+int fprint_s(int f_descriptor, const char* str);
 
-int print_s(const char* str);
-
-// Print formatted string, supporting:
-// - %s for string
-// - %c for character
-// - %d for decimal number
-// - %x for hex number
-// - %p for pointer address
+/**
+ * Print formatted string, supporting:
+ * - %s for string
+ * - %c for character
+ * - %d for decimal number
+ * - %x for hex number
+ * - %p for pointer address
+ * - %% would be character '%'.
+ * \param format The format string.
+ */
 int printf(const char* format, ...);
 
 /**
- * Read the entire line from stream. The buffer is malloc, null-terminated, and
- * include new line character if it read one. If the buffer is not large enough,
- * then it would be realloc.
+ * Read the entire line from stream to str. The *str is malloc, null-terminated,
+ * and include new line character if it read one. If the buffer is not large
+ * enough, then it would be realloc. size would be update to match the size of
+ * the allocated buffer.
  *
- * The function update str and size if the read is correct. If the read is
- * successful, the function returns the number of read characters (excluding the
- * null terminate). Else return -1.
+ * \param str String buffer to be written to. It would be reallocated if we do
+ * not have enough space. size would be update accordingly.
+ * \param size pointer to the size of the allocated string buffer.
+ * \param stream pointer to the input stream.
+ * \returns the number of read characters (excluding the null terminate). Else
+ * return -1.
  */
 int64_t getline(char** str, size_t* size, int* stream);
 
@@ -57,6 +70,13 @@ char getc(uint64_t f_descriptor);
 char* fgets(char* buff, size_t read_size, uint64_t f_descriptor);
 
 /**
- * Print error
+ * Print formatted error message, supporting:
+ * - %s for string
+ * - %c for character
+ * - %d for decimal number
+ * - %x for hex number
+ * - %p for pointer address
+ * - %% would be character '%'.
+ * \param format The format string.
  */
-void perror(const char* str);
+void perror(const char* format, ...);
