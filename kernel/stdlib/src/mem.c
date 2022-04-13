@@ -14,16 +14,18 @@ uintptr_t user_heap = USER_HEAP;
 void* mbuffer = NULL;
 size_t remain_mbuffer_size = 0;
 
-void memtest() {
-  printf("[MEM]: %p - mbuffer = %p\n", &mbuffer, mbuffer);
-  printf("[MEM]: %p - remain_mbuffer_size = %d\n", &remain_mbuffer_size,
-         remain_mbuffer_size);
-  printf("[MEM]: %p - user_heap = %p\n\n", &user_heap, user_heap);
-}
-
+/******************************************************************************/
 /**
- * Map chunk of virtual memory address starting at vaddr to the address space.
- * For now, we ignore flags, fd, and offset.
+ * Invoke system call to map a chunk of memory, starting at vaddr.
+ * If vaddr == NULL, the OS choose the next virtual address available in user
+ * heap.
+ * \param vaddr The virtual memory start address to be mapped.
+ * \param length Byte size of the memory chunk.
+ * \param prot Protection (including read, write, execute permission).
+ * \param flags Not used in our OS.
+ * \param fd Not used in our OS.
+ * \param offset Not used in our OS.
+ * \returns the mapped virtual address.
  */
 void* mmap(void* addr, size_t length, int prot, int flags, int fd,
            size_t offset) {
@@ -65,7 +67,10 @@ void* mmap(void* addr, size_t length, int prot, int flags, int fd,
 }
 
 /**
- * Unmmap chunk of virtual memory address starting at vaddr.
+ * Invoke system call to unmap a chunk of memory, starting at vaddr.
+ * \param vaddr The virtual memory start address to be unmapped.
+ * \param length Byte size of the memory chunk.
+ * \returns 0 if successful, else -1.
  */
 int munmap(void* addr, size_t length) {
   uintptr_t cursor = (uintptr_t)addr & PAGE_ALIGN_MASK;
@@ -83,6 +88,10 @@ int munmap(void* addr, size_t length) {
 /**
  * Change the protection of the chunk of virtual memory address starting at
  * vaddr.
+ * \param vaddr The virtual memory start address to be set protection.
+ * \param length Byte size of the memory chunk.
+ * \param prot Protection (including read, write, execute permission).
+ * \returns 0 if successful, else -1.
  */
 int mprotect(void* addr, size_t length, int prot) {
   bool writable = (prot & PROT_WRITE) != 0;
@@ -107,6 +116,10 @@ int mprotect(void* addr, size_t length, int prot) {
  * src:
  * https://curtsinger.cs.grinnell.edu/teaching/2022S/CSC395/kernel/libc.html by
  * professor Charlie Curtsinger.
+ * 
+ * Request memory chunk from heap.
+ * \param size Size of the memory chunk to be requested.
+ * \returns start address of the memory chunk. NULL if the function fails.
  */
 void* malloc(size_t sz) {
   // Round sz up to a multiple of 16
@@ -133,11 +146,26 @@ void* malloc(size_t sz) {
   return result;
 }
 
-void free(void* p) {
-  // Do nothing
+/**
+ * Set value to a memory chunk.
+ * \param dst Base address of the memory chunk.
+ * \param value Value to be set.
+ * \param size Size of the memory chunk.
+ * \param return pointer to the memory chunk.
+ */ 
+void* memset(void* dst, int value, size_t num) {
+  for (int i = 0; i < num; i++) {
+    ((unsigned char*)dst)[i] = (unsigned char)value;
+  }
+  return dst;
 }
 
-// Copy memory from src to dest. Size is in byte
+/**
+ * Copy memory from src to dst.
+ * \param dst Base memory address of the destination memory.
+ * \param src Base memory address of the source memory.
+ * \param size Size of the memory chunk.
+ */ 
 void memcpy(void* dst, void* src, size_t size) {
   char* d = (char*)dst;
   char* s = (char*)src;
@@ -147,10 +175,9 @@ void memcpy(void* dst, void* src, size_t size) {
   }
 }
 
-// Set memory to a certain value
-void* memset(void* dst, int value, size_t num) {
-  for (int i = 0; i < num; i++) {
-    ((unsigned char*)dst)[i] = (unsigned char)value;
-  }
-  return dst;
+/**
+ * Free memory p
+ */ 
+void free(void* p) {
+  // Do nothing
 }

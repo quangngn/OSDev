@@ -26,7 +26,7 @@ int64_t sys_write(uint64_t f_descriptor, const char* str, size_t write_size) {
 static void print_c(char c) { sys_write(STD_OUT, &c, 1); }
 
 // Print a string to the terminal
-static int print_s(const char* str) {
+int print_s(const char* str) {
   int len = strlen(str);
   sys_write(STD_OUT, str, len);
   return len;

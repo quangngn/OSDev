@@ -22,8 +22,9 @@ typedef void (*term_write_t)(const char*, size_t, uint8_t fg, uint8_t bg);
 void kset_term_write(term_write_t fn);
 
 /**
- * Count the number of character in the input string.
+ * Count the number of characters in the input string.
  * \param str Input string.
+ * \returns number of characters in str (excluding null character).
  */
 size_t kstrlen(const char* str);
 

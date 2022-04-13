@@ -28,8 +28,9 @@ keyboard_t keyboard = {.buffer = {.read = 0, .write = 0, .size = 0},
 void kset_term_write(term_write_t fn) { term_write = fn; }
 
 /**
- * Count the number of character in the input string.
+ * Count the number of characters in the input string.
  * \param str Input string.
+ * \returns number of characters in str (excluding null character).
  */
 size_t kstrlen(const char* str) {
   // Early exit if str is NULL

@@ -18,6 +18,9 @@ int64_t sys_read(uint64_t f_descriptor, char* buff, size_t read_size,
                  bool incl_newln, bool echo_char);
 int64_t sys_write(uint64_t f_descriptor, const char* str, size_t write_size);
 
+
+int print_s(const char* str);
+
 // Print formatted string, supporting:
 // - %s for string
 // - %c for character

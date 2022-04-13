@@ -13,6 +13,7 @@ void test_stdio() {
   size_t size = 0;
   int stream = STD_IN;
   getline(&s, &size, &stream);
+  print_s(s);
   printf(s);
 
   printf("\n");
