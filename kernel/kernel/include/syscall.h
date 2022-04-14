@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <system.h>
 
+#include "executable.h"
 #include "keyboard.h"
 #include "kprint.h"
 #include "page.h"
@@ -67,3 +68,16 @@ int64_t read_handler(uint64_t f_descriptor, char* buff, size_t read_size,
  */
 int64_t write_handler(uint64_t f_descriptor, const char* str,
                       size_t write_size);
+
+/**
+ * Handler to invoke the execution of program with name exec_name.
+ * \param exe_name Name of the executable to be exec.
+ * \returns true if the function is executed successfully, else return falses.
+ */
+bool exec_handler(const char* exe_name);
+
+/**
+ * Hanlder to exit the current process and invoke shell exec.
+ * \returns true if the function is executed successfully, else return falses.
+ */
+bool exit_handler();

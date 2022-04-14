@@ -214,9 +214,10 @@ bool vm_map(uintptr_t proot, uintptr_t vaddress, bool user, bool writable,
     vpte->writable = writable ? 1 : 0;
     vpte->exe_disable = executable ? 0 : 1;
     vpte->present = 1;
-  } else {
-    kprintf("[WARNING] vm_map: Page is already mapped, vaddr = %p\n", vaddress);
-  }
+  } 
+  // else {
+  //   kprintf("[WARNING] vm_map: Page is already mapped, vaddr = %p\n", vaddress);
+  // }
   return true;
 }
 

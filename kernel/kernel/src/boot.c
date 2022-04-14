@@ -2,6 +2,8 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <system.h>
+#include <process.h>
+#include <stdio.h>
 
 #include "executable.h"
 #include "gdt.h"
@@ -12,7 +14,6 @@
 #include "stivale2.h"
 #include "syscall.h"
 #include "term.h"
-#include "usermode_entry.h"
 #include "util.h"
 
 // Define struct tag pointer to hold information about memory section. These
@@ -140,36 +141,17 @@ void setup_kernel(struct stivale2_struct* hdr) {
 
   // Init terminal
   term_init();
-}
 
-void to_usermode(exe_entry_fn_ptr_t entry_func) {
-  // Pick an arbitrary location and size for the user-mode stack
-  uintptr_t user_stack = USER_STACK;
-  size_t user_stack_size = 8 * PAGE_SIZE;
-
-  // Map the user-mode-stack
-  for (uintptr_t p = user_stack; p < user_stack + user_stack_size;
-       p += 0x1000) {
-    // Map a page that is user-accessible, writable, but not executable
-    vm_map(read_cr3() & PAGE_ALIGN_MASK, p, true, true, false);
-  }
-
-  // And now jump to the entry point:
-  // User data selector with priv=3
-  // Stack starts at the high address minus 8 bytes
-  // User code selector with priv=3
-  // Jump to the entry point specified in the ELF file
-  usermode_entry(USER_DATA_SELECTOR | 0x3, user_stack + user_stack_size - 8,
-                 USER_CODE_SELECTOR | 0x3, entry_func);
+  // Init executable list for loading and running executable 
+  printf("Hi\n");
+  // init_exe_list();
 }
 
 void _start(struct stivale2_struct* hdr) {
   setup_kernel(hdr);
-
-  // Call memtest in init program
-  exe_entry_fn_ptr_t fn;
-  load_executatble("init", &fn);
-  to_usermode(fn);
+  
+  // Load and run init program
+  // exec("init");
 
   // We're done, just hang...
   halt();

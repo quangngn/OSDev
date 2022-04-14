@@ -1,14 +1,18 @@
 #pragma once
+#include <mem.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
+#include "gdt.h"
 #include "kprint.h"
 #include "page.h"
 #include "port.h"
 #include "stivale2.h"
 #include "util.h"
+#include "usermode_entry.h"
 
 // ELF file type
 #define ET_EXEC 0x02
@@ -96,7 +100,34 @@ typedef struct sec_hdr {
                          // field contains zero.
 } sec_hdr_t;
 
+// Struct contains information necessary to load segment to mem space
+typedef struct seg_info {
+  uintptr_t vaddr_seg;
+  uintptr_t vaddr_seg_file;
+  size_t mem_size;
+  size_t file_size;
+  bool readable;
+  bool writable;
+  bool executable;
+  struct seg_info* next;
+} seg_info_t;
+
+// Struct contains information to run and executable
+typedef struct exe_info {
+  char* exe_name;
+  exe_entry_fn_ptr_t entry;
+  seg_info_t* segments;
+  struct exe_info* next;
+} exe_info_t;
+
 /******************************************************************************/
+/**
+ * Loop find and extract necessary information of all executable image files
+ * available to run. Store info struct in in the exe_list.
+ * \returns true if execute successfully, else returns false.
+ */
+void init_exe_list();
+
 /**
  * Function loads the first executable with matching name exe_name from stivale2
  * module. The entry_func is going to be set to the entry address of the
@@ -105,4 +136,27 @@ typedef struct sec_hdr {
  * \param exe_entry_fn_ptr_t Function pointer to be set.
  * \returns true if load successfully, else returns false.
  */
-bool load_executatble(const char* exe_name, exe_entry_fn_ptr_t* entry_func);
+bool load_exe(const char* exe_name, exe_entry_fn_ptr_t* entry_func);
+
+/**
+ * Function unmap executable from the memory. The input can either be exe_name
+ * or the pointer to exe information struct (hint). The function would
+ * prioritize using hint rather than exe_name.
+ * \param exe_name Name of the executable.
+ * \param hint Pointer to the executable info struct.
+ * \returns true if unmap successfully, else returns false.
+ */
+bool unmap_exe(const char* exe_name, exe_info_t* hint);
+
+/**
+ * Find and run the executable with name exe_name.
+ * \param exe_name Name of the executable.
+ */
+bool run_exe(const char* exe_name);
+
+/**
+ * Print information of the executable with name exe_name, including name and
+ * each segment info.
+ * \param exe_name Name of the executable.
+ */
+void print_exe_info(const char* exe_name);

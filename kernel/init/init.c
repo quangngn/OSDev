@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <process.h>
 #include "test_stdlib.h"
 
 int sum(int* arr, size_t len) {
@@ -16,6 +17,5 @@ int sum(int* arr, size_t len) {
 void _start() {
   test_stdio();
 
-  // Loop forever
-  for (;;) {}
+  exit();
 }

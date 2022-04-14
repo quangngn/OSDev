@@ -271,7 +271,8 @@ int64_t getline(char** str, size_t* size, int* stream) {
     str_len = sys_read(STD_IN, *str, *size, true, true, str_len);
     (*str)[str_len] = '\0';
 
-    // 2. If we still have more characters to read if all cond meet:
+    // 2. If all following conditions are met (aka we still have more character
+    // to read), would reallocate the current *str to hold more character:
     // - *str buffer is full
     // - The end of string is not a newline character.
     // - The number of readed character does not change.

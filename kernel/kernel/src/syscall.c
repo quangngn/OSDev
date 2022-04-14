@@ -57,6 +57,13 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1,
        * arg0: vaddress to be unmapped
        */
       return vm_unmap(proot, (uintptr_t)arg0);
+    case SYSCALL_EXEC:
+      /**
+       * arg0: name of the executable to be exec.
+       */ 
+      return exec_handler((const char*) arg0);
+    case SYSCALL_EXIT:
+      return exit_handler();
     default:
       return -1;
   }
@@ -164,4 +171,21 @@ int64_t write_handler(uint64_t f_descriptor, const char* str,
     }
   }
   return i;
+}
+
+/**
+ * Handler to invoke the execution of program with name exec_name.
+ * \param exe_name Name of the executable to be exec.
+ * \returns true if the function is executed successfully, else return falses.
+ */
+bool exec_handler(const char* exe_name) {
+  return run_exe(exe_name);
+}
+
+/**
+ * Hanlder to exit the current process and invoke shell exec.
+ * \returns true if the function is executed successfully, else return falses.
+ */
+bool exit_handler() {
+  return run_exe("shell");
 }

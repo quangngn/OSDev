@@ -7,6 +7,8 @@
 #define SYSCALL_MMAP 9
 #define SYSCALL_MPROTECT 10
 #define SYSCALL_MUNMAP 11
+#define SYSCALL_EXEC 59
+#define SYSCALL_EXIT 60
 
 /******************************************************************************/
 // Page related 
@@ -27,3 +29,6 @@
 #define STD_IN 0
 #define STD_OUT 1
 #define STD_ERR 2
+
+/******************************************************************************/
+#define MAX_NB_PROCESS 256
