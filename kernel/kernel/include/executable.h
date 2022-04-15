@@ -1,17 +1,15 @@
 #pragma once
-#include <mem.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <string.h>
 
 #include "gdt.h"
+#include "kmem.h"
 #include "kprint.h"
 #include "page.h"
 #include "port.h"
 #include "stivale2.h"
-#include "util.h"
 #include "usermode_entry.h"
 
 // ELF file type

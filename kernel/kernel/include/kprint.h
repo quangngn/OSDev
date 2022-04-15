@@ -11,6 +11,10 @@
 #define NUM_DIGIT_DEC_UINT64 20
 #define NUM_DIGIT_HEX_UINT64 16
 
+#define WRITE_MODE_NORMAL 0
+#define WRITE_MODE_ERROR 1
+#define WRITE_MODE_INPUT 2
+
 // Type of function to print to stivale2's terminal
 typedef void (*term_write_t)(const char*, size_t, uint8_t fg, uint8_t bg);
 
@@ -27,6 +31,12 @@ void kset_term_write(term_write_t fn);
  * \returns number of characters in str (excluding null character).
  */
 size_t kstrlen(const char* str);
+
+/**
+ * Function to call string comparison. In case 1 string is the prefix of the
+ * other string, the prefix is consider less than the other string.
+ */
+int kstrcmp(const char* str1, const char* str2);
 
 /**
  * Print a single character to the terminal.
@@ -73,6 +83,18 @@ void kprint_p(void* ptr);
  * \param format The format string.
  */
 void kprintf(const char* format, ...);
+
+/**
+ * Print formatted error_message, supporting:
+ * - %s for string
+ * - %c for character
+ * - %d for decimal number
+ * - %x for hex number
+ * - %p for pointer address
+ * - %% would be character '%'.
+ * \param format The format string.
+ */
+void kperror(const char* format, ...);
 
 /**
  * Print usable memory in format:

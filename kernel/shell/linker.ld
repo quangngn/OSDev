@@ -18,7 +18,7 @@ PHDRS
 SECTIONS
 {
     /* Request placement above the identity-mapped virtual memory for convenience */
-    . = 0x500000000;
+    . = 0x300000000;
 
     .text : {
         *(.text .text.*)

@@ -10,7 +10,7 @@
 
 #include "port.h"
 #include "stivale2.h"
-#include "util.h"
+#include "kmem.h"
 
 #define VGA_BUFFER 0xB8000
 #define VGA_WIDTH 80

@@ -11,12 +11,9 @@ void test_stdio() {
 
   char* s = NULL;
   size_t size = 0;
-  int stream = STD_IN;
+  uint64_t stream = STD_IN;
   getline(&s, &size, &stream);
-  fprint_s(STD_OUT, s);
   printf(s);
-
-  printf("\n");
 }
 
 // Test

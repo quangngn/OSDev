@@ -143,15 +143,14 @@ void setup_kernel(struct stivale2_struct* hdr) {
   term_init();
 
   // Init executable list for loading and running executable 
-  printf("Hi\n");
-  // init_exe_list();
+  init_exe_list();
 }
 
 void _start(struct stivale2_struct* hdr) {
   setup_kernel(hdr);
   
-  // Load and run init program
-  // exec("init");
+  // // Load and run init program
+  run_exe("shell");
 
   // We're done, just hang...
   halt();

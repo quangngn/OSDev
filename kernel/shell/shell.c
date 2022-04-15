@@ -1,31 +1,40 @@
 #include <mem.h>
+#include <process.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <process.h>
 
 void _start() {
-  char* command = NULL;
-  size_t command_buff_size = 0;
+  char* line = NULL;
+  size_t line_size = 0;
   uint64_t stream = STD_IN;
 
-  // Endless loop of read to 
-  do {
-    // print prompt
-    printf("> ");
+  // Endless loop of read to
+  while (true) {
+    printf("? ");
+    if (getline(&line, &line_size, &stream) == -1) {
+      perror("[ERROR] Unable to read command line.\n");
+    } else {
+      // Read toke from line. The first valid token (non null, non empty) is our
+      // executable's name.
+      char* tok = strtok(line, " \n");
+      while (strcmp(tok, "") == 0 && tok != NULL) {
+        tok = strtok(NULL, " \n");
+      }
 
-    // Get input command
-    getline(&command, &command_buff_size, &stream);
-
-    // Extract exe_name from the input command
-    char* exe_name = strsep(&command, " \n");
-    while (strcmp(exe_name, "") == 0) exe_name = strsep(&command, " \n");
-
-    // Execute the command
-    exec(exe_name);
-  } while (command == NULL || strcmp(command, "q") != 0);
-
+      // If type "quit", the shell program exits, else we launch the executable.
+      if (strcmp(tok, "quit") == 0) {
+        break;
+      } else {
+        exec(tok);
+      }
+    }
+    free(line);
+    line = NULL;
+    line_size = 0;
+  }
   // Loop forever
-  for (;;) {}
+  for (;;) {
+  }
 }

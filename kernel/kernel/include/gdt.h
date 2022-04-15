@@ -5,6 +5,7 @@
  */
 #pragma once
 #include "util.h"
+#include "kmem.h"
 
 // Define the offsets into the GDT where we'll place important descriptors
 #define KERNEL_CODE_SELECTOR 0x08

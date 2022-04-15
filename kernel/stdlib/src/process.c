@@ -10,7 +10,7 @@ extern int64_t syscall(uint64_t nr, ...);
  * \returns true if the function is executed successfully, else return falses.
  */
 void exec(const char* exe_name) {
-  // syscall(SYSCALL_EXEC, exe_name);
+  syscall(SYSCALL_EXEC, exe_name);
 }
 
 /**
@@ -18,5 +18,5 @@ void exec(const char* exe_name) {
  * \returns true if the function is executed successfully, else return falses.
  */
 void exit() {
-  // syscall(SYSCALL_EXIT);
+  syscall(SYSCALL_EXIT);
 }

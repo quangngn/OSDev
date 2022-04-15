@@ -22,8 +22,9 @@
 /******************************************************************************/
 // Mem location for stack and heap
 #define USER_STACK 0x70000000000
-#define USER_HEAP 0x90000000000
+#define USER_HEAP  0x90000000000
 
+#define KERNEL_HEAP 0xffff900000000000
 /******************************************************************************/
 // I/O related
 #define STD_IN 0

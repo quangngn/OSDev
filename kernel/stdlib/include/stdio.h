@@ -63,7 +63,7 @@ void perror(const char* format, ...);
  * \returns the number of read characters (excluding the null terminate). Else
  * return -1.
  */
-int64_t getline(char** str, size_t* size, int* stream);
+int64_t getline(char** str, size_t* size, uint64_t* stream);
 
 /**
  * Read one character from the stdin file descriptor.

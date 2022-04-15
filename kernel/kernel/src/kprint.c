@@ -5,6 +5,9 @@
 extern struct stivale2_struct_tag_memmap* mmap_struct_tag;
 extern struct stivale2_struct_tag_hhdm* hhdm_struct_tag;
 
+static uint8_t fg = VGA_COLOR_WHITE;
+static uint8_t bg = VGA_COLOR_BLACK;
+
 // Buffers being used to store digit characters when printing number
 char buffer_dec_uint64[NUM_DIGIT_DEC_UINT64 + 1];
 char buffer_hex_uint64[NUM_DIGIT_HEX_UINT64 + 1];
@@ -20,6 +23,26 @@ keyboard_t keyboard = {.buffer = {.read = 0, .write = 0, .size = 0},
                        .shift = 0,
                        .capslock = 0};
 
+/******************************************************************************/
+void set_mode(uint8_t mode) {
+  switch (mode) {
+    case WRITE_MODE_NORMAL:
+      fg = VGA_COLOR_WHITE;
+      bg = VGA_COLOR_BLACK;
+      return;
+    case WRITE_MODE_ERROR:
+      fg = VGA_COLOR_RED;
+      bg = VGA_COLOR_BLACK;
+      return;
+    case WRITE_MODE_INPUT:
+      fg = VGA_COLOR_LIGHT_GREEN;
+      bg = VGA_COLOR_BLACK;
+      return;
+    default:
+      fg = VGA_COLOR_WHITE;
+      bg = VGA_COLOR_BLACK;
+  }
+}
 /******************************************************************************/
 /**
  * Set value to term_write
@@ -48,10 +71,33 @@ size_t kstrlen(const char* str) {
 }
 
 /**
+ * Function to call string comparison. In case 1 string is the prefix of the
+ * other string, the prefix is consider less than the other string.
+ */
+int kstrcmp(const char* str1, const char* str2) {
+  if (str1 == NULL && str2 != NULL) return -1;
+  if (str1 != NULL && str2 == NULL) return 1;
+  if (str1 == NULL && str2 == NULL) return 0;
+  int idx = 0;
+  while (true) {
+    if (str1[idx] < str2[idx]) {
+      return -1;
+    } else if (str1[idx] > str2[idx]) {
+      return 1;
+    } else if (str1[idx] == '\0' && str2[idx] == '\0') {
+      // We reach the end of both strings and all characters are checked to be
+      // the same
+      return 0;
+    }
+    idx++;
+  }
+}
+
+/**
  * Print a single character to the terminal.
  * \param c Character to be printed
  */
-void kprint_c(char c) { term_write(&c, 1, VGA_COLOR_WHITE, VGA_COLOR_BLACK); }
+void kprint_c(char c) { term_write(&c, 1, fg, bg); }
 
 /**
  * Print a string to the terminal.
@@ -59,7 +105,7 @@ void kprint_c(char c) { term_write(&c, 1, VGA_COLOR_WHITE, VGA_COLOR_BLACK); }
  */
 void kprint_s(const char* str) {
   if (str == NULL) return;
-  term_write(str, kstrlen(str), VGA_COLOR_WHITE, VGA_COLOR_BLACK);
+  term_write(str, kstrlen(str), fg, bg);
 }
 
 /**
@@ -89,7 +135,7 @@ void kprint_d(uint64_t value) {
       num_digit++;
     }
 
-    term_write(cursor, num_digit, VGA_COLOR_WHITE, VGA_COLOR_BLACK);
+    term_write(cursor, num_digit, fg, bg);
   }
 }
 
@@ -120,7 +166,7 @@ void kprint_x(uint64_t value) {
       num_digit++;
     }
 
-    term_write(cursor, num_digit, VGA_COLOR_WHITE, VGA_COLOR_BLACK);
+    term_write(cursor, num_digit, fg, bg);
   }
 }
 
@@ -147,6 +193,8 @@ void kprint_p(void* ptr) {
 void kprintf(const char* format, ...) {
   if (format == NULL) return;
   
+  // Set fg color to white and bg color to black
+  set_mode(WRITE_MODE_NORMAL);
   const char* cursor = format;
   // Set up va_list to read arguments
   va_list args;
@@ -194,6 +242,72 @@ void kprintf(const char* format, ...) {
     }
     cursor++;
   }
+}
+
+/**
+ * Print formatted error_message, supporting:
+ * - %s for string
+ * - %c for character
+ * - %d for decimal number
+ * - %x for hex number
+ * - %p for pointer address
+ * - %% would be character '%'.
+ * \param format The format string.
+ */
+void kperror(const char* format, ...) {
+  if (format == NULL) return;
+  
+  // Set fg color to white and bg color to black
+  set_mode(WRITE_MODE_ERROR);
+  const char* cursor = format;
+  // Set up va_list to read arguments
+  va_list args;
+  va_start(args, format);
+
+  // Read each character in format and handle each case when we see %
+  while (*cursor != '\0') {
+    if (*cursor == '%') {
+      // Process the character right after the '%'
+      cursor++;
+      switch (*cursor) {
+        // case "%%" --> print '%'
+        case '%':
+          kprint_c('%');
+          break;
+        // case "%c" --> print next arg as a character
+        case 'c':
+          kprint_c(va_arg(args, int));
+          break;
+        // case "%s" --> print next arg as a string
+        case 's':
+          kprint_s(va_arg(args, char*));
+          break;
+        // case "%d" --> print next arg as a decimal number
+        case 'd':
+          kprint_d(va_arg(args, uint64_t));
+          break;
+        // case "%x" --> print next arg as a hex number
+        case 'x':
+          kprint_x(va_arg(args, uint64_t));
+          break;
+        // case "%p" --> print next arg as a pointer address
+        case 'p':
+          kprint_p(va_arg(args, void*));
+          break;
+        // case "%" -> print nothing, return
+        case '\0':
+          set_mode(WRITE_MODE_NORMAL);
+          return;
+        // unsupported escape character
+        default:
+          kprint_s("<not supported>");
+      }
+    } else {
+      kprint_c(*cursor);
+    }
+    cursor++;
+  }
+  set_mode(WRITE_MODE_NORMAL);
 }
 
 /**

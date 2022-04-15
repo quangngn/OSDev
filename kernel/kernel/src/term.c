@@ -63,6 +63,10 @@ void term_putchar(char c, uint8_t fg, uint8_t bg) {
     if (term_col > 0) {
       term_col--;
       term[term_row * VGA_WIDTH + term_col].c = ' ';
+    } else if (term_row > 0) {
+      term_row--;
+      term_col = VGA_WIDTH - 1;
+      term[term_row * VGA_WIDTH + term_col].c = ' ';
     }
     term_update_cursor();
     return;
