@@ -114,9 +114,16 @@ void kb_init(keyboard_t* kb) {
  * code being passed to the keyboard to be processed accordingly. We record
  * input when the key is down.
  *
- * We do not differentiate left and right Alt/Shift/CTRL key yet.
+ * We do not differentiate left and right Alt/CTRL key yet.
  * We also do not record to the buffer scancode >= CAPSLOCK_DOWN_SS, which is
  * the limit between printable characters and non-printable characters.
+ * 
+ * The value being stored to the circular queue has 32 bits where:
+ * - bit 0 to 15: store scancode.
+ * - bit 16 to 19: Caps Lock state.
+ * - bit 20 to 23: ALT state.
+ * - bit 24 to 27: CTRL state.  
+ * - bit 28 to 31: SHIFT state.
  *
  * \param kb Pointer to keyboard object.
  * \param val Value of the scan code.
@@ -125,38 +132,31 @@ void kb_input_scan_code(keyboard_t* kb, uint64_t val) {
   if (kb == NULL) return;
 
   switch (val) {
-    // If the Alt key is pressed, we set alt variable to ALT_ON_MASK
+    // If the Alt key is pressed, we toggle alt variable with ALT_ON_MASK
     case ALT_DOWN_SS:
-      kb->alt = ALT_ON_MASK;
-      break;
-    // If the Alt key is released, we set shift variable to 0
     case ALT_UP_SS:
-      kb->alt = 0;
+      kb->alt ^= ALT_ON_MASK;
       break;
 
-    // If the Shift key is pressed, we set shift variable to SHIFT_ON_MASK
+    // If the Shift key is pressed, we toggle shift variable with SHIFT_ON_MASK
     case LSHIFT_DOWN_SS:
-    case RSHIFT_DOWN_SS:
-      kb->shift = SHIFT_ON_MASK;
-      break;
-    // If the Shift key is released, we set shift variable to 0
     case LSHIFT_UP_SS:
+      kb->shift ^= LSHIFT_ON_MASK;
+      break;
+    case RSHIFT_DOWN_SS:
     case RSHIFT_UP_SS:
-      kb->shift = 0;
+      kb->shift ^= RSHIFT_ON_MASK;
       break;
 
     // If the CAPSLOCK key is pressed, we toggle capslock with CAPSLOCK_ON_MASK
     case CAPSLOCK_DOWN_SS:
-      kb->capslock ^= CAPSLOCK_ON_MASK;  // Toggle the caplock bit on/off
+      kb->capslock ^= CAPSLOCK_ON_MASK; 
       break;
 
-    // If the CTRL key is pressed, we set ctrl variable to CTRL_ON_MASK
+    // If the CTRL key is pressed, we toggle ctrl variable with CTRL_ON_MASK
     case CTRL_DOWN_SS:
-      kb->ctrl = CTRL_ON_MASK;
-      break;
-    // If the CTRL key is released, we set ctrl variable to 0
     case CTRL_UP_SS:
-      kb->ctrl = 0;
+      kb->ctrl ^= CTRL_ON_MASK;
       break;
 
     default:

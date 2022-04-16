@@ -17,8 +17,16 @@ After being provided with term.h and term.c, I update term_write() function to a
 The set_mode() function in kprint.c is a quick function to switch between different color modes. 
 
 The kget_c() function uses the keyboard object to read input from the circular queue. It can process all typable characters, including tab, enter, and backspace. It also correctly interprets holding Shift, Ctrl, Alt, and Caps Lock. The mechanism for this feature is as follows: 
-- Upon receiving a scan code for key down, a state variable (specific to each key) is set. For Shift, Ctr, and Alt, upon key up, this state variable is turn off (set to 0). For Caps Lock, the state variable is toggled upon reading next key down scan code.
-- Limitation: I haven't test when trying to hold down both Shift keys and then release 1 key. This case, the keyboard might set shift state variable = 0.
+- Upon receiving a scan code for key down, a state variable (specific to each key) is toggled on. For Shift, Ctr, and Alt, upon key up, this state variable is toggled off. For Caps Lock, the state variable is toggled upon reading next key down scan code.
+
+- Shift key is registered as long as at least 1 key is being held down at any time.
+
+- The value being stored to the circular queue has 32 bits where:
+  - bit 0 to 15: store scancode.
+  - bit 16 to 19: Caps Lock state.
+  - bit 20 to 23: ALT state.
+  - bit 24 to 27: CTRL state.  
+  - bit 28 to 31: SHIFT state.
 
 File: kernel/kprint.*, kernel/keyboard.*, kernel/term.*
 

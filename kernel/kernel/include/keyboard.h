@@ -29,10 +29,15 @@
 #define ASCII_BACKSPACE 8
 
 // SET KEYBOARD STAGE BITS
-#define SHIFT_ON_MASK 0x80000000
-#define CTRL_ON_MASK 0x40000000
-#define CAPSLOCK_ON_MASK 0x20000000
-#define ALT_ON_MASK 0x10000000
+#define LSHIFT_ON_MASK 0x20000000
+#define RSHIFT_ON_MASK 0x10000000
+#define SHIFT_ON_MASK 0x30000000
+
+#define CTRL_ON_MASK 0x01000000
+
+#define ALT_ON_MASK 0x0010000
+
+#define CAPSLOCK_ON_MASK 0x00010000
 
 #define KEYBOARD_BUFFER_SIZE 1024
 
@@ -60,7 +65,7 @@ void cq_init(circular_queue_t *cq);
  * - Read data pointed to by cq->read index
  * - Advance cq->read index.
  * - Reduce buffer size (number of elements not bytes).
- * 
+ *
  * \param cq Pointer to the circular queue.
  * \param read_val Pointer to the variable where cq_read stores the read
  * character.
@@ -74,7 +79,7 @@ bool cq_read(circular_queue_t *cq, uint64_t *read_val);
  * - Write val to the buffer at index cq->write.
  * - Advance cq->write index.
  * - Increase the buffer size (number of elements not bytes).
- * 
+ *
  * \param cq Pointer to the circular queue.
  * \param write_val Value to be written.
  */

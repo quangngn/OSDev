@@ -18,10 +18,9 @@ void _start() {
   printf("Please input something: \n");
   getline(&s, &size, &stream);
 
-  printf("This is what you have type: \n");
-  fprint_s(s);
+  printf("This is what you have typed: \n");
+  fprint_s(STD_OUT, s);
 
   exit();
-  for (;;) {
-  }
+  for (;;) {}
 }
