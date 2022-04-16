@@ -7,5 +7,7 @@
     "stdint.h": "c",
     "stivale2.h": "c",
     "stddef.h": "c"
-  }
+  },
+  "editor.wordWrap": "wordWrapColumn",
+  "editor.wordWrapColumn": 80  
 }

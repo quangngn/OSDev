@@ -147,9 +147,10 @@ void setup_kernel(struct stivale2_struct* hdr) {
 }
 
 void _start(struct stivale2_struct* hdr) {
+  // Set up kernel
   setup_kernel(hdr);
   
-  // // Load and run init program
+  // Load and run shell program
   run_exe("shell");
 
   // We're done, just hang...

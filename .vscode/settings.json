@@ -7,5 +7,7 @@
         "executable.h": "c",
         "sstream": "c",
         "stdbool.h": "c"
-    }
+    },
+    "editor.wordWrap": "wordWrapColumn",
+    "editor.wordWrapColumn": 80
 }
