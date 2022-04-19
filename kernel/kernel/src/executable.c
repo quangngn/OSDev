@@ -199,7 +199,6 @@ void to_usermode(exe_entry_fn_ptr_t entry_func) {
        p += 0x1000) {
     // Unmap any old stack if there are any.
     // Map a page that is user-accessible, writable, but not executable.
-    vm_unmap(read_cr3() & PAGE_ALIGN_MASK, p);
     vm_map(read_cr3() & PAGE_ALIGN_MASK, p, true, true, false);
   }
 
@@ -334,7 +333,10 @@ bool load_exe(const char* exe_name, exe_entry_fn_ptr_t* entry_func) {
     return false;
   }
 
-  // 2. Load segment:
+  // 2. Unmap the lower half:
+  unmap_lower_half(read_cr3() & PAGE_ALIGN_MASK);
+
+  // 3. Load segment:
   seg_info_t* seg = cursor->segments;
   while (seg != NULL) {
     if (!load_segment(seg)) {
@@ -344,10 +346,6 @@ bool load_exe(const char* exe_name, exe_entry_fn_ptr_t* entry_func) {
     seg = seg->next;
   }
 
-  // 3. Set entry function pointer to exe's entry,
-  if (current_exe != NULL && current_exe != cursor) {
-    unmap_exe(NULL, current_exe);
-  }
   current_exe = cursor;
   *entry_func = (exe_entry_fn_ptr_t)cursor->entry;
   return true;

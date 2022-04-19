@@ -74,10 +74,10 @@ The implementation loads and executes any executables as expected.
 Note that since we do not support multiple processes context switch, these processes share the same address space. As a result, I modified their linkers to give them different entry addresses. 
 
 My approach is reading the module struct once, collecting each executable's information, and organized into a linked list of exe_info_t nodes. We can view this as a simple in-memory directory. This helps: 
-- Simplify the load and unmap executable code. 
+- Simplify the load and unmap executable code.
 - Easy to identify the currently active executable.
 
-At any time, there is only one executable being executed. Upon switching between two executables, the old executable's memory (including user stack) is unmapped from the address space. 
+At any time, there is only one executable being executed. Upon switching between two executables, the lower half memory is unmap before new executable being loaded. 
 
 File: kernel/executable.*, kernel/page.*, stdlib/process.*
 
