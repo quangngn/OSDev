@@ -197,7 +197,6 @@ void to_usermode(exe_entry_fn_ptr_t entry_func) {
   // Map the user-mode-stack
   for (uintptr_t p = user_stack; p < user_stack + user_stack_size;
        p += 0x1000) {
-    // Unmap any old stack if there are any.
     // Map a page that is user-accessible, writable, but not executable.
     vm_map(read_cr3() & PAGE_ALIGN_MASK, p, true, true, false);
   }
