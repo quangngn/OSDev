@@ -77,7 +77,7 @@ My approach is reading the module struct once, collecting each executable's info
 - Simplify the load and unmap executable code. 
 - Easy to identify the currently active executable.
 
-At any time, there is only one executable being executed. Upon switching between two executables, the old executable's memory is unmapped from the address space. 
+At any time, there is only one executable being executed. Upon switching between two executables, the old executable's memory (including user stack) is unmapped from the address space. 
 
 File: kernel/executable.*, kernel/page.*, stdlib/process.*
 
@@ -93,9 +93,9 @@ The standard library implementation handles all the mentioned and more functions
 
 Note that, getline is dynamically malloc. It shows input live in the terminal. What you see is what you get. The backspace is handle as expected. 
 
-The implementation of getline does not call getc() to fill the buffer one character at a time. Instead, it calls sys_read() on the entire buffer. If the buffer is full, we reallocated the buffer to a bigger size. This time sys_read would use the read_char_counter argument to continue reading to buffer. 
+The implementation of getline does not call getc() to fill the buffer one character at a time. Instead, it calls sys_read() on the entire buffer. If the buffer is full, we reallocated the buffer to a bigger size. This time sys_read() would use the read_char_counter argument to continue reading to buffer. 
 
-The reason for this implementation is that it is easier for getline to process the backspace behavior in both terminal and buffer. I acknowledge that this makes sys_read() call more complicated. To be honest, I still wonder whether I should put the backspace handler in the syscall's read_handler() or getline().
+The reason for this implementation is that it is easier for getline to process the backspace behavior in both terminal and buffer. I acknowledge that this makes sys_read() call more complicated. Maybe if I have more time, I would put the backspace handler in the getline() function.
 
 The init program includes a test_stdlib.h to test for string and stdio functions.
 

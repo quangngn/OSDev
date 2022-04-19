@@ -10,6 +10,10 @@ static char buffer_hex_uint64[NUM_DIGIT_HEX_UINT64 + 1];
 
 // Syscall wrappers: function that invoke the syscall() functions
 // Wrapper to call read system call
+int64_t read(uint64_t f_descriptor, char* buff, size_t read_size) {
+  return syscall(SYSCALL_READ, f_descriptor, (uint64_t)buff, read_size, true,
+                 true, 0);
+}
 int64_t sys_read(uint64_t f_descriptor, char* buff, size_t read_size,
                  bool incl_newln, bool echo_char, int64_t read_char_counter) {
   return syscall(SYSCALL_READ, f_descriptor, (uint64_t)buff, read_size,
@@ -17,6 +21,10 @@ int64_t sys_read(uint64_t f_descriptor, char* buff, size_t read_size,
 }
 
 // Wrapper to call write system call
+int64_t write(uint64_t f_descriptor, const char* str, size_t write_size) {
+  return syscall(SYSCALL_WRITE, f_descriptor, (uint64_t)str, write_size);
+}
+
 int64_t sys_write(uint64_t f_descriptor, const char* str, size_t write_size) {
   return syscall(SYSCALL_WRITE, f_descriptor, (uint64_t)str, write_size);
 }
@@ -300,7 +308,7 @@ int64_t getline(char** str, size_t* size, uint64_t* stream) {
  */
 char getc(uint64_t f_descriptor) {
   char ret_c = 0;
-  sys_read(f_descriptor, &ret_c, 1, true, true, 0);
+  read(f_descriptor, &ret_c, 1);
   return ret_c;
 }
 
@@ -314,7 +322,7 @@ char getc(uint64_t f_descriptor) {
  */
 char* fgets(char* buff, size_t read_size, uint64_t f_descriptor) {
   // Call read system call (which does not null-terminate the string for us)
-  int64_t len = sys_read(f_descriptor, buff, read_size, true, true, 0);
+  int64_t len = read(f_descriptor, buff, read_size);
   // Null-terminate buffer
   buff[len] = '\0';
   return buff;
