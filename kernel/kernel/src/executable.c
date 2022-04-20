@@ -129,6 +129,10 @@ bool load_segment(seg_info_t* segment_info) {
 
   // Copy content from the file image to the newly mapped page
   kmemcpy((void*)vaddr_seg, (void*)(vaddr_seg_file), file_size);
+  // Zero out bss segment
+  if (mem_size > file_size) {
+    kmemset((void*)(vaddr_seg + file_size), 0, mem_size - file_size);
+  }
 
   // After copying content to the newly mapped page, we set its protection
   // mode according to defined in ELF program header table entry
@@ -411,8 +415,8 @@ void print_exe_info(const char* exe_name) {
   kprintf("Exe's name: %s.\n", exe_name);
   seg_info_t* seg = exe->segments;
   while (seg != NULL) {
-    kprintf("|%p|%p|%d|%d|", seg->vaddr_seg, seg->vaddr_seg_file,
-            seg->mem_size, seg->file_size);
+    kprintf("|%p|%p|%d|%d|", seg->vaddr_seg, seg->vaddr_seg_file, seg->mem_size,
+            seg->file_size);
     if (seg->readable) {
       kprintf("R");
     } else {
