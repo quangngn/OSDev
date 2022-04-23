@@ -40,6 +40,12 @@ typedef struct vga_entry {
   uint8_t bg : 4;
 } __attribute__((packed)) vga_entry_t;
 
+// Reset the color of the terminal
+void reset_term_color();
+
+// Set the color of the terminal
+void set_term_color(uint8_t fg, uint8_t bg);
+
 // Turn on the VGA cursor
 void term_enable_cursor();
 
@@ -50,10 +56,10 @@ void term_update_cursor();
 void term_clear();
 
 // Write one character to the terminal
-void term_putchar(char c, uint8_t fg, uint8_t bg);
+void term_putchar(char c);
 
 // Write string to the terminal
-void term_puts(const char* s, size_t size, uint8_t fg, uint8_t bg);
+void term_puts(const char* s, size_t size);
 
 // Initialize the terminal
 void term_init();

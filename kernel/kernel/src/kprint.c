@@ -24,26 +24,6 @@ keyboard_t keyboard = {.buffer = {.read = 0, .write = 0, .size = 0},
                        .capslock = 0};
 
 /******************************************************************************/
-void set_mode(uint8_t mode) {
-  switch (mode) {
-    case WRITE_MODE_NORMAL:
-      fg = VGA_COLOR_WHITE;
-      bg = VGA_COLOR_BLACK;
-      return;
-    case WRITE_MODE_ERROR:
-      fg = VGA_COLOR_RED;
-      bg = VGA_COLOR_BLACK;
-      return;
-    case WRITE_MODE_INPUT:
-      fg = VGA_COLOR_LIGHT_GREEN;
-      bg = VGA_COLOR_BLACK;
-      return;
-    default:
-      fg = VGA_COLOR_WHITE;
-      bg = VGA_COLOR_BLACK;
-  }
-}
-/******************************************************************************/
 /**
  * Set value to term_write
  * \param fn Function to be set.
@@ -97,7 +77,7 @@ int kstrcmp(const char* str1, const char* str2) {
  * Print a single character to the terminal.
  * \param c Character to be printed
  */
-void kprint_c(char c) { term_write(&c, 1, fg, bg); }
+void kprint_c(char c) { term_write(&c, 1); }
 
 /**
  * Print a string to the terminal.
@@ -105,7 +85,7 @@ void kprint_c(char c) { term_write(&c, 1, fg, bg); }
  */
 void kprint_s(const char* str) {
   if (str == NULL) return;
-  term_write(str, kstrlen(str), fg, bg);
+  term_write(str, kstrlen(str));
 }
 
 /**
@@ -135,7 +115,7 @@ void kprint_d(uint64_t value) {
       num_digit++;
     }
 
-    term_write(cursor, num_digit, fg, bg);
+    term_write(cursor, num_digit);
   }
 }
 
@@ -166,7 +146,7 @@ void kprint_x(uint64_t value) {
       num_digit++;
     }
 
-    term_write(cursor, num_digit, fg, bg);
+    term_write(cursor, num_digit);
   }
 }
 
@@ -193,10 +173,8 @@ void kprint_p(void* ptr) {
 void kprintf(const char* format, ...) {
   if (format == NULL) return;
   
-  // Set fg color to white and bg color to black
-  set_mode(WRITE_MODE_NORMAL);
-  const char* cursor = format;
   // Set up va_list to read arguments
+  const char* cursor = format;
   va_list args;
   va_start(args, format);
 
@@ -256,11 +234,12 @@ void kprintf(const char* format, ...) {
  */
 void kperror(const char* format, ...) {
   if (format == NULL) return;
-  
+
   // Set fg color to white and bg color to black
-  set_mode(WRITE_MODE_ERROR);
-  const char* cursor = format;
+  set_term_color(VGA_COLOR_RED, VGA_COLOR_BLACK);
+
   // Set up va_list to read arguments
+  const char* cursor = format;
   va_list args;
   va_start(args, format);
 
@@ -296,7 +275,7 @@ void kperror(const char* format, ...) {
           break;
         // case "%" -> print nothing, return
         case '\0':
-          set_mode(WRITE_MODE_NORMAL);
+          reset_term_color;
           return;
         // unsupported escape character
         default:
@@ -307,7 +286,7 @@ void kperror(const char* format, ...) {
     }
     cursor++;
   }
-  set_mode(WRITE_MODE_NORMAL);
+  reset_term_color();
 }
 
 /**

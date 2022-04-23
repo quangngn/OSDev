@@ -16,7 +16,7 @@
 #define WRITE_MODE_INPUT 2
 
 // Type of function to print to stivale2's terminal
-typedef void (*term_write_t)(const char*, size_t, uint8_t fg, uint8_t bg);
+typedef void (*term_write_t)(const char*, size_t);
 
 /******************************************************************************/
 /**

@@ -107,6 +107,9 @@ int64_t read_handler(uint64_t f_descriptor, char* buff, size_t read_size,
   if (f_descriptor != STD_IN || buff == NULL) {
     return -1;
   } else {
+    // Set input text color 
+    set_term_color(VGA_COLOR_LIGHT_GREEN, VGA_COLOR_BLACK);
+
     // Count the number of read characters so far.
     // This variable is also used as the index for the next available slot for
     // new character to be read.
@@ -118,7 +121,7 @@ int64_t read_handler(uint64_t f_descriptor, char* buff, size_t read_size,
         // Add newline to buffer
         if (incl_newln) buff[read_char_counter++] = c;
         // Print newline character and exit loop
-        if (echo_char) term_putchar(c, VGA_COLOR_LIGHT_GREEN, VGA_COLOR_BLACK);
+        if (echo_char) term_putchar(c);
         break;
       }
 
@@ -131,8 +134,10 @@ int64_t read_handler(uint64_t f_descriptor, char* buff, size_t read_size,
         // Put the valid character into the buffer
         buff[read_char_counter++] = c;
       }
-      if (echo_char) term_putchar(c, VGA_COLOR_LIGHT_GREEN, VGA_COLOR_BLACK);
+      if (echo_char) term_putchar(c);
     }
+    // Reset the color setting
+    reset_term_color();
     // If we finished reading return the number of read characters
     return read_char_counter;
   }
@@ -157,19 +162,23 @@ int64_t write_handler(uint64_t f_descriptor, const char* str,
     return -1;
   }
 
+  // Set terminal color based on 
   uint8_t fg = (f_descriptor == STD_ERR) ? VGA_COLOR_RED : VGA_COLOR_WHITE;
   uint8_t bg = VGA_COLOR_BLACK;
+  set_term_color(fg, bg);
 
   // Repeat printing characters one by one. If we print null terminate, we
   int i = 0;
   while (i < write_size) {
     if (str[i] != '\0') {
-      term_putchar(str[i], fg, bg);
+      term_putchar(str[i]);
       i++;
     } else {
+      reset_term_color();
       return i;
     }
   }
+  reset_term_color();
   return i;
 }
 

@@ -15,3 +15,9 @@ void halt() {
 // Convert physical address to virtual address by adding hhdm base virtual
 // address
 uintptr_t ptov(uintptr_t paddr) { return paddr + hhdm_struct_tag->addr; }
+
+uint64_t get_time() {
+  uint64_t msr;
+  __asm__("rdtsc\n" : "=a"(msr));
+  return msr;
+}

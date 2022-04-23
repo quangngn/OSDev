@@ -15,6 +15,19 @@ vga_entry_t* term;
 size_t term_col = 0;
 size_t term_row = 0;
 
+static uint8_t fg = VGA_COLOR_WHITE;
+static uint8_t bg = VGA_COLOR_BLACK;
+
+void reset_term_color() {
+  fg = VGA_COLOR_WHITE;
+  bg = VGA_COLOR_BLACK;
+}
+
+void set_term_color(uint8_t new_fg, uint8_t new_bg) {
+  fg = new_fg;
+  bg = new_bg;
+}
+
 // Turn on the VGA cursor
 void term_enable_cursor() {
   // Set starting scaline to 13 (three up from bottom)
@@ -52,7 +65,7 @@ void term_clear() {
 }
 
 // Write one character to the terminal
-void term_putchar(char c, uint8_t fg, uint8_t bg) {
+void term_putchar(char c) {
   // Handle characters that do not consume extra space (no scrolling necessary)
   if (c == '\r') {
     term_col = 0;
@@ -113,9 +126,9 @@ void term_putchar(char c, uint8_t fg, uint8_t bg) {
 }
 
 // Write string to the terminal
-void term_puts(const char* s, size_t size, uint8_t fg, uint8_t bg) {
+void term_puts(const char* s, size_t size) {
   for (int i = 0; i < size; i++) {
-    term_putchar(s[i], fg, bg);
+    term_putchar(s[i]);
   }
 }
 
