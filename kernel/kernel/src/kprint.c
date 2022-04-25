@@ -311,7 +311,8 @@ void kprint_mem_usage() {
   // Loop through each entry in the memory
   for (size_t i = 0; i < mmap_struct_tag->entries; i++) {
     mmap_entry = &(mmap_struct_tag->memmap[i]);
-    if (mmap_entry->type == STIVALE2_MMAP_TYPE_USABLE) {
+    // if (mmap_entry->type == STIVALE2_MMAP_FRAMEBUFFER) {
+    if (mmap_entry->type == STIVALE2_MMAP_USABLE) {
       kprintf("%p-%p mapped at %p-%p\n", mmap_entry->base,
               mmap_entry->base + mmap_entry->length,
               mmap_entry->base + hhdm_addr,

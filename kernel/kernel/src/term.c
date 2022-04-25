@@ -20,7 +20,7 @@ extern size_t screen_h;
 extern size_t screen_w;
 extern uintptr_t buffer_addr;
 
-// Struct to hold the current state of the terminal 
+// Struct to hold the current state of the terminal
 terminal_t term;
 /******************************************************************************/
 // Initialize the terminal
@@ -38,6 +38,7 @@ bool term_init() {
 
   // Clear terminal (aka clear frame buffer)
   term_clear();
+  return true;
 }
 
 void term_reset_color() {
@@ -51,10 +52,11 @@ void term_set_color(color_t new_fg, color_t new_bg) {
 }
 
 // Clear the terminal
-void term_clear() { graphic_clear_buffer; }
+void term_clear() { graphic_clear_buffer(); }
 
 bool term_put_psf_char(char c) {
-  psf_put_char(c, term.row, term.col, term.fg, term.bg, term.enable_cursor);
+  return psf_put_char(c, term.row, term.col, term.fg, term.bg,
+                      term.enable_cursor);
 }
 
 // Write one character to the terminal

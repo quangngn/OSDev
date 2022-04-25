@@ -163,8 +163,8 @@ int64_t write_handler(uint64_t f_descriptor, const char* str,
   }
 
   // Set terminal color based on 
-  uint8_t fg = (f_descriptor == STD_ERR) ? ARGB32_RED : ARGB32_WHITE;
-  uint8_t bg = ARGB32_BLACK;
+  color_t fg = (f_descriptor == STD_ERR) ? ARGB32_RED : ARGB32_WHITE;
+  color_t bg = ARGB32_BLACK;
   term_set_color(fg, bg);
 
   // Repeat printing characters one by one. If we print null terminate, we

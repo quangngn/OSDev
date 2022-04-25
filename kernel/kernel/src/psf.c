@@ -18,7 +18,6 @@ uint32_t psf_font_h = 0;
 uint32_t psf_glyph_sz = 0;
 uint32_t psf_nglyph = 0;
 char* psf_glyph_start = NULL;
-char* psf_glyph_end = NULL;
 
 size_t term_w = 0;
 size_t term_h = 0;
@@ -31,7 +30,7 @@ bool psf_init() {
   psf_font_h = font->height;
   psf_glyph_sz = font->bytesperglyph;
   psf_nglyph = font->numglyph;
-  psf_glyph_start = (uintptr_t)font + font->headersize;
+  psf_glyph_start = (char*)((uintptr_t)font + font->headersize);
 
   // Init screen information
   term_w = screen_w / psf_font_w;
@@ -46,7 +45,7 @@ bool psf_put_char(char c, size_t row, size_t col, color_t fg, color_t bg,
   }
 
   // 1. Find the address of the glymph that corresponds to character c:
-  char* glyph = psf_glyph_start[(uint32_t)c * psf_glyph_sz];
+  char* glyph = &psf_glyph_start[(uint32_t)c * psf_glyph_sz];
 
   // 2. Find location on the frame buffer to print:
   size_t pixel_row = row * psf_font_h;
@@ -59,13 +58,14 @@ bool psf_put_char(char c, size_t row, size_t col, color_t fg, color_t bg,
     pixel_t* cursor = row_start;
     // cur_glyph_row points to the current row in the printed glyph
     uint8_t cur_glyph_row = glyph[i];
+    uint8_t mask = 0x80;
 
     // Each bits in the glyph corresponds to a pixel in the frame buffer.
     // If the bit is 0, we put background color to the frame buffer, else
     // we put foreground color to the frame buffer.
     for (int j = 0; j < psf_font_w; j++) {
-      *cursor = cur_glyph_row % 2 == 0 ? (pixel_t)bg : (pixel_t)fg;
-      cur_glyph_row /= 2;
+      *cursor = ((cur_glyph_row & mask) == 0) ? (pixel_t)bg : (pixel_t)fg;
+      mask >>= 1;
       cursor++;
     }
 

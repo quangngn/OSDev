@@ -1,4 +1,5 @@
 #include "kgraphic.h"
+
 #include "psf.h"
 
 extern struct stivale2_struct_tag_framebuffer* framebuffer_struct_tag;
@@ -23,7 +24,8 @@ bool graphic_init() {
 
 void graphic_clear_buffer() {
   uint64_t* cursor = (uint64_t*)buffer_addr;
-  uint64_t* buffer_end_addr = (uint64_t*)(buffer_addr + (screen_w * screen_h));
+  uint64_t* buffer_end_addr =
+      (uint64_t*)(buffer_addr + (screen_w * screen_h * sizeof(pixel_t)));
 
   while (cursor < buffer_end_addr) {
     *cursor++ = 0;
