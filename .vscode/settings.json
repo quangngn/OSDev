@@ -6,7 +6,8 @@
         "system.h": "c",
         "executable.h": "c",
         "sstream": "c",
-        "stdbool.h": "c"
+        "stdbool.h": "c",
+        "kgraphic.h": "c"
     },
     "editor.wordWrap": "wordWrapColumn",
     "editor.wordWrapColumn": 80

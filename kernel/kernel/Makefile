@@ -8,6 +8,9 @@ OUT := obj
 
 SRC := $(wildcard src/*.c)
 ASM := $(wildcard asm/*.s)
+FONT := $(wildcard fonts/*.psf)
+
+F_OBJ := $(patsubst %.psf, $(OUT)/%.o, $(FONT))
 C_OBJ := $(patsubst %.c, $(OUT)/%.o, $(SRC))
 S_OBJ := $(patsubst %.s, $(OUT)/%.o, $(ASM))
 DEP := $(patsubst %.c, $(OUT)/%.d, $(SRC))
@@ -23,12 +26,17 @@ clean:
 run:
 	$(MAKE) -C .. run
 
-kernel.elf: $(C_OBJ) $(S_OBJ) linker.ld ../stdlib/libc.a
-	$(LD) -T linker.ld -o $@ $(C_OBJ) $(S_OBJ) $(LDFLAGS)
+kernel.elf: $(C_OBJ) $(S_OBJ) $(F_OBJ) linker.ld ../stdlib/libc.a
+	$(LD) -T linker.ld -o $@ $(C_OBJ) $(S_OBJ) $(F_OBJ) $(LDFLAGS)
+
+$(F_OBJ): $(OUT)/%.o: %.psf
+	@mkdir -p `dirname $@`
+	$(LD) -r -b binary -o $@ $<
 
 $(C_OBJ): $(OUT)/%.o: %.c
 	@mkdir -p `dirname $@`
 	$(CC) $(CFLAGS) -c $< -o $@
+
 
 $(S_OBJ): $(OUT)/%.o: %.s
 	@mkdir -p `dirname $@`

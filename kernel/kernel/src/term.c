@@ -7,122 +7,104 @@
 
 // hhdm struct allow us to get the base virtual address
 extern struct stivale2_struct_tag_hhdm* hhdm_struct_tag;
+extern struct stivale2_struct_tag_framebuffer* framebuffer_struct_tag;
 
-// A pointer to the VGA buffer
-vga_entry_t* term;
+// Defined in psf.c
+extern uint32_t psf_font_w;
+extern uint32_t psf_font_h;
+extern size_t term_h;
+extern size_t term_w;
 
-// The current cursor position in the terminal
-size_t term_col = 0;
-size_t term_row = 0;
+// Defined in kgraphic.c
+extern size_t screen_h;
+extern size_t screen_w;
+extern uintptr_t buffer_addr;
 
-static uint8_t fg = VGA_COLOR_WHITE;
-static uint8_t bg = VGA_COLOR_BLACK;
+// Struct to hold the current state of the terminal 
+terminal_t term;
+/******************************************************************************/
+// Initialize the terminal
+bool term_init() {
+  if (framebuffer_struct_tag == NULL) return false;
 
-void reset_term_color() {
-  fg = VGA_COLOR_WHITE;
-  bg = VGA_COLOR_BLACK;
+  // Init terminal's state values
+  term.row = 0;
+  term.col = 0;
+  term.fg = ARGB32_WHITE;
+  term.bg = ARGB32_BLACK;
+  term.enable_cursor = true;
+  // Number of byte in frame buffer buffer for each row of the terminal
+  term.byte_per_row = screen_w * psf_font_h * sizeof(pixel_t);
+
+  // Clear terminal (aka clear frame buffer)
+  term_clear();
 }
 
-void set_term_color(uint8_t new_fg, uint8_t new_bg) {
-  fg = new_fg;
-  bg = new_bg;
+void term_reset_color() {
+  term.fg = ARGB32_WHITE;
+  term.bg = ARGB32_BLACK;
 }
 
-// Turn on the VGA cursor
-void term_enable_cursor() {
-  // Set starting scaline to 13 (three up from bottom)
-  outb(0x3D4, 0x0A);
-  outb(0x3D5, (inb(0x3D5) & 0xC0) | 13);
-
-  // Set ending scanline to 15 (bottom)
-  outb(0x3D4, 0x0B);
-  outb(0x3D5, (inb(0x3D5) & 0xE0) | 15);
-}
-
-// Update the VGA cursor
-void term_update_cursor() {
-  uint16_t pos = term_row * VGA_WIDTH + term_col;
-
-  outb(0x3D4, 0x0F);
-  outb(0x3D5, (uint8_t)(pos & 0xFF));
-  outb(0x3D4, 0x0E);
-  outb(0x3D5, (uint8_t)((pos >> 8) & 0xFF));
+void term_set_color(color_t new_fg, color_t new_bg) {
+  term.fg = new_fg;
+  term.bg = new_bg;
 }
 
 // Clear the terminal
-void term_clear() {
-  // Clear the terminal
-  for (size_t i = 0; i < VGA_WIDTH * VGA_HEIGHT; i++) {
-    term[i].c = ' ';
-    term[i].bg = VGA_COLOR_BLACK;
-    term[i].fg = VGA_COLOR_WHITE;
-  }
+void term_clear() { graphic_clear_buffer; }
 
-  term_col = 0;
-  term_row = 0;
-
-  term_update_cursor();
+bool term_put_psf_char(char c) {
+  psf_put_char(c, term.row, term.col, term.fg, term.bg, term.enable_cursor);
 }
 
 // Write one character to the terminal
 void term_putchar(char c) {
   // Handle characters that do not consume extra space (no scrolling necessary)
   if (c == '\r') {
-    term_col = 0;
-    term_update_cursor();
+    term.col = 0;
     return;
-
   } else if (c == '\b') {
-    if (term_col > 0) {
-      term_col--;
-      term[term_row * VGA_WIDTH + term_col].c = ' ';
-    } else if (term_row > 0) {
-      term_row--;
-      term_col = VGA_WIDTH - 1;
-      term[term_row * VGA_WIDTH + term_col].c = ' ';
+    if (term.col > 0) {
+      term.col--;
+      term_put_psf_char(' ');
+    } else if (term.row > 0) {
+      term.row--;
+      term.col = term_w - 1;
+      term_put_psf_char(' ');
     }
-    term_update_cursor();
     return;
   }
 
   // Handle newline
   if (c == '\n') {
-    term_col = 0;
-    term_row++;
+    term.col = 0;
+    term.row++;
   }
 
   // Wrap if needed
-  if (term_col == VGA_WIDTH) {
-    term_col = 0;
-    term_row++;
+  if (term.col == term_w) {
+    term.col = 0;
+    term.row++;
   }
 
   // Scroll if needed
-  if (term_row == VGA_HEIGHT) {
+  if (term.row == term_h) {
     // Shift characters up a row
-    kmemcpy((void*)term, (void*)(&term[VGA_WIDTH]),
-            sizeof(vga_entry_t) * VGA_WIDTH * (VGA_HEIGHT - 1));
-    term_row--;
+    uintptr_t src = buffer_addr + term.byte_per_row;
+    size_t copy_size = term.byte_per_row * (term_h - 1);
+    kmemcpy((void*)buffer_addr, (void*)src, copy_size);
+    term.row--;
 
     // Clear the last row
-    for (size_t i = 0; i < VGA_WIDTH; i++) {
-      size_t index = i + term_row * VGA_WIDTH;
-      term[index].c = ' ';
-      term[index].fg = fg;
-      term[index].bg = bg;
-    }
+    src = buffer_addr + copy_size;
+    kmemset((void*)src, 0, term.byte_per_row);
   }
 
   // Write the character, unless it's a newline
   if (c != '\n') {
-    size_t index = term_col + term_row * VGA_WIDTH;
-    term[index].c = c;
-    term[index].fg = fg;
-    term[index].bg = bg;
-    term_col++;
+    term_put_psf_char(c);
+    term.col++;
   }
-
-  term_update_cursor();
 }
 
 // Write string to the terminal
@@ -130,13 +112,4 @@ void term_puts(const char* s, size_t size) {
   for (int i = 0; i < size; i++) {
     term_putchar(s[i]);
   }
-}
-
-// Initialize the terminal
-void term_init() {
-  // Get a usable pointer to the VGA text mode buffer
-  term = (vga_entry_t*)(VGA_BUFFER + hhdm_struct_tag->addr);
-
-  term_enable_cursor();
-  term_clear();
 }

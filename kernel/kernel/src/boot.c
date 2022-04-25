@@ -8,6 +8,7 @@
 #include "executable.h"
 #include "gdt.h"
 #include "idt.h"
+#include "kgraphic.h"
 #include "kprint.h"
 #include "page.h"
 #include "pic.h"
@@ -37,16 +38,10 @@ static uint8_t stack[8192];
 static struct stivale2_tag unmap_null_hdr_tag = {
     .identifier = STIVALE2_HEADER_TAG_UNMAP_NULL_ID, .next = 0};
 
-// Request a terminal from the bootloader
-static struct stivale2_header_tag_terminal terminal_hdr_tag = {
-    .tag = {.identifier = STIVALE2_HEADER_TAG_TERMINAL_ID,
-            .next = (uintptr_t)(&unmap_null_hdr_tag)},
-    .flags = 0};
-
 // Any video header tag with preference for a linear buffer
 static struct stivale2_header_tag_any_video any_vid_hdr_tag = {
     .tag = {.identifier = STIVALE2_HEADER_TAG_ANY_VIDEO_ID,
-            .next = (uintptr_t)(&terminal_hdr_tag)},
+            .next = (uintptr_t)(&unmap_null_hdr_tag)},
     .preference = 0};
 
 static struct stivale2_header_tag_framebuffer framebuffer_hdr_tag = {
@@ -73,7 +68,7 @@ __attribute__((section(".stivale2hdr"),
 
     // First tag struct
     .tags = (uintptr_t)&framebuffer_hdr_tag};
-    // .tags = (uintptr_t)&framebuffer_hdr_tag};
+// .tags = (uintptr_t)&framebuffer_hdr_tag};
 
 /******************************************************************************/
 // Find a tag with a given ID
@@ -115,15 +110,6 @@ void print_frame_buffer_info(struct stivale2_struct_tag_framebuffer* ftag) {
 }
 
 void struct_tag_setup(struct stivale2_struct* hdr) {
-  // Terminal tag:
-  terminal_struct_tag = find_tag(hdr, STIVALE2_STRUCT_TAG_TERMINAL_ID);
-  if (terminal_struct_tag == NULL) {
-    halt();
-  } else {
-    // Save the term_write function pointer
-    kset_term_write((term_write_t)terminal_struct_tag->term_write);
-  }
-
   // Mmap tag and HHDM tag:
   mmap_struct_tag = find_tag(hdr, STIVALE2_STRUCT_TAG_MEMMAP_ID);
   hhdm_struct_tag = find_tag(hdr, STIVALE2_STRUCT_TAG_HHDM_ID);
@@ -156,8 +142,9 @@ void setup_kernel(struct stivale2_struct* hdr) {
   struct_tag_setup(hdr);
 
   // Init terminal
-  kset_term_write((term_write_t)term_puts);
+  graphic_init();
   term_init();
+  kset_term_write((term_write_t)term_puts);
 
   // Set up the GDT
   gdt_setup();

@@ -5,9 +5,6 @@
 extern struct stivale2_struct_tag_memmap* mmap_struct_tag;
 extern struct stivale2_struct_tag_hhdm* hhdm_struct_tag;
 
-static uint8_t fg = VGA_COLOR_WHITE;
-static uint8_t bg = VGA_COLOR_BLACK;
-
 // Buffers being used to store digit characters when printing number
 char buffer_dec_uint64[NUM_DIGIT_DEC_UINT64 + 1];
 char buffer_hex_uint64[NUM_DIGIT_HEX_UINT64 + 1];
@@ -236,7 +233,7 @@ void kperror(const char* format, ...) {
   if (format == NULL) return;
 
   // Set fg color to white and bg color to black
-  set_term_color(VGA_COLOR_RED, VGA_COLOR_BLACK);
+  term_set_color(ARGB32_RED, ARGB32_BLACK);
 
   // Set up va_list to read arguments
   const char* cursor = format;
@@ -275,7 +272,7 @@ void kperror(const char* format, ...) {
           break;
         // case "%" -> print nothing, return
         case '\0':
-          reset_term_color;
+          term_reset_color();
           return;
         // unsupported escape character
         default:
@@ -286,7 +283,7 @@ void kperror(const char* format, ...) {
     }
     cursor++;
   }
-  reset_term_color();
+  term_reset_color();
 }
 
 /**
