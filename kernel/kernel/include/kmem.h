@@ -39,7 +39,7 @@ void* kmalloc(size_t size);
 void kfree(void* p);
 
 // Set memory to a certain value
-void* kmemset(void* ptr, int value, size_t num);
+void* kmemset(void* ptr, int value, size_t size);
 
 // Copy memory from src to dest. Size is in byte
 void kmemcpy(void* dst, void* src, size_t size);

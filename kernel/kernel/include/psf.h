@@ -29,7 +29,7 @@ typedef struct psf {
  * \returns true if the initialization succeeds and false
  * otherwise.
  */
-bool psf_init();
+void  psf_init();
 
 /**
  * Using the glyphs table to draw pixel-by-pixel the characters onto the frame
@@ -39,7 +39,6 @@ bool psf_init();
  * \param pixel_col: The col index of the top left pixel.
  * \param fg: Foreground color of the character.
  * \param bg: Background color of the character.
- *
  * \returns true if the printing is within bound, else returns false.
  */
 bool psf_put_char(char c, size_t pixel_row, size_t pixel_col, color_t fg,

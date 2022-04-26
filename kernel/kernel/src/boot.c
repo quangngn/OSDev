@@ -34,6 +34,28 @@ extern uint8_t gdt;
 static uint8_t stack[8192];
 
 /******************************************************************************/
+// Helper functions
+// Log the framebuffer's info
+void print_framebuffer_info(struct stivale2_struct_tag_framebuffer* ftag) {
+  if (ftag == NULL) {
+    return;
+  }
+
+  kprintf("Frame buffer information: \n");
+  kprintf("Address: %p\n", ftag->framebuffer_addr);
+  kprintf("Dimension (W x H): %d x %d\n", ftag->framebuffer_width,
+          ftag->framebuffer_height);
+  kprintf("Bit per pixel: %d\n", ftag->framebuffer_bpp);
+  kprintf("Red mask size: %d, Red shift size: %d\n", ftag->red_mask_size,
+          ftag->red_mask_shift);
+  kprintf("Green mask size: %d, Green shift size: %d\n",
+  ftag->green_mask_size,
+          ftag->green_mask_shift);
+  kprintf("Blue mask size: %d, Blue shift size: %d\n", ftag->blue_mask_size,
+          ftag->blue_mask_shift);
+}
+
+/******************************************************************************/
 // Tell booloader to unmap the lower part
 static struct stivale2_tag unmap_null_hdr_tag = {
     .identifier = STIVALE2_HEADER_TAG_UNMAP_NULL_ID, .next = 0};
@@ -51,6 +73,12 @@ static struct stivale2_header_tag_framebuffer framebuffer_hdr_tag = {
     .framebuffer_width = 0,
     .framebuffer_bpp = 0};
 
+// Request a terminal from the bootloader
+static struct stivale2_header_tag_terminal terminal_hdr_tag = {
+    .tag = {.identifier = STIVALE2_HEADER_TAG_TERMINAL_ID,
+            .next = (uintptr_t)(&framebuffer_hdr_tag)},
+    .flags = 0};
+
 // Declare the header for the bootloader
 __attribute__((section(".stivale2hdr"),
                used)) static struct stivale2_header stivale_hdr = {
@@ -67,7 +95,7 @@ __attribute__((section(".stivale2hdr"),
     .flags = 0x1E,
 
     // First tag struct
-    .tags = (uintptr_t)&framebuffer_hdr_tag};
+    .tags = (uintptr_t)&terminal_hdr_tag};
 
 /******************************************************************************/
 // Find a tag with a given ID
@@ -90,32 +118,13 @@ void* find_tag(struct stivale2_struct* hdr, uint64_t id) {
   return NULL;
 }
 
-// void print_frame_buffer_info(struct stivale2_struct_tag_framebuffer* ftag) {
-//   if (ftag == NULL) {
-//     return;
-//   }
-
-//   kprintf("Frame buffer information: \n");
-//   kprintf("Address: %p\n", ftag->framebuffer_addr);
-//   kprintf("Dimension (W x H): %d x %d\n", ftag->framebuffer_width,
-//           ftag->framebuffer_height);
-//   kprintf("Bit per pixel: %d\n", ftag->framebuffer_bpp);
-//   kprintf("Red mask size: %d, Red shift size: %d\n", ftag->red_mask_size,
-//           ftag->red_mask_shift);
-//   kprintf("Green mask size: %d, Green shift size: %d\n",
-//   ftag->green_mask_size,
-//           ftag->green_mask_shift);
-//   kprintf("Blue mask size: %d, Blue shift size: %d\n", ftag->blue_mask_size,
-//           ftag->blue_mask_shift);
-// }
-
 void struct_tag_setup(struct stivale2_struct* hdr) {
-  // // Look for a terminal tag
-  // terminal_struct_tag = find_tag(hdr, STIVALE2_STRUCT_TAG_TERMINAL_ID);
-  // // Make sure we find a terminal tag
-  // if (terminal_struct_tag == NULL) halt();
-  // // Save the term_write function pointer
-  // kset_term_write((term_write_t)terminal_struct_tag->term_write);
+  // Look for a terminal tag
+  terminal_struct_tag = find_tag(hdr, STIVALE2_STRUCT_TAG_TERMINAL_ID);
+  // Make sure we find a terminal tag
+  if (terminal_struct_tag == NULL) halt();
+  // Save the term_write function pointer
+  kset_term_write((term_write_t)terminal_struct_tag->term_write);
 
   // Mmap tag and HHDM tag:
   mmap_struct_tag = find_tag(hdr, STIVALE2_STRUCT_TAG_MEMMAP_ID);
@@ -144,6 +153,8 @@ void setup_kernel(struct stivale2_struct* hdr) {
   // bootloader
   struct_tag_setup(hdr);
 
+  /* Printing anything using the build in terminal here */
+
   // Init terminal
   graphic_init();
   term_init();
@@ -170,8 +181,6 @@ void setup_kernel(struct stivale2_struct* hdr) {
   uintptr_t proot = read_cr3() & PAGE_ALIGN_MASK;
   unmap_lower_half(proot);
 
-  // ((term_w_t)terminal_struct_tag->term_write)("Hello5\n", 8);
-
   // Init executable list for loading and running executable
   init_exe_list();
 }
@@ -183,9 +192,6 @@ void _start(struct stivale2_struct* hdr) {
 
   // // Load and run shell program
   run_exe("shell");
-  // print_frame_buffer_info(framebuffer_struct_tag);
-  // ((term_w_t)terminal_struct_tag->term_write)("Hello\n", 7);
-  // kprintf("Hello\n");
 
   // We're done, just hang...
   halt();

@@ -102,8 +102,8 @@ void* kmalloc(size_t sz) {
 void kfree(void* p) { return; }
 
 // Set memory to a certain value
-void* kmemset(void* ptr, int value, size_t num) {
-  for (int i = 0; i < num; i++) {
+void* kmemset(void* ptr, int value, size_t size) {
+  for (int i = 0; i < size; i++) {
     ((unsigned char*)ptr)[i] = (unsigned char)value;
   }
   return ptr;
