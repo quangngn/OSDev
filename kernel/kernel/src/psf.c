@@ -43,8 +43,8 @@ bool psf_init() {
   psf_glyph_start = (char*)((uintptr_t)font + font->headersize);
 
   // Init screen information
-  term_w = screen_w / psf_font_w;
-  term_h = screen_h / psf_font_h;
+  term_w = screen_w / psf_font_w - 1;
+  term_h = screen_h / psf_font_h - 1;
   return true;
 }
 

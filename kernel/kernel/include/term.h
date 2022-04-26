@@ -24,13 +24,16 @@ typedef struct {
 } terminal_t;
 
 // Initialize the terminal
-bool term_init();
+void term_init();
 
 // Reset the color of the terminal
 void term_reset_color();
 
 // Set the color of the terminal
 void term_set_color(color_t fg, color_t bg);
+
+// Reset the value of terminal object to its initial state
+void term_reset();
 
 // Clear the terminal
 void term_clear();

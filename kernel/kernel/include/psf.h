@@ -29,7 +29,7 @@ typedef struct psf {
  * \returns true if the initialization succeeds and false
  * otherwise.
  */
-void  psf_init();
+bool psf_init();
 
 /**
  * Using the glyphs table to draw pixel-by-pixel the characters onto the frame
