@@ -22,6 +22,7 @@ extern uintptr_t buffer_addr;
 
 // Struct to hold the current state of the terminal
 terminal_t term;
+
 /******************************************************************************/
 // Initialize the terminal
 bool term_init() {
@@ -52,11 +53,22 @@ void term_set_color(color_t new_fg, color_t new_bg) {
 }
 
 // Clear the terminal
-void term_clear() { graphic_clear_buffer(); }
+void term_clear() {
+  // Clear the framebuffer
+  graphic_clear_buffer();
+  term.col = 0;
+  term.row = 0;
+  term.fg = ARGB32_WHITE;
+  term.bg = ARGB32_BLACK;
+  term.enable_cursor = true;
+  // Reset the terminal stats
+  term.byte_per_row = screen_w * psf_font_h * sizeof(pixel_t);
+}
 
+// Draw psf glyph of character c to the terminal
 bool term_put_psf_char(char c) {
-  return psf_put_char(c, term.row, term.col, term.fg, term.bg,
-                      term.enable_cursor);
+  return psf_put_char(c, term.row * psf_font_h, term.col * psf_font_w, term.fg,
+                      term.bg);
 }
 
 // Write one character to the terminal
@@ -95,11 +107,14 @@ void term_putchar(char c) {
     uintptr_t src = buffer_addr + term.byte_per_row;
     size_t copy_size = term.byte_per_row * (term_h - 1);
     kmemcpy((void*)buffer_addr, (void*)src, copy_size);
-    term.row--;
 
     // Clear the last row
     src = buffer_addr + copy_size;
     kmemset((void*)src, 0, term.byte_per_row);
+
+    // Set cursor to the start of the bottom line
+    term.row--;
+    term.col = 0;
   }
 
   // Write the character, unless it's a newline

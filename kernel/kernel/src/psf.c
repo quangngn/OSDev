@@ -19,13 +19,23 @@ uint32_t psf_glyph_sz = 0;
 uint32_t psf_nglyph = 0;
 char* psf_glyph_start = NULL;
 
+// Number of rows and columns of characters that can be fited within the given
+// frame buffer.
 size_t term_w = 0;
 size_t term_h = 0;
 
-// Requirement for now, the
+/**
+ * Init the information regarding the current psf font.
+ * Requirement: The screen pixel width must be a multiple of each glyph's width.
+ * Same for height.
+ * \returns true if the initialization succeeds and false
+ * otherwise.
+ */
 bool psf_init() {
-  // Init global values related to font
   psf_t* font = (psf_t*)&_binary_fonts_font_psf_start;
+  if (font == NULL) return false;
+
+  // Init global values related to font
   psf_font_w = font->width;
   psf_font_h = font->height;
   psf_glyph_sz = font->bytesperglyph;
@@ -38,9 +48,22 @@ bool psf_init() {
   return true;
 }
 
-bool psf_put_char(char c, size_t row, size_t col, color_t fg, color_t bg,
-                  bool enable_cursor) {
-  if (row >= term_h || col >= term_w || c >= psf_nglyph) {
+/**
+ * Using the glyphs table to draw pixel-by-pixel the characters onto the frame
+ * framebuffer.
+ * \param c: Character to be printed.
+ * \param pixel_row: The row index of the top left pixel.
+ * \param pixel_col: The col index of the top left pixel.
+ * \param fg: Foreground color of the character.
+ * \param bg: Background color of the character.
+ *
+ * \returns true if the printing is within bound, else returns false.
+ */
+bool psf_put_char(char c, size_t pixel_row, size_t pixel_col, color_t fg,
+                  color_t bg) {
+  // Check for out of bound
+  if (pixel_row >= screen_h - psf_font_h ||
+      pixel_col >= screen_w - psf_font_w || c >= psf_nglyph) {
     return false;
   }
 
@@ -48,8 +71,6 @@ bool psf_put_char(char c, size_t row, size_t col, color_t fg, color_t bg,
   char* glyph = &psf_glyph_start[(uint32_t)c * psf_glyph_sz];
 
   // 2. Find location on the frame buffer to print:
-  size_t pixel_row = row * psf_font_h;
-  size_t pixel_col = col * psf_font_w;
   pixel_t* row_start = (pixel_t*)buffer_addr + pixel_row * screen_w + pixel_col;
 
   // 3. Print each row in the glyph to the frame buffer with fg and bg colors:

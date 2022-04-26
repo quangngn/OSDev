@@ -8,6 +8,11 @@ size_t screen_w = 0;
 size_t screen_h = 0;
 uintptr_t buffer_addr = 0;
 
+/**
+ * Read the framebuffer struct tag to gain information about the current
+ * framebuffer. The function also initialize psf font. 
+ * \returns true if init successfully else returns false.
+ */
 bool graphic_init() {
   if (framebuffer_struct_tag == NULL) return false;
 
@@ -22,6 +27,9 @@ bool graphic_init() {
   return true;
 }
 
+/**
+ * Set the framebuffer value to 0
+ */ 
 void graphic_clear_buffer() {
   uint64_t* cursor = (uint64_t*)buffer_addr;
   uint64_t* buffer_end_addr =

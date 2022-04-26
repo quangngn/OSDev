@@ -51,12 +51,6 @@ static struct stivale2_header_tag_framebuffer framebuffer_hdr_tag = {
     .framebuffer_width = 0,
     .framebuffer_bpp = 0};
 
-// Request a terminal from the bootloader
-static struct stivale2_header_tag_terminal terminal_hdr_tag = {
-    .tag = {.identifier = STIVALE2_HEADER_TAG_TERMINAL_ID,
-            .next = (uintptr_t)(&framebuffer_hdr_tag)},
-    .flags = 0};
-
 // Declare the header for the bootloader
 __attribute__((section(".stivale2hdr"),
                used)) static struct stivale2_header stivale_hdr = {
@@ -73,7 +67,7 @@ __attribute__((section(".stivale2hdr"),
     .flags = 0x1E,
 
     // First tag struct
-    .tags = (uintptr_t)&terminal_hdr_tag};
+    .tags = (uintptr_t)&framebuffer_hdr_tag};
 
 /******************************************************************************/
 // Find a tag with a given ID
@@ -116,12 +110,12 @@ void* find_tag(struct stivale2_struct* hdr, uint64_t id) {
 // }
 
 void struct_tag_setup(struct stivale2_struct* hdr) {
-  // Look for a terminal tag
-  terminal_struct_tag = find_tag(hdr, STIVALE2_STRUCT_TAG_TERMINAL_ID);
-  // Make sure we find a terminal tag
-  if (terminal_struct_tag == NULL) halt();
-  // Save the term_write function pointer
-  kset_term_write((term_write_t)terminal_struct_tag->term_write);
+  // // Look for a terminal tag
+  // terminal_struct_tag = find_tag(hdr, STIVALE2_STRUCT_TAG_TERMINAL_ID);
+  // // Make sure we find a terminal tag
+  // if (terminal_struct_tag == NULL) halt();
+  // // Save the term_write function pointer
+  // kset_term_write((term_write_t)terminal_struct_tag->term_write);
 
   // Mmap tag and HHDM tag:
   mmap_struct_tag = find_tag(hdr, STIVALE2_STRUCT_TAG_MEMMAP_ID);
@@ -149,7 +143,6 @@ void setup_kernel(struct stivale2_struct* hdr) {
   // We've booted! Let's start processing tags passed to kernel from the
   // bootloader
   struct_tag_setup(hdr);
-  kprintf("Henlo!\n");
 
   // Init terminal
   graphic_init();

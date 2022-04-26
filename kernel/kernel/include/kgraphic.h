@@ -21,5 +21,14 @@
 typedef uint32_t color_t;
 typedef uint32_t pixel_t;
 
+/**
+ * Read the framebuffer struct tag to gain information about the current
+ * framebuffer. The function also initialize psf font. 
+ * \returns true if init successfully else returns false.
+ */
 bool graphic_init();
+
+/**
+ * Set the framebuffer value to 0
+ */ 
 void graphic_clear_buffer();
