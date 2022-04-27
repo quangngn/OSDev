@@ -105,13 +105,6 @@ void term_putchar(char c) {
     // Set cursor to the start of the bottom line
     term.row--;
 
-    // size_t pixel_row = term.row * psf_font_h;
-    // size_t pixel_col = 0;
-    // for (int i = 0; i < term_w; i++) {
-    //   pixel_col = i * psf_font_w;
-    //   psf_put_char(' ', pixel_row, pixel_col, term.fg, term.bg);
-    // }
-
     // Clear the last row
     uintptr_t last_row = buffer_addr + copy_size;
     kmemset((void*)last_row, 0, term.byte_per_row);

@@ -48,8 +48,7 @@ void print_framebuffer_info(struct stivale2_struct_tag_framebuffer* ftag) {
   kprintf("Bit per pixel: %d\n", ftag->framebuffer_bpp);
   kprintf("Red mask size: %d, Red shift size: %d\n", ftag->red_mask_size,
           ftag->red_mask_shift);
-  kprintf("Green mask size: %d, Green shift size: %d\n",
-  ftag->green_mask_size,
+  kprintf("Green mask size: %d, Green shift size: %d\n", ftag->green_mask_size,
           ftag->green_mask_shift);
   kprintf("Blue mask size: %d, Blue shift size: %d\n", ftag->blue_mask_size,
           ftag->blue_mask_shift);
@@ -191,7 +190,9 @@ void _start(struct stivale2_struct* hdr) {
   setup_kernel(hdr);
 
   // // Load and run shell program
-  run_exe("shell");
+  // run_exe("shell");
+
+  for (int i = 0; i < 10; i++) kprintf("2^%d = %d\n", i, pow(2, i));
 
   // We're done, just hang...
   halt();
