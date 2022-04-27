@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <system.h>
+#include <trigonometry.h>
 
 #include "executable.h"
 #include "gdt.h"
@@ -17,6 +18,11 @@
 #include "term.h"
 #include "util.h"
 
+// Function to write to terminal is defined in stivale2 source
+extern term_write_t term_write;
+extern int64_t syscall(uint64_t nr, ...);
+extern uint8_t gdt;
+
 // Define struct tag pointer to hold information about memory section. These
 // pointers will be init by reading provided struct tag from the bootloader.
 struct stivale2_struct_tag_memmap* mmap_struct_tag = NULL;
@@ -24,11 +30,6 @@ struct stivale2_struct_tag_hhdm* hhdm_struct_tag = NULL;
 struct stivale2_struct_tag_modules* modules_struct_tag = NULL;
 struct stivale2_struct_tag_terminal* terminal_struct_tag = NULL;
 struct stivale2_struct_tag_framebuffer* framebuffer_struct_tag = NULL;
-
-// Function to write to terminal is defined in stivale2 source
-extern term_write_t term_write;
-extern int64_t syscall(uint64_t nr, ...);
-extern uint8_t gdt;
 
 // Reserve space for the stack
 static uint8_t stack[8192];
@@ -143,6 +144,22 @@ inline void enable_write_protection() {
   write_cr0(cr0);
 }
 
+/**
+ * Enable SSE/SSE2 for floating point operation. 
+ * Src: https://wiki.osdev.org/SSE
+ */ 
+void enable_sse() {
+  uint64_t cr0 = read_cr0();
+  cr0 &= ~(1 << 2);
+  cr0 |= (1 << 1);
+  write_cr0(cr0);
+
+  uint64_t cr4 = read_cr4();
+  cr4 |= (1 << 9);
+  cr4 |= (1 << 10);
+  write_cr4(cr4);
+}
+
 void invalidate_tlb(uintptr_t virtual_address) {
   __asm__("invlpg (%0)" ::"r"(virtual_address) : "memory");
 }
@@ -153,6 +170,9 @@ void setup_kernel(struct stivale2_struct* hdr) {
   struct_tag_setup(hdr);
 
   /* Printing anything using the build in terminal here */
+
+  // Enable SSE for hard floating point operations
+  enable_sse();
 
   // Init terminal
   graphic_init();
@@ -189,8 +209,8 @@ void _start(struct stivale2_struct* hdr) {
   // Set up kernel
   setup_kernel(hdr);
 
-  // // Load and run shell program
-  run_exe("shell");
+  // Run init to check stdlib
+  run_exe("init");
 
   // We're done, just hang...
   halt();

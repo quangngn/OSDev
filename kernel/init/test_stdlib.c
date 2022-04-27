@@ -1,5 +1,7 @@
 #include "test_stdlib.h"
 
+#include <trigonometry.h>
+
 // Test stdio.h
 void test_stdio() {
   printf("[stdio.h test]:\n");
@@ -167,4 +169,33 @@ void test_string() {
     perror("sring.h test failed!\n");
     return;
   }
+}
+
+void test_trig() {
+  int pass_count = 0;
+  float degs[] = {0.0,    50.3,   123.5,  204.1,  300.2,  370.0,
+                  484.4,  559.5,  659.4,  -10.0,  -123.4, -199.1,
+                  -298.7, -370.0, -484.4, -559.5, -659.4};
+  float target_sin[] = {0.00000,  0.76940, 0.83389,  -0.40833, -0.86427,
+                        0.17365,  0.82511, -0.33381, -0.87121, -0.17365,
+                        -0.83485, 0.32722, 0.87715,  -0.17365, -0.82511,
+                        0.33381,  0.87121};
+  float target_cos[] = {1.00000,  0.63877,  -0.55194, -0.91283, 0.50302,
+                        0.98481,  -0.56497, -0.94264, 0.49090,  0.98481,
+                        -0.55048, -0.94495, 0.48022,  0.98481,  -0.56497,
+                        -0.94264, 0.49090};
+
+  for (int i = 0; i < 17; i++) {
+    float sin_res = sin(degs[i]);
+    int res = (int)(sin_res * 10000);
+    int truth = (int)(target_sin[i] * 10000);
+    if (res == truth) {
+      pass_count += 1;
+    } else {
+      perror("Error at index %d, our res = %d and sample res = %d\n", i, res,
+             truth);
+    }
+  }
+
+  printf("Test pass: %d/17\n", pass_count);
 }
