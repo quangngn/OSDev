@@ -190,9 +190,7 @@ void _start(struct stivale2_struct* hdr) {
   setup_kernel(hdr);
 
   // // Load and run shell program
-  // run_exe("shell");
-
-  for (int i = 0; i < 10; i++) kprintf("2^%d = %d\n", i, pow(2, i));
+  run_exe("shell");
 
   // We're done, just hang...
   halt();
