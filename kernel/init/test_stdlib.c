@@ -176,26 +176,40 @@ void test_trig() {
   float degs[] = {0.0,    50.3,   123.5,  204.1,  300.2,  370.0,
                   484.4,  559.5,  659.4,  -10.0,  -123.4, -199.1,
                   -298.7, -370.0, -484.4, -559.5, -659.4};
-  float target_sin[] = {0.00000,  0.76940, 0.83389,  -0.40833, -0.86427,
-                        0.17365,  0.82511, -0.33381, -0.87121, -0.17365,
-                        -0.83485, 0.32722, 0.87715,  -0.17365, -0.82511,
-                        0.33381,  0.87121};
-  float target_cos[] = {1.00000,  0.63877,  -0.55194, -0.91283, 0.50302,
-                        0.98481,  -0.56497, -0.94264, 0.49090,  0.98481,
-                        -0.55048, -0.94495, 0.48022,  0.98481,  -0.56497,
-                        -0.94264, 0.49090};
+  float expected_sin[] = {0.00000,  0.76940, 0.83389,  -0.40833, -0.86427,
+                          0.17365,  0.82511, -0.33381, -0.87121, -0.17365,
+                          -0.83485, 0.32722, 0.87715,  -0.17365, -0.82511,
+                          0.33381,  0.87121};
+  float expected_cos[] = {1.00000,  0.63877,  -0.55194, -0.91283, 0.50302,
+                          0.98481,  -0.56497, -0.94264, 0.49090,  0.98481,
+                          -0.55048, -0.94495, 0.48022,  0.98481,  -0.56497,
+                          -0.94264, 0.49090};
 
+  // Test for sine
   for (int i = 0; i < 17; i++) {
     float sin_res = sin(degs[i]);
     int res = (int)(sin_res * 10000);
-    int truth = (int)(target_sin[i] * 10000);
-    if (res == truth) {
+    int exp_res = (int)(expected_sin[i] * 10000);
+    if (res == exp_res) {
       pass_count += 1;
     } else {
-      perror("Error at index %d, our res = %d and sample res = %d\n", i, res,
-             truth);
+      perror("Error at sin test %d; our res = %d vs expected res = %d\n", i,
+             res, exp_res);
     }
   }
 
-  printf("Test pass: %d/17\n", pass_count);
+  // Test for cosine:
+  for (int i = 0; i < 17; i++) {
+    float cos_res = cos(degs[i]);
+    int res = (int)(cos_res * 10000);
+    int exp_res = (int)(expected_cos[i] * 10000);
+    if (res == exp_res) {
+      pass_count += 1;
+    } else {
+      perror("Error at cos test %d; our res = %d vs expected res = %d\n", i,
+             res, exp_res);
+    }
+  }
+
+  printf("Test pass: %d/34\n", pass_count);
 }

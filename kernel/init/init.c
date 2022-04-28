@@ -12,16 +12,18 @@ void run_test() {
   test_trig();
 }
 
+void get_input() {
+  char* s = NULL;
+  size_t size = 0;
+  uint64_t stream = STD_IN;
+  printf("Please input something: \n");
+  getline(&s, &size, &stream);
+  printf("This is what you have typed: \n");
+  fprint_s(STD_OUT, s);
+}
+
 void _start() {
-  // char* s = NULL;
-  // size_t size = 0;
-  // uint64_t stream = STD_IN;
-  // printf("Please input something: \n");
-  // getline(&s, &size, &stream);
-
-  // printf("This is what you have typed: \n");
-  // fprint_s(STD_OUT, s);
-
+  // get_input();
   run_test();
 
   exit();
