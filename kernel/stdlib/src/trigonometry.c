@@ -4,7 +4,7 @@
 // For sine table, the values are from 0 to 360 degrees with 0.1 step.
 // For cosine table, the values are from 0 to 360 degrees with 0.1 step.
 // For tangent table, the values are from -90 to 90 degrees with 0.1 step.
-static const float sine_tbl[] = {
+static const float sin_tbl[] = {
     0.00000,  0.00175,  0.00349,  0.00524,  0.00698,  0.00873,  0.01047,
     0.01222,  0.01396,  0.01571,  0.01745,  0.01920,  0.02094,  0.02269,
     0.02443,  0.02618,  0.02792,  0.02967,  0.03141,  0.03316,  0.03490,
@@ -521,7 +521,7 @@ static const float sine_tbl[] = {
     -0.01571, -0.01396, -0.01222, -0.01047, -0.00873, -0.00698, -0.00524,
     -0.00349, -0.00175};
 
-static const float cosine_tbl[] = {
+static const float cos_tbl[] = {
     1.00000,  1.00000,  0.99999,  0.99999,  0.99998,  0.99996,  0.99995,
     0.99993,  0.99990,  0.99988,  0.99985,  0.99982,  0.99978,  0.99974,
     0.99970,  0.99966,  0.99961,  0.99956,  0.99951,  0.99945,  0.99939,
@@ -1038,16 +1038,12 @@ static const float cosine_tbl[] = {
     0.99988,  0.99990,  0.99993,  0.99995,  0.99996,  0.99998,  0.99999,
     0.99999,  1.00000};
 
-float normalized_to_0_360(float deg) {
-  return deg - (int)(deg / 360.0) * 360.0;
-}
-
 float sin(float deg) {
-  if (deg < 0) {
+  if (deg < 0.0) {
     return -sin(deg * -1.0);
   } else {
-    deg = normalized_to_0_360(deg);
-    return sine_tbl[(int)(deg * 10)];
+    deg = deg - (int)(deg / 360.0) * 360.0;
+    return sin_tbl[(int)(deg * 10)];
   }
 }
 
@@ -1055,8 +1051,8 @@ float cos(float deg) {
   if (deg < 0) {
     return cos(deg * -1.0);
   } else {
-    deg = normalized_to_0_360(deg);
-    return sine_tbl[(int)(deg * 10)];
+    deg = deg - (int)(deg / 360.0) * 360.0;
+    return cos_tbl[(int)(deg * 10)];
   }
 }
 
