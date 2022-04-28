@@ -37,7 +37,7 @@ ivec2_t ivec2_mult(ivec2_t v1, ivec2_t v2);
 // Multiple vector with scalar
 ivec2_t ivec2_scale(ivec2_t v1, int scale);
 // Dot-product of two vectors
-ivec2_t ivec2_dot_prod(ivec2_t v1, ivec2_t v2);
+int ivec2_dot_prod(ivec2_t v1, ivec2_t v2);
 // Square of the vector's magnitude
 int ivec2_mag_sq(ivec2_t v1);
 // Check if two vectors are equal (x1 == x2 && y1 == y2)
@@ -53,9 +53,9 @@ fvec2_t fvec2_ew_mult(fvec2_t v1, fvec2_t v2);
 // Multiple vector with scalar
 fvec2_t fvec2_scale(fvec2_t v1, float scale);
 // Dot-product of two vectors
-fvec2_t fvec2_dot_prod(fvec2_t v1, fvec2_t v2);
+float fvec2_dot_prod(fvec2_t v1, fvec2_t v2);
 // Square of the vector's magnitude
-int fvec2_mag_sq(fvec2_t v1);
+float fvec2_mag_sq(fvec2_t v1);
 // Check if two vectors are equal (x1 == x2 && y1 == y2)
 bool fvec2_equal(fvec2_t v1, fvec2_t v2);
 
