@@ -96,8 +96,8 @@ bool graphic_get_framebuffer_info(framebuffer_info_t* fb_info);
 /**
  * Copy src buffer to the kernel's framebuffer at coordinate (dst_x, dst_y).
  * This is similar to drawing a window onto the screen. We don't draw the
- * portion of the window outside of the screen. 
- * 
+ * portion of the window outside of the screen.
+ *
  * XY-coordinate has the origin on top-left corner.
  *
  * \param src Address of the source buffer.
@@ -105,7 +105,8 @@ bool graphic_get_framebuffer_info(framebuffer_info_t* fb_info);
  * \param dst_y The y coordinate on the destination buffer.
  * \param src_w The width of the source buffer.
  * \param src_h The height of the source buffer.
+ * \param flip Boolean whether we flip the source buffer.
  * \returns true if copy successfully and false otherwise.
  */
-bool framebuffer_cpy_handler(pixel_t* src, int64_t dst_x, int64_t dst_y,
-                             uint64_t src_w, uint64_t src_h);
+bool framebuffer_cpy_handler(pixel_t* src, int32_t dst_x, int32_t dst_y,
+                             uint32_t src_w, uint32_t src_h, bool flip);

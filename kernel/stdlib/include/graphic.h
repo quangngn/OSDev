@@ -4,14 +4,15 @@
 #include <stdint.h>
 
 #include "math.h"
+#include "mem.h"
 
 typedef struct {
-  uintptr_t addr;
+  pixel_t* addr;
+  color_t bg;
   uint32_t width;
   uint32_t height;
-  uint32_t byte_per_pixel;
-  uint32_t screen_x;
-  uint32_t screen_y;
+  int32_t screen_x;
+  int32_t screen_y;
 } window_t;
 
 typedef struct {
@@ -29,11 +30,32 @@ typedef struct {
   uint8_t unused;
 } framebuffer_info_t;
 
+typedef union {
+  fvec2_t p2d;
+  fvec4_t p4d;
+} point_t;
+
+typedef struct {
+  point_t p0;
+  point_t p1;
+} line_t;
+
+typedef struct {
+  line_t l0;
+  line_t l1;
+  line_t l2;
+} triangle_t;
+
 // System function to setup user's framebuffer for app's window
-bool graphic_get_framebuffer_info(framebuffer_info_t *fb_info);
-bool draw(window_t *window_t);
+bool graphic_get_framebuffer_info(framebuffer_info_t* fb_info);
+bool graphic_init_window(window_t* window, uint32_t width, uint32_t height,
+                         uint32_t screen_x, uint32_t screen_y, color_t bg);
+bool draw(window_t* window_t, bool flip);
 
-// Draw primitive to user's framebuffer
-bool draw_pixel(int x, int y, color_t color, bool flip);
-bool draw_pixel(int x, int y, color_t color, bool flip);
-
+// Draw primitive to user's framebuffer in 2D
+static inline void window_set(int x, int y, color_t color, window_t* window) {
+  window->addr[x + y * window->width] = color;
+}
+bool draw_pixel(const point_t* p, color_t color, window_t* window);
+bool draw_line(const line_t* l, color_t color, window_t* window_t);
+bool draw_triangle(const triangle_t* t, color_t, bool fill, window_t* window_t);

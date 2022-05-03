@@ -25,6 +25,7 @@
 // Mem location for stack and heap
 #define USER_STACK 0x70000000000
 #define USER_HEAP  0x90000000000
+#define USER_FRAMEBUFFER 0x100000000000
 
 #define KERNEL_HEAP 0xffff900000000000
 /******************************************************************************/

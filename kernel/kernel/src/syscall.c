@@ -82,7 +82,7 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1,
        * arg4: source's buffer height in pixel.
        */
       return framebuffer_cpy_handler((pixel_t*)arg0, (int)arg1, (int)arg2, arg3,
-                                     arg4);
+                                     arg4, (bool)arg5);
     default:
       return -1;
   }
@@ -201,6 +201,7 @@ int64_t write_handler(uint64_t f_descriptor, const char* str,
   return i;
 }
 
+/******************************************************************************/
 /**
  * Handler to invoke the execution of program with name exec_name.
  * \param exe_name Name of the executable to be exec.
@@ -214,6 +215,7 @@ bool exec_handler(const char* exe_name) { return run_exe(exe_name); }
  */
 bool exit_handler() { return run_exe("shell"); }
 
+/******************************************************************************/
 /**
  * Handler to handler query kernel's framebuffer information. The information is
  * written to a user's framebuffer information struct.
@@ -254,25 +256,26 @@ bool get_framebuffer_info_handler(framebuffer_info_t* fb_info) {
  * \param dst_y The y coordinate on the destination buffer.
  * \param src_w The width of the source buffer.
  * \param src_h The height of the source buffer.
+ * \param flip Boolean whether we flip the source buffer.
  * \returns true if copy successfully and false otherwise.
  */
-bool framebuffer_cpy_handler(pixel_t* src, int64_t dst_x, int64_t dst_y,
-                             uint64_t src_w, uint64_t src_h) {
+bool framebuffer_cpy_handler(pixel_t* src, int32_t dst_x, int32_t dst_y,
+                             uint32_t src_w, uint32_t src_h, bool flip) {
   // Check if the buffer is available
   if (framebuffer_struct_tag == NULL) return false;
 
   // Check for out of bound, in this case we do not need to print
-  int64_t dst_x_end = dst_x + src_w;
-  int64_t dst_y_end = dst_y + src_h;
+  int32_t dst_x_end = dst_x + src_w;
+  int32_t dst_y_end = dst_y + src_h;
   if (dst_x >= screen_w || dst_y >= screen_h || dst_x_end <= 0 ||
       dst_y_end <= 0)
     return true;
 
   // Compute location to start and end printing in src and end:
-  int64_t src_x = 0;
-  int64_t src_y = 0;
-  int64_t src_x_end = src_w;
-  int64_t src_y_end = src_h;
+  int32_t src_x = 0;
+  int32_t src_y = 0;
+  int32_t src_x_end = src_w;
+  int32_t src_y_end = src_h;
 
   // If printing destination starts out of left edge ...
   if (dst_x < 0) {
@@ -302,16 +305,34 @@ bool framebuffer_cpy_handler(pixel_t* src, int64_t dst_x, int64_t dst_y,
   if (src_x >= src_w || src_y >= src_h || src_x_end <= 0 || src_y_end <= 0)
     return true;
 
-  // Compute memory addressess for source and destination
-  src += src_w * src_y + src_x;  // the start of first printed line in src
-  pixel_t* dst = (pixel_t*)buffer_addr;
-  dst += screen_w * dst_y + dst_x;  // the start of first printed line in dst
-  int64_t copied_row_byte_size = (src_x_end - src_x) * sizeof(pixel_t);
+  // Print the source buffer depend on whether you would flip it
+  if (flip) {
+    src_y = src_h - src_y;
+    src_y_end = src_h - src_y_end;
 
-  for (int i = src_y; i < src_y_end; i++) {
-    kmemcpy(dst, src, copied_row_byte_size);
-    src += src_w;
-    dst += screen_w;
+    // Compute memory addressess for source and destination
+    src += src_w * src_y + src_x;  // the start of first printed line in src
+    pixel_t* dst = (pixel_t*)buffer_addr;
+    dst += screen_w * dst_y + dst_x;  // the start of first printed line in dst
+    size_t copied_row_byte_size = (src_x_end - src_x) * sizeof(pixel_t);
+
+    for (int i = src_y_end; i < src_y; i++) {
+      kmemcpy(dst, src, copied_row_byte_size);
+      src -= src_w;
+      dst += screen_w;
+    }
+  } else {
+    // Compute memory addressess for source and destination
+    src += src_w * src_y + src_x;  // the start of first printed line in src
+    pixel_t* dst = (pixel_t*)buffer_addr;
+    dst += screen_w * dst_y + dst_x;  // the start of first printed line in dst
+    size_t copied_row_byte_size = (src_x_end - src_x) * sizeof(pixel_t);
+
+    for (int i = src_y; i < src_y_end; i++) {
+      kmemcpy(dst, src, copied_row_byte_size);
+      src += src_w;
+      dst += screen_w;
+    }
   }
 
   return true;
