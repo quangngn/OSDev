@@ -30,7 +30,10 @@ typedef struct {
 } framebuffer_info_t;
 
 // System function to setup user's framebuffer for app's window
-bool graphic_init_window((window_t *window, framebuffer_info_t fb_info);
+bool graphic_get_framebuffer_info(framebuffer_info_t *fb_info);
 bool draw(window_t *window_t);
 
 // Draw primitive to user's framebuffer
+bool draw_pixel(int x, int y, color_t color, bool flip);
+bool draw_pixel(int x, int y, color_t color, bool flip);
+

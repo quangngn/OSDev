@@ -9,7 +9,7 @@ void run_test() {
   // Test functions for stdio.h and string.h
   // test_stdio();
   // test_string();
-  test_trig();
+  // test_trig();
 }
 
 void get_input() {
