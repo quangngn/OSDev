@@ -3,6 +3,10 @@
 // External functions for system call handler. syscall(uint64_t nr, ...) is
 // defined in asm/syscall.s
 extern int64_t syscall(uint64_t nr, ...);
+extern struct stivale2_struct_tag_framebuffer* framebuffer_struct_tag;
+extern size_t screen_w;
+extern size_t screen_h;
+extern uintptr_t buffer_addr;
 
 /**
  * syscall_handler(...) is being called inside syscall_entry(). Notice that
@@ -60,10 +64,25 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1,
     case SYSCALL_EXEC:
       /**
        * arg0: name of the executable to be exec.
-       */ 
-      return exec_handler((const char*) arg0);
+       */
+      return exec_handler((const char*)arg0);
     case SYSCALL_EXIT:
       return exit_handler();
+    case SYSCALL_GET_FRAMEBUFFER_INFO:
+      /**
+       * arg0: pointer to the framebuffer_info_t struct.
+       */
+      return get_framebuffer_info_handler((framebuffer_info_t*)arg0);
+    case SYSCALL_FRAMEBUFFER_CPY:
+      /**
+       * arg0: source address.
+       * arg1: x in pixel coordinate of dst buffer. (top-left origin)
+       * arg2: y in pixel coordinate of dst buffer. (top-left origin)
+       * arg3: source's buffer width in pixel.
+       * arg4: source's buffer height in pixel.
+       */
+      return framebuffer_cpy_handler((pixel_t*)arg0, (int)arg1, (int)arg2, arg3,
+                                     arg4);
     default:
       return -1;
   }
@@ -107,7 +126,7 @@ int64_t read_handler(uint64_t f_descriptor, char* buff, size_t read_size,
   if (f_descriptor != STD_IN || buff == NULL) {
     return -1;
   } else {
-    // Set input text color 
+    // Set input text color
     term_set_color(ARGB32_LIGHT_GREEN, ARGB32_BLACK);
 
     // Count the number of read characters so far.
@@ -162,7 +181,7 @@ int64_t write_handler(uint64_t f_descriptor, const char* str,
     return -1;
   }
 
-  // Set terminal color based on 
+  // Set terminal color based on
   color_t fg = (f_descriptor == STD_ERR) ? ARGB32_RED : ARGB32_WHITE;
   color_t bg = ARGB32_BLACK;
   term_set_color(fg, bg);
@@ -187,14 +206,113 @@ int64_t write_handler(uint64_t f_descriptor, const char* str,
  * \param exe_name Name of the executable to be exec.
  * \returns true if the function is executed successfully, else return falses.
  */
-bool exec_handler(const char* exe_name) {
-  return run_exe(exe_name);
-}
+bool exec_handler(const char* exe_name) { return run_exe(exe_name); }
 
 /**
  * Hanlder to exit the current process and invoke shell exec.
  * \returns true if the function is executed successfully, else return falses.
  */
-bool exit_handler() {
-  return run_exe("shell");
+bool exit_handler() { return run_exe("shell"); }
+
+/**
+ * Handler to handler query kernel's framebuffer information. The information is
+ * written to a user's framebuffer information struct.
+ * \param fb_info Pointer to the user's framebuffer information struct.
+ * \returns true if query successfully and false otherwise.
+ */
+bool get_framebuffer_info_handler(framebuffer_info_t* fb_info) {
+  if (framebuffer_struct_tag == NULL) return false;
+
+  // Set framebuffer information struct
+  fb_info->framebuffer_width = framebuffer_struct_tag->framebuffer_width;
+  fb_info->framebuffer_height = framebuffer_struct_tag->framebuffer_height;
+
+  fb_info->framebuffer_pitch = framebuffer_struct_tag->framebuffer_pitch;
+  fb_info->framebuffer_bpp = framebuffer_struct_tag->framebuffer_bpp;
+  fb_info->memory_model = framebuffer_struct_tag->memory_model;
+  // Red
+  fb_info->red_mask_size = framebuffer_struct_tag->red_mask_size;
+  fb_info->red_mask_shift = framebuffer_struct_tag->red_mask_shift;
+  // Green
+  fb_info->green_mask_size = framebuffer_struct_tag->green_mask_size;
+  fb_info->green_mask_shift = framebuffer_struct_tag->green_mask_shift;
+  // Blue
+  fb_info->blue_mask_size = framebuffer_struct_tag->blue_mask_size;
+  fb_info->blue_mask_shift = framebuffer_struct_tag->blue_mask_shift;
+  return true;
+}
+
+/**
+ * Copy src buffer to the kernel's framebuffer at coordinate (dst_x, dst_y).
+ * This is similar to drawing a window onto the screen. We don't draw the
+ * portion of the window outside of the screen.
+ *
+ * XY-coordinate has the origin on top-left corner.
+ *
+ * \param src Address of the source buffer.
+ * \param dst_x The x coordinate on the destination buffer.
+ * \param dst_y The y coordinate on the destination buffer.
+ * \param src_w The width of the source buffer.
+ * \param src_h The height of the source buffer.
+ * \returns true if copy successfully and false otherwise.
+ */
+bool framebuffer_cpy_handler(pixel_t* src, int64_t dst_x, int64_t dst_y,
+                             uint64_t src_w, uint64_t src_h) {
+  // Check if the buffer is available
+  if (framebuffer_struct_tag == NULL) return false;
+
+  // Check for out of bound, in this case we do not need to print
+  int64_t dst_x_end = dst_x + src_w;
+  int64_t dst_y_end = dst_y + src_h;
+  if (dst_x >= screen_w || dst_y >= screen_h || dst_x_end <= 0 ||
+      dst_y_end <= 0)
+    return true;
+
+  // Compute location to start and end printing in src and end:
+  int64_t src_x = 0;
+  int64_t src_y = 0;
+  int64_t src_x_end = src_w;
+  int64_t src_y_end = src_h;
+
+  // If printing destination starts out of left edge ...
+  if (dst_x < 0) {
+    src_x = -dst_x;
+    dst_x = 0;
+  }
+
+  // If printing destination starts out of top edge ...
+  if (dst_y < 0) {
+    src_y = -dst_y;
+    dst_y = 0;
+  }
+
+  // If printing destination ends out of right edge ...
+  if (dst_x_end > screen_w) {
+    src_x_end = src_w - (dst_x_end - screen_w);
+    dst_x_end = screen_w;
+  }
+
+  // If printing destination ends out of bottom edge ...
+  if (dst_y_end > screen_h) {
+    src_y_end = src_h - (dst_y_end - screen_h);
+    dst_y_end = screen_h;
+  }
+  
+  // Check if offset in source is still within bound
+  if (src_x >= src_w || src_y >= src_h || src_x_end <= 0 || src_y_end <= 0)
+    return true;
+
+  // Compute memory addressess for source and destination
+  src += src_w * src_y + src_x;  // the start of first printed line in src
+  pixel_t* dst = (pixel_t*)buffer_addr;
+  dst += screen_w * dst_y + dst_x;  // the start of first printed line in dst
+  int64_t copied_row_byte_size = (src_x_end - src_x) * sizeof(pixel_t);
+
+  for (int i = src_y; i < src_y_end; i++) {
+    kmemcpy(dst, src, copied_row_byte_size);
+    src += src_w;
+    dst += screen_w;
+  }
+
+  return true;
 }

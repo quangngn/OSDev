@@ -1,13 +1,16 @@
 #pragma once
 
+#include <graphic.h>
 #include <stdint.h>
 #include <system.h>
 
 #include "executable.h"
 #include "keyboard.h"
+#include "kgraphic.h"
 #include "kprint.h"
 #include "page.h"
 #include "port.h"
+#include "stivale2.h"
 #include "term.h"
 
 /**
@@ -81,3 +84,28 @@ bool exec_handler(const char* exe_name);
  * \returns true if the function is executed successfully, else return falses.
  */
 bool exit_handler();
+
+/**
+ * Handler to handler query kernel's framebuffer information. The information is
+ * written to a user's framebuffer information struct.
+ * \param fb_info Pointer to the user's framebuffer information struct.
+ * \returns true if query successfully and false otherwise.
+ */
+bool get_framebuffer_info_handler(framebuffer_info_t* fb_info);
+
+/**
+ * Copy src buffer to the kernel's framebuffer at coordinate (dst_x, dst_y).
+ * This is similar to drawing a window onto the screen. We don't draw the
+ * portion of the window outside of the screen. 
+ * 
+ * XY-coordinate has the origin on top-left corner.
+ *
+ * \param src Address of the source buffer.
+ * \param dst_x The x coordinate on the destination buffer.
+ * \param dst_y The y coordinate on the destination buffer.
+ * \param src_w The width of the source buffer.
+ * \param src_h The height of the source buffer.
+ * \returns true if copy successfully and false otherwise.
+ */
+bool framebuffer_cpy_handler(pixel_t* src, int64_t dst_x, int64_t dst_y,
+                             uint64_t src_w, uint64_t src_h);

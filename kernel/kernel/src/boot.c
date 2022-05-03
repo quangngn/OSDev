@@ -175,7 +175,7 @@ void setup_kernel(struct stivale2_struct* hdr) {
   enable_sse();
 
   // Init terminal
-  graphic_init();
+  kgraphic_init();
   term_init();
   kset_term_write((term_write_t)term_puts);
 

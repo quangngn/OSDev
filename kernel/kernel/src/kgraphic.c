@@ -13,7 +13,7 @@ uintptr_t buffer_addr = 0;
  * framebuffer. The function also initialize psf font. 
  * \returns true if init successfully else returns false.
  */
-bool graphic_init() {
+bool kgraphic_init() {
   if (framebuffer_struct_tag == NULL) return false;
 
   // Init screen information
@@ -30,7 +30,7 @@ bool graphic_init() {
 /**
  * Set the framebuffer value to 0
  */ 
-void graphic_clear_buffer() {
+void kgraphic_clear_buffer() {
   uint64_t* cursor = (uint64_t*)buffer_addr;
   uint64_t* buffer_end_addr =
       (uint64_t*)(buffer_addr + (screen_w * screen_h * sizeof(pixel_t)));

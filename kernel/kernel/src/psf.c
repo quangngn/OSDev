@@ -7,7 +7,7 @@ extern struct stivale2_struct_tag_framebuffer* framebuffer_struct_tag;
 extern char _binary_fonts_font_psf_start;
 extern char _binary_fonts_font_psf_end;
 
-// Defined in graphic.c
+// Defined in kgraphic.c
 extern size_t screen_w;
 extern size_t screen_h;
 extern uintptr_t buffer_addr;

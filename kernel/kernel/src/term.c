@@ -53,7 +53,7 @@ void term_reset() {
 // Clear the terminal
 void term_clear() {
   // Clear the framebuffer
-  graphic_clear_buffer();
+  kgraphic_clear_buffer();
 }
 
 // Draw psf glyph of character c to the terminal
