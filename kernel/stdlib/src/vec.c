@@ -129,25 +129,21 @@ bool fmat2x2_equal(fmat2x2_t m1, fmat2x2_t m2) {
 
 /******************************************************************************/
 // Vec4 int
-
 ivec4_t ivec4_add(ivec4_t v1, ivec4_t v2) {
   ivec4_t res = {
       .x = v1.x + v2.x, .y = v1.y + v2.y, .z = v1.z + v2.z, .w = v1.w + v2.w};
-
   return res;
 }
 
 ivec4_t ivec4_sub(ivec4_t v1, ivec4_t v2) {
   ivec4_t res = {
       .x = v1.x - v2.x, .y = v1.y - v2.y, .z = v1.z - v2.z, .w = v1.w - v2.w};
-
   return res;
 }
 
 ivec4_t ivec4_mult(ivec4_t v1, ivec4_t v2) {
   ivec4_t res = {
       .x = v1.x * v2.x, .y = v1.y * v2.y, .z = v1.z * v2.z, .w = v1.w * v2.w};
-
   return res;
 }
 
@@ -156,7 +152,6 @@ ivec4_t ivec4_scale(ivec4_t v1, int scale) {
                  .y = v1.y * scale,
                  .z = v1.z * scale,
                  .w = v1.w * scale};
-
   return res;
 }
 
@@ -172,24 +167,23 @@ bool ivec4_equal(ivec4_t v1, ivec4_t v2) {
   return v1.x == v2.x && v1.y == v2.y && v1.z == v2.z && v1.w == v2.w;
 }
 
+/******************************************************************************/
+// Vec4 float
 fvec4_t fvec4_add(fvec4_t v1, fvec4_t v2) {
   fvec4_t res = {
       .x = v1.x + v2.x, .y = v1.y + v2.y, .z = v1.z + v2.z, .w = v1.w + v2.w};
-
   return res;
 }
 
 fvec4_t fvec4_sub(fvec4_t v1, fvec4_t v2) {
   fvec4_t res = {
       .x = v1.x - v2.x, .y = v1.y - v2.y, .z = v1.z - v2.z, .w = v1.w - v2.w};
-
   return res;
 }
 
 fvec4_t fvec4_ew_mult(fvec4_t v1, fvec4_t v2) {
   fvec4_t res = {
       .x = v1.x * v2.x, .y = v1.y * v2.y, .z = v1.z * v2.z, .w = v1.w * v2.w};
-
   return res;
 }
 
@@ -198,7 +192,6 @@ fvec4_t fvec4_scale(fvec4_t v1, float scale) {
                  .y = v1.y * scale,
                  .z = v1.z * scale,
                  .w = v1.w * scale};
-
   return res;
 }
 
@@ -214,6 +207,8 @@ bool fvec4_equal(fvec4_t v1, fvec4_t v2) {
   return v1.x == v2.x && v1.y == v2.y && v1.z == v2.z && v1.w == v2.w;
 }
 
+/******************************************************************************/
+// Mat4x4 int
 imat4x4_t imat4x4_add(imat4x4_t m1, imat4x4_t m2) {
   imat4x4_t res = {.c1 = {.x = m1.c1.x + m2.c1.x,
                           .y = m1.c1.y + m2.c1.y,
@@ -283,6 +278,7 @@ imat4x4_t imat4x4_matmul(imat4x4_t m1, imat4x4_t m2) {
                                m1.c3.z * m2.c1.z + m1.c4.z * m2.c1.w,
                           .w = m1.c1.w * m2.c1.x + m1.c2.w * m2.c1.y +
                                m1.c3.w * m2.c1.z + m1.c4.w * m2.c1.w},
+
                    .c2 = {.x = m1.c1.x * m2.c2.x + m1.c2.x * m2.c2.y +
                                m1.c3.x * m2.c2.z + m1.c4.x * m2.c2.w,
                           .y = m1.c1.y * m2.c2.x + m1.c2.y * m2.c2.y +
@@ -291,6 +287,7 @@ imat4x4_t imat4x4_matmul(imat4x4_t m1, imat4x4_t m2) {
                                m1.c3.z * m2.c2.z + m1.c4.z * m2.c2.w,
                           .w = m1.c1.w * m2.c2.x + m1.c2.w * m2.c2.y +
                                m1.c3.w * m2.c2.z + m1.c4.w * m2.c2.w},
+
                    .c3 = {.x = m1.c1.x * m2.c3.x + m1.c2.x * m2.c3.y +
                                m1.c3.x * m2.c3.z + m1.c4.x * m2.c3.w,
                           .y = m1.c1.y * m2.c3.x + m1.c2.y * m2.c3.y +
@@ -299,6 +296,7 @@ imat4x4_t imat4x4_matmul(imat4x4_t m1, imat4x4_t m2) {
                                m1.c3.z * m2.c3.z + m1.c4.z * m2.c3.w,
                           .w = m1.c1.w * m2.c3.x + m1.c2.w * m2.c3.w +
                                m1.c3.w * m2.c3.z + m1.c4.w * m2.c3.w},
+
                    .c4 = {.x = m1.c1.x * m2.c4.x + m1.c2.x * m2.c4.y +
                                m1.c3.x * m2.c4.z + m1.c4.x * m2.c4.w,
                           .y = m1.c1.y * m2.c4.x + m1.c2.y * m2.c4.y +
@@ -307,7 +305,6 @@ imat4x4_t imat4x4_matmul(imat4x4_t m1, imat4x4_t m2) {
                                m1.c3.z * m2.c4.z + m1.c4.z * m2.c4.w,
                           .w = m1.c1.w * m2.c4.x + m1.c2.w * m2.c4.y +
                                m1.c3.w * m2.c4.z + m1.c4.w * m2.c4.w}};
-
   return res;
 }
 
@@ -316,6 +313,8 @@ bool imat4x4_equal(imat4x4_t m1, imat4x4_t m2) {
          ivec4_equal(m1.c3, m2.c3) && ivec4_equal(m1.c4, m2.c4);
 }
 
+/******************************************************************************/
+// Mat4x4 float
 fmat4x4_t fmat4x4_add(fmat4x4_t m1, fmat4x4_t m2) {
   fmat4x4_t res = {.c1 = {.x = m1.c1.x + m2.c1.x,
                           .y = m1.c1.y + m2.c1.y,
@@ -336,7 +335,7 @@ fmat4x4_t fmat4x4_add(fmat4x4_t m1, fmat4x4_t m2) {
   return res;
 }
 
-fmat4x4_t imat4x4_sub(fmat4x4_t m1, fmat4x4_t m2) {
+fmat4x4_t fmat4x4_sub(fmat4x4_t m1, fmat4x4_t m2) {
   fmat4x4_t res = {.c1 = {.x = m1.c1.x - m2.c1.x,
                           .y = m1.c1.y - m2.c1.y,
                           .z = m1.c1.z - m2.c1.z,
@@ -356,7 +355,7 @@ fmat4x4_t imat4x4_sub(fmat4x4_t m1, fmat4x4_t m2) {
   return res;
 }
 
-fmat4x4_t imat4x4_scale(fmat4x4_t m1, int scale) {
+fmat4x4_t fmat4x4_scale(fmat4x4_t m1, float scale) {
   fmat4x4_t res = {.c1 = {.x = m1.c1.x * scale,
                           .y = m1.c1.y * scale,
                           .z = m1.c1.z * scale,
@@ -409,7 +408,6 @@ fmat4x4_t fmat4x4_matmul(fmat4x4_t m1, fmat4x4_t m2) {
                                m1.c3.z * m2.c4.z + m1.c4.z * m2.c4.w,
                           .w = m1.c1.w * m2.c4.x + m1.c2.w * m2.c4.y +
                                m1.c3.w * m2.c4.z + m1.c4.w * m2.c4.w}};
-
   return res;
 }
 
