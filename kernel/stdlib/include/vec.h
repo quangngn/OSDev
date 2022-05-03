@@ -37,9 +37,9 @@ bool ivec2_mult(ivec2_t *v1, ivec2_t *v2, ivec2_t *res);
 // Multiple vector with scalar
 bool ivec2_scale(ivec2_t *v1, int scale, ivec2_t *res);
 // Dot-product of two vectors
-int ivec2_dot_prod(ivec2_t *v1, ivec2_t *v2);
+bool ivec2_dot_prod(ivec2_t *v1, ivec2_t *v2, int *ans);
 // Square of the vector's magnitude
-int ivec2_mag_sq(ivec2_t *v1);
+bool ivec2_mag_sq(ivec2_t *v1, int *ans);
 // Check if two vectors are equal (x1 == x2 && y1 == y2)
 bool ivec2_equal(ivec2_t *v1, ivec2_t *v2);
 
@@ -53,9 +53,9 @@ bool fvec2_ew_mult(fvec2_t *v1, fvec2_t *v2, fvec2_t *res);
 // Multiple vector with scalar
 bool fvec2_scale(fvec2_t *v1, float scale, fvec2_t *res);
 // Dot-product of two vectors
-float fvec2_dot_prod(fvec2_t *v1, fvec2_t *v2);
+bool fvec2_dot_prod(fvec2_t *v1, fvec2_t *v2, float *ans);
 // Square of the vector's magnitude
-float fvec2_mag_sq(fvec2_t *v1);
+bool fvec2_mag_sq(fvec2_t *v1, float *ans);
 // Check if two vectors are equal (x1 == x2 && y1 == y2)
 bool fvec2_equal(fvec2_t *v1, fvec2_t *v2);
 
@@ -67,7 +67,7 @@ bool imat2x2_sub(imat2x2_t *m1, imat2x2_t *m2, imat2x2_t *res);
 // Multiply matrix with scale
 bool imat2x2_scale(imat2x2_t *m1, int scale, imat2x2_t *res);
 // Multiply two matrices
-bool imat2x2_matmul(imat2x2_t *m1, int scale, imat2x2_t *res);
+bool imat2x2_matmul(imat2x2_t *m1, imat2x2_t *m2, imat2x2_t *res);
 // Check if two matrices are equal
 bool imat2x2_equal(imat2x2_t *m1, imat2x2_t *m2);
 
@@ -76,7 +76,7 @@ bool fmat2x2_add(fmat2x2_t *m1, fmat2x2_t *m2, fmat2x2_t *res);
 // Elementwise subtract two matrices
 bool fmat2x2_sub(fmat2x2_t *m1, fmat2x2_t *m2, fmat2x2_t *res);
 // Multiply matrix with scale
-bool fmat2x2_scale(fmat2x2_t *m1, int scale, fmat2x2_t *res);
+bool fmat2x2_scale(fmat2x2_t *m1, float scale, fmat2x2_t *res);
 // Multiply two matrices
 bool fmat2x2_matmul(fmat2x2_t *m1, fmat2x2_t *m2, fmat2x2_t *res);
 // Check if two matrices are equal
