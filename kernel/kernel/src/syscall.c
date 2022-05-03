@@ -297,7 +297,7 @@ bool framebuffer_cpy_handler(pixel_t* src, int64_t dst_x, int64_t dst_y,
     src_y_end = src_h - (dst_y_end - screen_h);
     dst_y_end = screen_h;
   }
-  
+
   // Check if offset in source is still within bound
   if (src_x >= src_w || src_y >= src_h || src_x_end <= 0 || src_y_end <= 0)
     return true;

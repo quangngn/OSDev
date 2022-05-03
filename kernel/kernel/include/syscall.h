@@ -91,7 +91,7 @@ bool exit_handler();
  * \param fb_info Pointer to the user's framebuffer information struct.
  * \returns true if query successfully and false otherwise.
  */
-bool get_framebuffer_info_handler(framebuffer_info_t* fb_info);
+bool graphic_get_framebuffer_info(framebuffer_info_t* fb_info);
 
 /**
  * Copy src buffer to the kernel's framebuffer at coordinate (dst_x, dst_y).

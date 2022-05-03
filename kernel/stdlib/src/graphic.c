@@ -1,9 +1,18 @@
 #include "graphic.h"
 
+// External functions for system call handler. syscall(uint64_t nr, ...) is
+// defined in asm/syscall.s
+extern int64_t syscall(uint64_t nr, ...);
+
 // System function to setup user's framebuffer for app's window
-bool graphic_init_window(window_t *window, uint32_t w, uint32_t height,
-                                 uint32_t byte_per_pixel) {
-  return true;
+bool graphic_get_framebuffer_info(framebuffer_info_t *fb_info) {
+  if (fb_info == NULL) return false;
+  return (bool)syscall(SYSCALL_GET_FRAMEBUFFER_INFO, fb_info);
 }
 
-void graphic_draw(window_t *window) {};
+bool graphic_draw(window_t *window) {
+  if (window == NULL) return false;
+  return (bool)syscall(SYSCALL_FRAMEBUFFER_CPY, window->addr, window->screen_x,
+                       window->screen_y, window->width, window->height);
+}
+
