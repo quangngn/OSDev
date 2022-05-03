@@ -491,8 +491,7 @@ bool imat4x4_equal(imat4x4_t *m1, imat4x4_t *m2) {
 
   return ivec4_equal(&(m1->c1), &(m2->c1)) &&
          ivec4_equal(&(m1->c2), &(m2->c2)) &&
-         ivec4_equal(&(m1->c3), &(m2->c3)) && 
-         ivec4_equal(&(m1->c4), &(m2->c4));
+         ivec4_equal(&(m1->c3), &(m2->c3)) && ivec4_equal(&(m1->c4), &(m2->c4));
 }
 
 /******************************************************************************/
@@ -622,17 +621,20 @@ bool fmat4x4_equal(fmat4x4_t *m1, fmat4x4_t *m2) {
 
   return fvec4_equal(&(m1->c1), &(m2->c1)) &&
          fvec4_equal(&(m1->c2), &(m2->c2)) &&
-         fvec4_equal(&(m1->c3), &(m2->c3)) && 
-         fvec4_equal(&(m1->c4), &(m2->c4));
+         fvec4_equal(&(m1->c3), &(m2->c3)) && fvec4_equal(&(m1->c4), &(m2->c4));
 }
 
-bool fmat4x1_matmul(fmat4x4_t *m1, fmat4x1_t *m2, fmat4x1_t *res){
+bool fmat4x1_matmul(fmat4x4_t *m1, fmat4x1_t *m2, fmat4x1_t *res) {
   if (m1 == NULL || m2 == NULL || res == NULL) return false;
-  
-  res->c1.x = m1->c1.x * m2->c1.x + m1->c2.x * m2->c1.y + m1->c3.x * m2->c1.z + m1->c4.x * m2->c1.w;
-  res->c1.y = m1->c1.y * m2->c1.x + m1->c2.y * m2->c1.y + m1->c3.y * m2->c1.z + m1->c4.y * m2->c1.w;
-  res->c1.z = m1->c1.z * m2->c1.x + m1->c2.z * m2->c1.y + m1->c3.z * m2->c1.z + m1->c4.z * m2->c1.w;
-  res->c1.w = m1->c1.w * m2->c1.x + m1->c2.w * m2->c1.y + m1->c3.w * m2->c1.z + m1->c4.w * m2->c1.w;
+
+  res->c1.x = m1->c1.x * m2->c1.x + m1->c2.x * m2->c1.y + m1->c3.x * m2->c1.z +
+              m1->c4.x * m2->c1.w;
+  res->c1.y = m1->c1.y * m2->c1.x + m1->c2.y * m2->c1.y + m1->c3.y * m2->c1.z +
+              m1->c4.y * m2->c1.w;
+  res->c1.z = m1->c1.z * m2->c1.x + m1->c2.z * m2->c1.y + m1->c3.z * m2->c1.z +
+              m1->c4.z * m2->c1.w;
+  res->c1.w = m1->c1.w * m2->c1.x + m1->c2.w * m2->c1.y + m1->c3.w * m2->c1.z +
+              m1->c4.w * m2->c1.w;
 
   return true;
 }
