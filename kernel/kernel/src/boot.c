@@ -210,7 +210,7 @@ void _start(struct stivale2_struct* hdr) {
   setup_kernel(hdr);
 
   // Run init to check stdlib
-  run_exe("init");
+  run_exe("graphic_test");
 
   // We're done, just hang...
   halt();

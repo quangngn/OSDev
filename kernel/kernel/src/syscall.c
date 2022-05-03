@@ -81,8 +81,8 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1,
        * arg3: source's buffer width in pixel.
        * arg4: source's buffer height in pixel.
        */
-      return framebuffer_cpy_handler((pixel_t*)arg0, (int)arg1, (int)arg2, arg3,
-                                     arg4, (bool)arg5);
+      return framebuffer_cpy_handler((pixel_t*)arg0, (int)arg1, (int)arg2,
+                                     (int)arg3, (int)arg4, (bool)arg5);
     default:
       return -1;
   }
@@ -259,23 +259,23 @@ bool get_framebuffer_info_handler(framebuffer_info_t* fb_info) {
  * \param flip Boolean whether we flip the source buffer.
  * \returns true if copy successfully and false otherwise.
  */
-bool framebuffer_cpy_handler(pixel_t* src, int32_t dst_x, int32_t dst_y,
-                             uint32_t src_w, uint32_t src_h, bool flip) {
+bool framebuffer_cpy_handler(pixel_t* src, int dst_x, int dst_y, int src_w,
+                             int src_h, bool flip) {
   // Check if the buffer is available
   if (framebuffer_struct_tag == NULL) return false;
 
   // Check for out of bound, in this case we do not need to print
-  int32_t dst_x_end = dst_x + src_w;
-  int32_t dst_y_end = dst_y + src_h;
+  int dst_x_end = dst_x + src_w;
+  int dst_y_end = dst_y + src_h;
   if (dst_x >= screen_w || dst_y >= screen_h || dst_x_end <= 0 ||
       dst_y_end <= 0)
     return true;
 
   // Compute location to start and end printing in src and end:
-  int32_t src_x = 0;
-  int32_t src_y = 0;
-  int32_t src_x_end = src_w;
-  int32_t src_y_end = src_h;
+  int src_x = 0;
+  int src_y = 0;
+  int src_x_end = src_w;
+  int src_y_end = src_h;
 
   // If printing destination starts out of left edge ...
   if (dst_x < 0) {

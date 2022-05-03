@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include "test_stdlib.h"
 
 void run_test() {
   // Test functions for stdio.h and string.h
