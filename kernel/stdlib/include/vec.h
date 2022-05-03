@@ -37,9 +37,9 @@ bool ivec2_mult(ivec2_t *v1, ivec2_t *v2, ivec2_t *res);
 // Multiple vector with scalar
 bool ivec2_scale(ivec2_t *v1, int scale, ivec2_t *res);
 // Dot-product of two vectors
-bool ivec2_dot_prod(ivec2_t *v1, ivec2_t *v2, int *ans);
+bool ivec2_dot_prod(ivec2_t *v1, ivec2_t *v2, int *res);
 // Square of the vector's magnitude
-bool ivec2_mag_sq(ivec2_t *v1, int *ans);
+bool ivec2_mag_sq(ivec2_t *v1, int *res);
 // Check if two vectors are equal (x1 == x2 && y1 == y2)
 bool ivec2_equal(ivec2_t *v1, ivec2_t *v2);
 
@@ -53,9 +53,9 @@ bool fvec2_ew_mult(fvec2_t *v1, fvec2_t *v2, fvec2_t *res);
 // Multiple vector with scalar
 bool fvec2_scale(fvec2_t *v1, float scale, fvec2_t *res);
 // Dot-product of two vectors
-bool fvec2_dot_prod(fvec2_t *v1, fvec2_t *v2, float *ans);
+bool fvec2_dot_prod(fvec2_t *v1, fvec2_t *v2, float *res);
 // Square of the vector's magnitude
-bool fvec2_mag_sq(fvec2_t *v1, float *ans);
+bool fvec2_mag_sq(fvec2_t *v1, float *res);
 // Check if two vectors are equal (x1 == x2 && y1 == y2)
 bool fvec2_equal(fvec2_t *v1, fvec2_t *v2);
 
@@ -122,11 +122,11 @@ bool ivec4_sub(ivec4_t *v1, ivec4_t *v2, ivec4_t *res);
 // Elementwise multiply vectors
 bool ivec4_mult(ivec4_t *v1, ivec4_t *v2, ivec4_t *res);
 // Multiple vector with scalar
-bool ivec4_scale(ivec4_t v1, int scale, ivec4_t *res);
+bool ivec4_scale(ivec4_t *v1, int scale, ivec4_t *res);
 // Dot-product of two vectors
-int ivec4_dot_prod(ivec4_t *v1, ivec4_t *v2);
+int ivec4_dot_prod(ivec4_t *v1, ivec4_t *v2, int *res);
 // Square of the vector's magnitude
-int ivec4_mag_sq(ivec4_t *v1);
+int ivec4_mag_sq(ivec4_t *v1, int *res);
 // Check if two vectors are equal (x1 == x2 && y1 == y2 && z1 == z2 && w1 == w2)
 bool ivec4_equal(ivec4_t *v1, ivec4_t *v2);
 
@@ -140,9 +140,9 @@ bool fvec4_ew_mult(fvec4_t *v1, fvec4_t *v2, fvec4_t *res);
 // Multiple vector with scalar
 bool fvec4_scale(fvec4_t *v1, float scale, fvec4_t *res);
 // Dot-product of two vectors
-float fvec4_dot_prod(fvec4_t *v1, fvec4_t *v2);
+float fvec4_dot_prod(fvec4_t *v1, fvec4_t *v2, float *res);
 // Square of the vector's magnitude
-int fvec4_mag_sq(fvec4_t *v1);
+float fvec4_mag_sq(fvec4_t *v1, float *res);
 // Check if two vectors are equal (x1 == x2 && y1 == y2 && z1 == z2 && w1 == w2)
 bool fvec4_equal(fvec4_t *v1, fvec4_t *v2);
 
@@ -165,6 +165,6 @@ bool fmat4x4_sub(fmat4x4_t *m1, fmat4x4_t *m2, fmat4x4_t *res);
 // Multiply two matrices
 bool fmat4x4_matmul(fmat4x4_t *m1, fmat4x4_t *m2, fmat4x4_t *res);
 // Multiply matrix with scale
-bool fmat4x4_scale(fmat4x4_t *m1, float scale);
+bool fmat4x4_scale(fmat4x4_t *m1, float scale, fmat4x4_t *res);
 // Check if two matrices are equal
 bool fmat4x4_equal(fmat4x4_t *m1, fmat4x4_t *m2);
