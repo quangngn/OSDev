@@ -91,9 +91,11 @@ void running_triangle() {
 }
 
 void _start() {
-  window_init(&window, 720, 720, 0, 0, ARGB32_MAGENTA);
+  window_init(&window, 720, 720, -200, -200, ARGB32_MAGENTA);
+  draw_triangle_pattern();
+  graphic_draw(&window, true);
 
-  running_triangle();
+  // running_triangle();
 
   for (;;) {
   }

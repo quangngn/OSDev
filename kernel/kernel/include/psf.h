@@ -18,8 +18,8 @@ typedef struct psf {
   uint32_t flags;         /* 0 if there's no unicode table */
   uint32_t numglyph;      /* number of glyphs */
   uint32_t bytesperglyph; /* size of each glyph */
-  uint32_t height;        /* height in pixels */
-  uint32_t width;         /* width in pixels */
+  int32_t height;         /* height in pixels */
+  int32_t width;          /* width in pixels */
 } psf_t;
 
 /**
@@ -41,5 +41,5 @@ bool psf_init();
  * \param bg: Background color of the character.
  * \returns true if the printing is within bound, else returns false.
  */
-bool psf_put_char(char c, size_t pixel_row, size_t pixel_col, color_t fg,
+bool psf_put_char(char c, int32_t pixel_row, int32_t pixel_col, color_t fg,
                   color_t bg);

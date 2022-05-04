@@ -4,8 +4,8 @@
 
 extern struct stivale2_struct_tag_framebuffer* framebuffer_struct_tag;
 
-size_t screen_w = 0;
-size_t screen_h = 0;
+int32_t screen_w = 0;
+int32_t screen_h = 0;
 uintptr_t buffer_addr = 0;
 
 /**

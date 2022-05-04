@@ -8,21 +8,21 @@ extern char _binary_fonts_font_psf_start;
 extern char _binary_fonts_font_psf_end;
 
 // Defined in kgraphic.c
-extern size_t screen_w;
-extern size_t screen_h;
+extern int32_t screen_w;
+extern int32_t screen_h;
 extern uintptr_t buffer_addr;
 
 // Global variables related to the loaded psf font
-uint32_t psf_font_w = 0;
-uint32_t psf_font_h = 0;
+int32_t psf_font_w = 0;
+int32_t psf_font_h = 0;
 uint32_t psf_glyph_sz = 0;
 uint32_t psf_nglyph = 0;
 char* psf_glyph_start = NULL;
 
 // Number of rows and columns of characters that can be fited within the given
 // frame buffer.
-size_t term_w = 0;
-size_t term_h = 0;
+int32_t term_w = 0;
+int32_t term_h = 0;
 
 /**
  * Init the information regarding the current psf font.
@@ -59,11 +59,11 @@ bool psf_init() {
  *
  * \returns true if the printing is within bound, else returns false.
  */
-bool psf_put_char(char c, size_t pixel_row, size_t pixel_col, color_t fg,
+bool psf_put_char(char c, int32_t pixel_row, int32_t pixel_col, color_t fg,
                   color_t bg) {
   // Check for out of bound
   if (pixel_row >= screen_h - psf_font_h ||
-      pixel_col >= screen_w - psf_font_w || c >= psf_nglyph) {
+      pixel_col >= screen_w - psf_font_w || c < 0 || c >= psf_nglyph) {
     return false;
   }
 

@@ -108,5 +108,5 @@ bool get_framebuffer_info_handler(framebuffer_info_t* fb_info);
  * \param flip Boolean whether we flip the source buffer.
  * \returns true if copy successfully and false otherwise.
  */
-bool framebuffer_cpy_handler(pixel_t* src, int dst_x, int dst_y,
-                             int src_w, int src_h, bool flip);
+bool framebuffer_cpy_handler(pixel_t* src, int32_t dst_x, int32_t dst_y,
+                             int32_t src_w, int32_t src_h, bool flip);

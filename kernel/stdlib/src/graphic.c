@@ -26,8 +26,9 @@ void graphic_draw(window_t *window, bool flip) {
   if (window == NULL) return;
 
   // Make draw call
-  syscall(SYSCALL_FRAMEBUFFER_CPY, window->addr, window->screen_x,
-          window->screen_y, window->width, window->height, flip);
+  syscall(SYSCALL_FRAMEBUFFER_CPY, window->addr, (int64_t)window->screen_x,
+          (int64_t)window->screen_y, (int64_t)window->width,
+          (int64_t)window->height, flip);
   window_clear(window);
 }
 

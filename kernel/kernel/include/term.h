@@ -15,8 +15,8 @@
 #include "stivale2.h"
 
 typedef struct {
-  size_t row;
-  size_t col;
+  int32_t row;
+  int32_t col;
   size_t byte_per_row;
   color_t fg;
   color_t bg;
