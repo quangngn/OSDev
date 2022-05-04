@@ -20,8 +20,8 @@ typedef struct {
   int32_t framebuffer_height;
   int32_t framebuffer_pitch;  // Pitch in bytes
   int32_t framebuffer_bpp;    // Bits per pixel
-  uint8_t memory_model;   // Memory model: 1=RGB, all other values undefined
-  uint8_t red_mask_size;  // RGB mask sizes and left shifts
+  uint8_t memory_model;       // Memory model: 1=RGB, all other values undefined
+  uint8_t red_mask_size;      // RGB mask sizes and left shifts
   uint8_t red_mask_shift;
   uint8_t green_mask_size;
   uint8_t green_mask_shift;
@@ -48,14 +48,13 @@ bool graphic_draw(window_t* window_t, bool flip);
 
 // System function to setup user's framebuffer for app's window
 bool graphic_get_framebuffer_info(framebuffer_info_t* fb_info);
-bool graphic_init_window(window_t* window, int width, int height,
-                         int screen_x, int screen_y, color_t bg);
+bool graphic_init_window(window_t* window, int width, int height, int screen_x,
+                         int screen_y, color_t bg);
 bool graphic_clear_window(window_t* window);
 
 // Draw primitive to user's framebuffer in 2D
-static inline void window_set(int x, int y, color_t color, window_t* window) {
-  window->addr[x + y * window->width] = color;
-}
+void window_set(int x, int y, color_t color, window_t* window);
+
 bool draw_pixel(const point_t* p, color_t color, window_t* window);
 bool draw_line(const line_t* l, color_t color, window_t* window);
 bool draw_triangle(const triangle_t* t, color_t, bool fill, window_t* window);

@@ -28,8 +28,8 @@ bool graphic_clear_window(window_t *window) {
   return true;
 }
 
-bool graphic_init_window(window_t *window, int width, int height,
-                         int screen_x, int screen_y, color_t bg) {
+bool graphic_init_window(window_t *window, int width, int height, int screen_x,
+                         int screen_y, color_t bg) {
   if (window == NULL) return false;
 
   // Memmap address for the window's framebuffer. This would start at
@@ -52,6 +52,17 @@ bool graphic_init_window(window_t *window, int width, int height,
 }
 
 /******************************************************************************/
+void window_set(int x, int y, color_t color, window_t *window) {
+  // Check if pixel is out of bound
+  if (window == NULL || x >= window->width || x < 0 || y >= window->height ||
+      y < 0) {
+    return;
+  }
+
+  // Draw the pixel to the window
+  window->addr[x + y * window->width] = color;
+}
+
 bool draw_pixel(const point_t *p, color_t color, window_t *window) {
   if (p == NULL || window == NULL) return false;
 
@@ -59,6 +70,11 @@ bool draw_pixel(const point_t *p, color_t color, window_t *window) {
   return true;
 }
 
+/**
+ * Credit: Dmitry V. Sokolov
+ * Link:
+ * https://github.com/ssloy/tinyrenderer/wiki/Lesson-1:-Bresenham’s-Line-Drawing-Algorithm
+ */
 bool draw_line(const line_t *l, color_t color, window_t *window) {
   if (l == NULL || window == NULL) return false;
 
@@ -66,45 +82,41 @@ bool draw_line(const line_t *l, color_t color, window_t *window) {
   int x0 = (int)l->p0.x;
   int y0 = (int)l->p0.y;
   int x1 = (int)l->p1.x;
-  int y1 = (int)l->p1.x;
+  int y1 = (int)l->p1.y;
 
-  // Get the direction we are computing
-  int dx = x1 - x0;
-  int dy = y1 - y0;
-  int sign_x = get_sign(dx);
-  int sign_y = get_sign(dy);
-  dx = abs(dx);
-  dy = abs(dy);
-
-  // Check for steepness
   bool steep = false;
-  if (dx < dy) {
-    swap(&dx, &dy);
+  if (abs(x0 - x1) < abs(y0 - y1)) {
+    swap(&x0, &y0);
+    swap(&x1, &y1);
     steep = true;
   }
-
-  // Compute constant:
-  int decision = 2 * dy - dx;
-  int step_dec_neg = 2 * dy;
-  int step_dec_non_neg = step_dec_neg - 2 * dx;
-
-  // Draw
-  window_set(x0, y0, color, window);
-  for (int i = 0; i < dx; i++) {
-    if (decision < 0) {
-      if (steep) {
-        y0 += sign_y;
-      } else {
-        x0 += sign_x;
+  if (x0 > x1) {
+    swap(&x0, &x1);
+    swap(&y0, &y1);
+  }
+  int dx = x1 - x0;
+  int dy = y1 - y0;
+  int derror2 = abs(dy) * 2;
+  int error2 = 0;
+  int y = y0;
+  if (steep) {
+    for (int x = x0; x <= x1; x++) {
+      window_set(y, x, color, window);
+      error2 += derror2;
+      if (error2 > dx) {
+        y += (y1 > y0 ? 1 : -1);
+        error2 -= dx * 2;
       }
-      decision += step_dec_neg;
-    } else {
-      x0 += sign_x;
-      y0 += sign_y;
-      decision += step_dec_non_neg;
     }
-    // Draw the point
-    window_set(x0, y0, color, window);
+  } else {
+    for (int x = x0; x <= x1; x++) {
+      window_set(x, y, color, window);
+      error2 += derror2;
+      if (error2 > dx) {
+        y += (y1 > y0 ? 1 : -1);
+        error2 -= dx * 2;
+      }
+    }
   }
   return true;
 }

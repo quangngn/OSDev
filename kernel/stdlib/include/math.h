@@ -6,7 +6,7 @@
 #include "trigonometry.h"
 #include "vec.h"
 
-static inline int64_t abs(int64_t v) {
+static inline int abs(int v) {
   return v < 0 ? -v : v;
 }
 
@@ -14,12 +14,20 @@ static inline float absf(float v) {
   return v < 0 ? -v : v;
 }
 
-static inline bool get_sign(int64_t v) {
-  return v >= 0;
+static inline bool get_sign(int v) {
+  if (v == 0) {
+    return 0;
+  } else {
+    return v < 0 ? -1 : 1;
+  }
 }
 
 static inline bool get_signf(float v) {
-  return v >= 0;
+  if (v == 0) {
+    return 0;
+  } else {
+    return v < 0 ? -1 : 1;
+  }
 }
 
 static bool swap(int *x, int *y) {
