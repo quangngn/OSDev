@@ -12,5 +12,3 @@ void halt();
 // Convert physical address to virtual address by adding hhdm base virtual
 // address
 uintptr_t ptov(uintptr_t paddr);
-
-uint64_t get_time();

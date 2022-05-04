@@ -5,6 +5,7 @@
 
 #include "math.h"
 #include "mem.h"
+#include "time.h"
 
 typedef struct {
   pixel_t* addr;
@@ -38,23 +39,126 @@ typedef struct {
 } line_t;
 
 typedef struct {
-  line_t l0;
-  line_t l1;
-  line_t l2;
+  point_t p0;
+  point_t p1;
+  point_t p2;
 } triangle_t;
 
-// Syscall wrapper
-bool graphic_draw(window_t* window_t, bool flip);
-
-// System function to setup user's framebuffer for app's window
+/******************************************************************************/
+// Graphical functions
+/**
+ * System call to get kernel's framebuffer's information. This information is
+ * provided in the framebuffer struct tag.
+ */
 bool graphic_get_framebuffer_info(framebuffer_info_t* fb_info);
-bool graphic_init_window(window_t* window, int width, int height, int screen_x,
-                         int screen_y, color_t bg);
-bool graphic_clear_window(window_t* window);
 
+/**
+ * Copy the current window's frame buffer to the kernel's framebuffer.
+ * \param window Pointer to the window struct.
+ * \param flip Boolean whether we flip the buffer vertically. Effectively
+ * changing the origin from top-left to bottom-left.
+ * \return true if draw successfully.
+ */
+void graphic_draw(window_t* window_t, bool flip);
+
+/******************************************************************************/
+// Window functions
+/**
+ * Init the window struct to hold information about the user's writable buffer.
+ * \param window Pointer to the window struct.
+ * \param width Width of the window (in pixel).
+ * \param height Height of the window (in pixel).
+ * \param screen_x Horizontal pixel coordinate that this window being drawn to
+ * the screen (aka kernel's buffer).
+ * \param screen_x Vertical pixel coordinate that this window being drawn to
+ * the screen (aka kernel's buffer).
+ * \param bg Default background color.
+ * \return true if succeed.
+ */
+bool window_init(window_t* window, int width, int height, int screen_x,
+                 int screen_y, color_t bg);
+
+/**
+ * Clear the window's framebuffer by setting to the default color.
+ * \param window Pointer to the window struct.
+ */
+void window_clear(window_t* window);
+
+/******************************************************************************/
 // Draw primitive to user's framebuffer in 2D
-void window_set(int x, int y, color_t color, window_t* window);
+/**
+ * Draw pixel onto the window's buffer. By default, the window have origin
+ * coordinate (0, 0) at the top left corner.
+ * \param x The horizontal coordinate of the pixel.
+ * \param y The vertical coordinate of the pixel.
+ * \param color The color of the pixel.
+ * \param window Pointer to the target window.
+ * \return true if draw succeeds.
+ */
+bool draw_pixel(int x, int y, color_t color, window_t* window);
 
-bool draw_pixel(const point_t* p, color_t color, window_t* window);
-bool draw_line(const line_t* l, color_t color, window_t* window);
-bool draw_triangle(const triangle_t* t, color_t, bool fill, window_t* window);
+/**
+ * Draw pixel onto the window's buffer. By default, the window have origin
+ * coordinate (0, 0) at the top left corner.
+ * \param p Pointer to the point struct.
+ * \param color The color of the pixel.
+ * \param window Pointer to the target window.
+ * \return true if draw succeeds.
+ */
+bool draw_pixel_p(point_t* p, color_t color, window_t* window);
+
+/**
+ * Credit: Dmitry V. Sokolov
+ * Link:
+ * https://github.com/ssloy/tinyrenderer/wiki/Lesson-1:-Bresenham’s-Line-Drawing-Algorithm
+ *
+ * Draw line onto the window's buffer. By default, the window have origin
+ * coordinate (0, 0) at the top left corner.
+ * \param x0 The horizontal coordinate of the start point.
+ * \param y0 The vertical coordinate of the start point.
+ * \param x1 The horizontal coordinate of the end point.
+ * \param y1 The vertical coordinate of the end point.
+ * \param color The color of the line.
+ * \param window Pointer to the target window.
+ * \return true if draw succeeds.
+ */
+bool draw_line(int x0, int y0, int x1, int y1, color_t color, window_t* window);
+
+/**
+ * Draw line onto the window's buffer. By default, the window have origin
+ * coordinate (0, 0) at the top left corner.
+ * \param l Pointer to the line object.
+ * \param color The color of the line.
+ * \param window Pointer to the target window.
+ * \return true if draw succeeds.
+ */
+bool draw_line_l(const line_t* l, color_t color, window_t* window);
+
+/**
+ * Draw a triangle onto the window's buffer. By default, the window have origin
+ * coordinate (0, 0) at the top left corner.
+ * \param x0 The horizontal coordinate of the 1st vertex.
+ * \param y0 The vertical coordinate of the 1st vertex.
+ * \param x1 The horizontal coordinate of the 2nd vertex.
+ * \param y1 The vertical coordinate of the 2nd vertex.
+ * \param x2 The horizontal coordinate of the 3rd vertex.
+ * \param y2 The vertical coordinate of the 3rd vertex.
+ * \param color The color of the triangle.
+ * \param fill Boolean whether the shape is filled.
+ * \param window Pointer to the target window.
+ * \return true if draw succeeds.
+ */
+bool draw_triangle(int x0, int y0, int x1, int y1, int x2, int y2,
+                   color_t color, bool fill, window_t* window);
+
+/**
+ * Draw a triangle onto the window's buffer. By default, the window have origin
+ * coordinate (0, 0) at the top left corner.
+ * \param t Pointer to the triangle.
+ * \param color The color of the triangle.
+ * \param fill Boolean whether the shape is filled.
+ * \param window Pointer to the target window.
+ * \return true if draw succeeds.
+ */
+bool draw_triangle_t(const triangle_t* t, color_t color, bool fill,
+                     window_t* window);

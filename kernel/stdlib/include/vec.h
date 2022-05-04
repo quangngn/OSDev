@@ -168,3 +168,12 @@ bool fmat4x4_matmul(fmat4x4_t *m1, fmat4x4_t *m2, fmat4x4_t *res);
 bool fmat4x4_scale(fmat4x4_t *m1, float scale, fmat4x4_t *res);
 // Check if two matrices are equal
 bool fmat4x4_equal(fmat4x4_t *m1, fmat4x4_t *m2);
+
+// Other operations
+static inline int det2(int x0, int y0, int x1, int y1) {
+  return x0 * y1 - x1 * y0;
+}
+
+static inline float det2f(float x0, float y0, float x1, float y1) {
+  return x0 * y1 - x1 * y0;
+}

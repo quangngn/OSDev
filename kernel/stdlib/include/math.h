@@ -14,7 +14,7 @@ static inline float absf(float v) {
   return v < 0 ? -v : v;
 }
 
-static inline bool get_sign(int v) {
+static bool get_sign(int v) {
   if (v == 0) {
     return 0;
   } else {
@@ -22,12 +22,28 @@ static inline bool get_sign(int v) {
   }
 }
 
-static inline bool get_signf(float v) {
+static bool get_signf(float v) {
   if (v == 0) {
     return 0;
   } else {
     return v < 0 ? -1 : 1;
   }
+}
+
+static int min(int v1, int v2) {
+  return v1 < v2 ? v1 : v2;
+}
+
+static int max(int v1, int v2) {
+  return v1 > v2 ? v1 : v2;
+}
+
+static float minf(float v1, float v2) {
+  return v1 < v2 ? v1 : v2;
+}
+
+static float maxf(float v1, float v2) {
+  return v1 > v2 ? v1 : v2;
 }
 
 static bool swap(int *x, int *y) {
