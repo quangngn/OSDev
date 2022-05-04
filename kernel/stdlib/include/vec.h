@@ -114,11 +114,6 @@ typedef struct {
   fvec4_t c4;
 } fmat4x4_t;
 
-// 4 x 1 Matrix struct
-typedef struct {
-  fvec4_t c1;
-} fmat4x1_t;
-
 // Vec4 integer functions
 // Elementwise add vectors
 bool ivec4_add(ivec4_t *v1, ivec4_t *v2, ivec4_t *res);
@@ -174,4 +169,4 @@ bool fmat4x4_scale(fmat4x4_t *m1, float scale, fmat4x4_t *res);
 // Check if two matrices are equal
 bool fmat4x4_equal(fmat4x4_t *m1, fmat4x4_t *m2);
 // Multiply a 4x4 matrix by a 4x1 matrix
-bool fmat4x1_matmul(fmat4x4_t *m1, fmat4x1_t *m2, fmat4x1_t *res);
+bool fmat4x4_mult_vec4(fmat4x4_t *m, fvec4_t *v, fvec4_t *res);

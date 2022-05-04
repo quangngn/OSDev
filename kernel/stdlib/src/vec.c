@@ -624,17 +624,13 @@ bool fmat4x4_equal(fmat4x4_t *m1, fmat4x4_t *m2) {
          fvec4_equal(&(m1->c3), &(m2->c3)) && fvec4_equal(&(m1->c4), &(m2->c4));
 }
 
-bool fmat4x1_matmul(fmat4x4_t *m1, fmat4x1_t *m2, fmat4x1_t *res) {
-  if (m1 == NULL || m2 == NULL || res == NULL) return false;
+bool fmat4x4_mult_vec4(fmat4x4_t *m, fvec4_t *v, fvec4_t *res) {
+  if (m == NULL || v == NULL || res == NULL) return false;
 
-  res->c1.x = m1->c1.x * m2->c1.x + m1->c2.x * m2->c1.y + m1->c3.x * m2->c1.z +
-              m1->c4.x * m2->c1.w;
-  res->c1.y = m1->c1.y * m2->c1.x + m1->c2.y * m2->c1.y + m1->c3.y * m2->c1.z +
-              m1->c4.y * m2->c1.w;
-  res->c1.z = m1->c1.z * m2->c1.x + m1->c2.z * m2->c1.y + m1->c3.z * m2->c1.z +
-              m1->c4.z * m2->c1.w;
-  res->c1.w = m1->c1.w * m2->c1.x + m1->c2.w * m2->c1.y + m1->c3.w * m2->c1.z +
-              m1->c4.w * m2->c1.w;
+  res->x = m->c1.x * v->x + m->c2.x * v->y + m->c3.x * v->z + m->c4.x * v->w;
+  res->y = m->c1.y * v->x + m->c2.y * v->y + m->c3.y * v->z + m->c4.y * v->w;
+  res->z = m->c1.z * v->x + m->c2.z * v->y + m->c3.z * v->z + m->c4.z * v->w;
+  res->w = m->c1.w * v->x + m->c2.w * v->y + m->c3.w * v->z + m->c4.w * v->w;
 
   return true;
 }
