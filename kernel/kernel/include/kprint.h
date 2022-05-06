@@ -113,6 +113,13 @@ void kprint_mem_usage();
 char kget_c();
 
 /**
+ * Read char from the keyboard buffer without stalling.
+ * \returns the character from the keyboard. If the keyboard buffer is empty,
+ * return null-terminate character.
+ */
+char kpeek_c();
+
+/**
  * Read a line of characters from the keyboard. Read characters until the buffer
  * fills or a newline character is read. If input ends with a newline, the
  * newline character is stored in output. The string written to output is always

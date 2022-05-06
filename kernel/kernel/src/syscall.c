@@ -84,6 +84,8 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1,
       return framebuffer_cpy_handler((pixel_t*)arg0, (int32_t)arg1,
                                      (int32_t)arg2, (int32_t)arg3,
                                      (int32_t)arg4, (bool)arg5);
+    case SYSCALL_PEEK_CHAR:
+      return kpeek_c();
     default:
       return -1;
   }

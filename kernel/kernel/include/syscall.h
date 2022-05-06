@@ -72,6 +72,7 @@ int64_t read_handler(uint64_t f_descriptor, char* buff, size_t read_size,
 int64_t write_handler(uint64_t f_descriptor, const char* str,
                       size_t write_size);
 
+/******************************************************************************/
 /**
  * Handler to invoke the execution of program with name exec_name.
  * \param exe_name Name of the executable to be exec.
@@ -85,6 +86,7 @@ bool exec_handler(const char* exe_name);
  */
 bool exit_handler();
 
+/******************************************************************************/
 /**
  * Handler to handler query kernel's framebuffer information. The information is
  * written to a user's framebuffer information struct.

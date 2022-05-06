@@ -313,6 +313,15 @@ char getc(uint64_t f_descriptor) {
 }
 
 /**
+ * Read char from the keyboard buffer without stalling.
+ * \returns the character from the keyboard. If the keyboard buffer is empty,
+ * return null-terminate character.
+ */
+char peekc() {
+  return syscall(SYSCALL_PEEK_CHAR);
+}
+
+/**
  * Read a string from the given file descriptor. The read stop when:
  * - Reach null-terminate character or newline.
  * - Reach read_size.

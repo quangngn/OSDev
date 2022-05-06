@@ -11,6 +11,7 @@
 #define SYSCALL_EXIT 60
 #define SYSCALL_GET_FRAMEBUFFER_INFO 1000
 #define SYSCALL_FRAMEBUFFER_CPY 1001
+#define SYSCALL_PEEK_CHAR 2000
 
 /******************************************************************************/
 // Page related 

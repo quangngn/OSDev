@@ -169,7 +169,7 @@ void kprint_p(void* ptr) {
  */
 void kprintf(const char* format, ...) {
   if (format == NULL) return;
-  
+
   // Set up va_list to read arguments
   const char* cursor = format;
   va_list args;
@@ -336,6 +336,20 @@ char kget_c() {
   };
   // Return the read character
   return ret;
+}
+
+/**
+ * Read char from the keyboard buffer without stalling.
+ * \returns the character from the keyboard. If the keyboard buffer is empty,
+ * return null-terminate character.
+ */
+char kpeek_c() {
+  char ret;
+  if (kb_read_c(&keyboard, &ret)) {
+    return ret;
+  } else {
+    return '\0';
+  }
 }
 
 /**

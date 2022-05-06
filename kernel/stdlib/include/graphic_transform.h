@@ -26,3 +26,5 @@ bool rotate_mat4x4(fmat4x4_t* rot_mat, float degx, float degy, float degz);
 bool transform_mat4x4(fmat4x4_t* transform_mat, fmat4x4_t* translate_mat,
                       fmat4x4_t* rot_mat1, fmat4x4_t* rot_mat2,
                       fmat4x4_t* rot_mat3, fmat4x4_t* scale_mat);
+
+bool perspective_proj_mat4x4(float near, float far, float angle);
