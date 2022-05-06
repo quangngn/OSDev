@@ -90,9 +90,23 @@ void running_triangle() {
   }
 }
 
+draw_test_rectangle() {
+  point_t p0 = {.x = 0, .y = 320, .z = 0, .w = 0};
+
+  point_t p1 = {.x = 320, .y = 320, .z = 0, .w = 0};
+  point_t p2 = {.x = 0, .y = 0, .z = 0, .w = 0};
+  point_t p3 = {.x = 320, .y = 0, .z = 0, .w = 0};
+
+  rectangle_t r0 = {.p0 = p0, .p1 = p1, .p2 = p2, .p3 = p3};
+  draw_rectangle_r(&r0, ARGB32_RED, true, &window);
+}
+
 void _start() {
-  window_init(&window, 720, 720, -200, -200, ARGB32_MAGENTA);
-  draw_triangle_pattern();
+  window_init(&window, 720, 720, 0, 0, ARGB32_BLUE);
+  // draw_triangle_pattern();
+  //  running_triangle();
+
+  draw_test_rectangle();
   graphic_draw(&window, true);
 
   // running_triangle();

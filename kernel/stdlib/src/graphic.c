@@ -251,3 +251,61 @@ bool draw_triangle_t(const triangle_t *t, color_t color, bool fill,
   return draw_triangle((int)t->p0.x, (int)t->p0.y, (int)t->p1.x, (int)t->p1.y,
                        (int)t->p2.x, (int)t->p2.y, color, fill, window);
 }
+
+/**
+ * Draw a triangle onto the window's buffer. By default, the window have origin
+ * coordinate (0, 0) at the top left corner.
+ * \param x0 The horizontal coordinate of the 1st vertex.
+ * \param y0 The vertical coordinate of the 1st vertex.
+ * \param x1 The horizontal coordinate of the 2nd vertex.
+ * \param y1 The vertical coordinate of the 2nd vertex.
+ * \param x2 The horizontal coordinate of the 3rd vertex.
+ * \param y2 The vertical coordinate of the 3rd vertex.
+ * \param x3 The horizontal coordinate of the 4th vertex.
+ * \param y3 The vertical coordinate of the 4th vertex.
+ * \param color The color of the triangle.
+ * \param fill Boolean whether the shape is filled.
+ * \param window Pointer to the target window.
+ * \return true if draw succeeds.
+ */
+bool draw_rectangle(int x0, int y0, int x1, int y1, int x2, int y2, int x3,
+                    int y3, color_t color, bool fill, window_t *window) {
+  if (window == NULL) return false;
+
+  int x_min = max(min(x0, min(x1, min(x2, x3))), 0);
+  int x_max = min(max(x0, max(x1, max(x2, x3))), window->width - 1);
+  int y_min = max(min(y0, min(y1, min(y2, y3))), 0);
+  int y_max = min(max(y0, max(y1, max(y2, y3))), window->height - 1);
+
+  if (fill) {
+    for (int y = y_min; y <= y_max; y++) {
+      for (int x = x_min; x <= x_max; x++) {
+        draw_pixel(x, y, color, window);
+      }
+    }
+    return true;
+  } else {
+    return draw_line(x_min, y_min, x_min, y_max, color, window) &&
+           draw_line(x_min, y_min, x_max, y_min, color, window) &&
+           draw_line(x_max, y_min, x_max, y_max, color, window) &&
+           draw_line(x_max, y_max, x_min, y_max, color, window);
+  }
+}
+
+/**
+ * Draw a rectangle onto the window's buffer. By default, the window have origin
+ * coordinate (0, 0) at the top left corner.
+ * \param r Pointer to the triangle.
+ * \param color The color of the triangle.
+ * \param fill Boolean whether the shape is filled.
+ * \param window Pointer to the target window.
+ * \return true if draw succeeds.
+ */
+bool draw_rectangle_r(const rectangle_t *r, color_t color, bool fill,
+                      window_t *window) {
+  if (r == NULL || window == NULL) return false;
+
+  return draw_rectangle((int)r->p0.x, (int)r->p0.y, (int)r->p1.x, (int)r->p1.y,
+                        (int)r->p2.x, (int)r->p2.y, (int)r->p3.x, (int)r->p3.y,
+                        color, fill, window);
+}

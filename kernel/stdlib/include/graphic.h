@@ -44,6 +44,13 @@ typedef struct {
   point_t p2;
 } triangle_t;
 
+typedef struct {
+  point_t p0;
+  point_t p1;
+  point_t p2;
+  point_t p3;
+} rectangle_t;
+
 /******************************************************************************/
 // Graphical functions
 /**
@@ -162,3 +169,33 @@ bool draw_triangle(int x0, int y0, int x1, int y1, int x2, int y2,
  */
 bool draw_triangle_t(const triangle_t* t, color_t color, bool fill,
                      window_t* window);
+/**
+ * Draw a triangle onto the window's buffer. By default, the window have origin
+ * coordinate (0, 0) at the top left corner.
+ * \param x0 The horizontal coordinate of the 1st vertex.
+ * \param y0 The vertical coordinate of the 1st vertex.
+ * \param x1 The horizontal coordinate of the 2nd vertex.
+ * \param y1 The vertical coordinate of the 2nd vertex.
+ * \param x2 The horizontal coordinate of the 3rd vertex.
+ * \param y2 The vertical coordinate of the 3rd vertex.
+ * \param x3 The horizontal coordinate of the 4th vertex.
+ * \param y3 The vertical coordinate of the 4th vertex.
+ * \param color The color of the triangle.
+ * \param fill Boolean whether the shape is filled.
+ * \param window Pointer to the target window.
+ * \return true if draw succeeds.
+ */
+bool draw_rectangle(int x0, int y0, int x1, int y1, int x2, int y2, int x3,
+                    int y3, color_t color, bool fill, window_t* window);
+
+/**
+ * Draw a rectangle onto the window's buffer. By default, the window have origin
+ * coordinate (0, 0) at the top left corner.
+ * \param r Pointer to the rectangle.
+ * \param color The color of the triangle.
+ * \param fill Boolean whether the shape is filled.
+ * \param window Pointer to the target window.
+ * \return true if draw succeeds.
+ */
+bool draw_rectangle_r(const rectangle_t* r, color_t color, bool fill,
+                      window_t* window);
