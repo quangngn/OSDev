@@ -9,7 +9,9 @@
         "stdbool.h": "c",
         "kgraphic.h": "c",
         "complex": "c",
-        "cmath": "c"
+        "cmath": "c",
+        "queue": "c",
+        "random": "c"
     },
     "editor.wordWrap": "wordWrapColumn",
     "editor.wordWrapColumn": 80

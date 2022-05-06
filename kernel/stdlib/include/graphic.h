@@ -162,3 +162,6 @@ bool draw_triangle(int x0, int y0, int x1, int y1, int x2, int y2,
  */
 bool draw_triangle_t(const triangle_t* t, color_t color, bool fill,
                      window_t* window);
+
+/******************************************************************************/
+// Transformation
