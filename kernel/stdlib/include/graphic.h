@@ -199,3 +199,6 @@ bool draw_rectangle(int x0, int y0, int x1, int y1, int x2, int y2, int x3,
  */
 bool draw_rectangle_r(const rectangle_t* r, color_t color, bool fill,
                       window_t* window);
+
+/******************************************************************************/
+// Transformation
