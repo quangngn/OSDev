@@ -98,12 +98,13 @@ void window_clear(window_t *window) {
  */
 bool pixel2d(int x, int y, color_t color, window_t *window) {
   // Check if pixel is out of bound
-  if (window == NULL || x >= window->width || x < 0 || y >= window->height ||
-      y < 0) {
+  if (window == NULL) {
     return false;
   } else {
-    // Draw the pixel to the window
-    (window->addr)[x + y * window->width] = color;
+    if (x < window->width && x >= 0 && y < window->height && y >= 0) {
+      // Draw the pixel to the window
+      (window->addr)[x + y * window->width] = color;
+    }
     return true;
   }
 }
@@ -135,8 +136,7 @@ bool pixel2d_p(point_t *p, color_t color, window_t *window) {
  * \param window Pointer to the target window.
  * \return true if draw succeeds.
  */
-bool line2d(int x0, int y0, int x1, int y1, color_t color,
-                  window_t *window) {
+bool line2d(int x0, int y0, int x1, int y1, color_t color, window_t *window) {
   if (window == NULL) return false;
 
   // Using Bresenham algorithm to print the line
@@ -188,8 +188,8 @@ bool line2d(int x0, int y0, int x1, int y1, color_t color,
 bool line2d_l(const line_t *l, color_t color, window_t *window) {
   if (l == NULL || window == NULL) return false;
 
-  return line2d((int)l->p0.x, (int)l->p0.y, (int)l->p1.x, (int)l->p1.y,
-                      color, window);
+  return line2d((int)l->p0.x, (int)l->p0.y, (int)l->p1.x, (int)l->p1.y, color,
+                window);
 }
 
 /**
@@ -206,8 +206,8 @@ bool line2d_l(const line_t *l, color_t color, window_t *window) {
  * \param window Pointer to the target window.
  * \return true if draw succeeds.
  */
-bool tri2d(int x0, int y0, int x1, int y1, int x2, int y2,
-                     color_t color, bool fill, window_t *window) {
+bool tri2d(int x0, int y0, int x1, int y1, int x2, int y2, color_t color,
+           bool fill, window_t *window) {
   if (window == NULL) return false;
 
   int x_min = max(min(x0, min(x1, x2)), 0);
@@ -350,4 +350,198 @@ bool rec2d_wh(int x, int y, int width, int height, color_t color, bool fill,
     line2d(x, y_end, x_end, y_end, color, window);
   }
   return true;
+}
+
+/******************************************************************************/
+/**
+ * Draw pixel onto the window's buffer. By default, the window have origin
+ * coordinate (0, 0) at the bottom left corner.
+ * \param x The horizontal coordinate of the pixel.
+ * \param y The vertical coordinate of the pixel.
+ * \param z The depth coordinate of the pixel.
+ * \param color The color of the pixel.
+ * \param window Pointer to the target window.
+ * \return true if draw succeeds.
+ */
+bool pixel3d(int x, int y, int z, color_t color, window_t *window) {
+  if (window == NULL) return false;
+  size_t idx = x + y * window->width;
+
+  if (window->z_buffer[idx] <= z && x < window->width && x >= 0 &&
+      y < window->height && y >= 0) {
+    window->addr[idx] = color;
+    window->z_buffer[idx] = z;
+  }
+  return true;
+}
+
+/**
+ * Draw pixel onto the window's buffer. By default, the window have origin
+ * coordinate (0, 0) at the bottom left corner.
+ * \param p Pointer to the point struct.
+ * \param color The color of the pixel.
+ * \param window Pointer to the target window.
+ * \return true if draw succeeds.
+ */
+bool pixel3d_p(point_t *p, color_t color, window_t *window) {
+  if (p == NULL || window == NULL) return false;
+
+  return pixel3d((int)p->x, (int)p->y, (int)p->z, color, window);
+}
+
+/**
+ * Credit: Dmitry V. Sokolov
+ * Link:
+ * https://github.com/ssloy/tinyrenderer/wiki/Lesson-1:-Bresenham’s-Line-Drawing-Algorithm
+ *
+ * Draw line onto the window's buffer. By default, the window have origin
+ * coordinate (0, 0) at the bottom left corner.
+ * \param x0 The horizontal coordinate of the start point.
+ * \param y0 The vertical coordinate of the start point.
+ * \param z0 The depth coordinate of the start point.
+ * \param x1 The horizontal coordinate of the end point.
+ * \param y1 The vertical coordinate of the end point.
+ * \param z1 The depth coordinate of the end.
+ * \param color The color of the line.
+ * \param window Pointer to the target window.
+ * \return true if draw succeeds.
+ */
+bool line3d(int x0, int y0, int z0, int x1, int y1, int z1, color_t color,
+            window_t *window) {
+  if (window == NULL) return false;
+
+  // Using Bresenham algorithm to print the line
+  bool steep = false;
+  if (abs(x0 - x1) < abs(y0 - y1)) {
+    swap(&x0, &y0);
+    swap(&x1, &y1);
+    steep = true;
+  }
+  if (x0 > x1) {
+    swap(&x0, &x1);
+    swap(&y0, &y1);
+    swap(&z0, &z1);
+  }
+  int dx = x1 - x0;
+  int dy = y1 - y0;
+  int derror2 = abs(dy) * 2;
+  int error2 = 0;
+  int y = y0;
+  float z = z0;
+  if (steep) {
+    for (int x = x0; x <= x1; x++) {
+      z = z_line_itpl((float)x, (float)x0, (float)x1, (float)z0, (float)z1);
+      pixel3d(y, x, (int)z, color, window);
+      error2 += derror2;
+      if (error2 > dx) {
+        y += (y1 > y0 ? 1 : -1);
+        error2 -= dx * 2;
+      }
+    }
+  } else {
+    for (int x = x0; x <= x1; x++) {
+      z = z_line_itpl((float)x, (float)x0, (float)x1, (float)z0, (float)z1);
+      pixel3d(x, y, z, color, window);
+      error2 += derror2;
+      if (error2 > dx) {
+        y += (y1 > y0 ? 1 : -1);
+        error2 -= dx * 2;
+      }
+    }
+  }
+  return true;
+}
+
+/**
+ * Draw line onto the window's buffer. By default, the window have origin
+ * coordinate (0, 0) at the bottom left corner.
+ * \param l Pointer to the line object.
+ * \param color The color of the line.
+ * \param window Pointer to the target window.
+ * \return true if draw succeeds.
+ */
+bool line3d_l(const line_t *l, color_t color, window_t *window) {
+  if (l == NULL || window == NULL) return false;
+
+  return line3d((int)l->p0.x, (int)l->p0.y, (int)l->p0.z, (int)l->p1.x,
+                (int)l->p1.y, (int)l->p1.z, color, window);
+}
+
+/**
+ * Draw a triangle onto the window's buffer. By default, the window have origin
+ * coordinate (0, 0) at the bottom left corner.
+ * \param x0 The horizontal coordinate of the 1st vertex.
+ * \param y0 The vertical coordinate of the 1st vertex.
+ * \param z0 The depth coordinate of the 1st vertex.
+ * \param x1 The horizontal coordinate of the 2nd vertex.
+ * \param y1 The vertical coordinate of the 2nd vertex.
+ * \param z1 The depth coordinate of the 2nd vertex.
+ * \param x2 The horizontal coordinate of the 3rd vertex.
+ * \param y2 The vertical coordinate of the 3rd vertex.
+ * \param z2 The depth coordinate of the 3rd vertex.
+ * \param color The color of the triangle.
+ * \param fill Boolean whether the shape is filled.
+ * \param window Pointer to the target window.
+ * \return true if draw succeeds.
+ */
+bool tri3d(int x0, int y0, int z0, int x1, int y1, int z1, int x2, int y2,
+           int z2, color_t color, bool fill, window_t *window) {
+  if (window == NULL) return false;
+
+  int x_min = max(min(x0, min(x1, x2)), 0);
+  int x_max = min(max(x0, max(x1, x2)), window->width - 1);
+  int y_min = max(min(y0, min(y1, y2)), 0);
+  int y_max = min(max(y0, max(y1, y2)), window->height - 1);
+  float dx10 = (float)(x1 - x0);
+  float dy10 = (float)(y1 - y0);
+  float dx21 = (float)(x2 - x1);
+  float dy21 = (float)(y2 - y1);
+  float dx02 = (float)(x0 - x2);
+  float dy02 = (float)(y0 - y2);
+
+  if (fill) {
+    for (int y = y_min; y <= y_max; y++) {
+      for (int x = x_min; x <= x_max; x++) {
+        float dx0 = (float)(x - x0);
+        float dx1 = (float)(x - x1);
+        float dx2 = (float)(x - x2);
+        float dy0 = (float)(y - y0);
+        float dy1 = (float)(y - y1);
+        float dy2 = (float)(y - y2);
+        float z0_det = det2f(dx0, dy0, dx10, dy10);
+        float z1_det = det2f(dx1, dy1, dx21, dy21);
+        float z2_det = det2f(dx2, dy2, dx02, dy02);
+
+        if ((z0_det >= 0 && z1_det >= 0 && z2_det >= 0) ||
+            (z0_det <= 0 && z1_det <= 0 && z2_det <= 0)) {
+          float sum_det = z0_det + z1_det + z2_det;
+          float z = z0 * (z0_det / sum_det) + z1 * (z1_det / sum_det) +
+                    z2 * (z2_det / sum_det);
+          pixel3d(x, y, z, color, window);
+        }
+      }
+    }
+    return true;
+  } else {
+    return line3d(x0, y0, z0, x1, y1, z1, color, window) &&
+           line3d(x1, y1, z1, x2, y2, z2, color, window) &&
+           line3d(x2, y2, z2, x0, y0, z0, color, window);
+  }
+}
+
+/**
+ * Draw a triangle onto the window's buffer. By default, the window have origin
+ * coordinate (0, 0) at the botom left corner.
+ * \param t Pointer to the triangle.
+ * \param color The color of the triangle.
+ * \param fill Boolean whether the shape is filled.
+ * \param window Pointer to the target window.
+ * \return true if draw succeeds.
+ */
+bool tri3d_t(const triangle_t *t, color_t color, bool fill, window_t *window) {
+  if (t == NULL || window == NULL) return false;
+
+  return tri3d((int)t->p0.x, (int)t->p0.y, (int)t->p0.z, (int)t->p1.x,
+               (int)t->p1.y, (int)t->p1.z, (int)t->p2.x, (int)t->p2.y,
+               (int)t->p2.z, color, fill, window);
 }

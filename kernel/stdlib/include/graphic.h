@@ -169,8 +169,8 @@ bool line2d_l(const line_t* l, color_t color, window_t* window);
  * \param window Pointer to the target window.
  * \return true if draw succeeds.
  */
-bool tri2d(int x0, int y0, int x1, int y1, int x2, int y2,
-                   color_t color, bool fill, window_t* window);
+bool tri2d(int x0, int y0, int x1, int y1, int x2, int y2, color_t color,
+           bool fill, window_t* window);
 
 /**
  * Draw a triangle onto the window's buffer. By default, the window have origin
@@ -181,8 +181,7 @@ bool tri2d(int x0, int y0, int x1, int y1, int x2, int y2,
  * \param window Pointer to the target window.
  * \return true if draw succeeds.
  */
-bool tri2d_t(const triangle_t* t, color_t color, bool fill,
-                     window_t* window);
+bool tri2d_t(const triangle_t* t, color_t color, bool fill, window_t* window);
 /**
  * Draw a rectangle onto the window's buffer. By default, the window have origin
  * coordinate (0, 0) at the bottom left corner.
@@ -199,8 +198,8 @@ bool tri2d_t(const triangle_t* t, color_t color, bool fill,
  * \param window Pointer to the target window.
  * \return true if draw succeeds.
  */
-bool rec2d(int x0, int y0, int x1, int y1, int x2, int y2, int x3,
-                    int y3, color_t color, bool fill, window_t* window);
+bool rec2d(int x0, int y0, int x1, int y1, int x2, int y2, int x3, int y3,
+           color_t color, bool fill, window_t* window);
 
 /**
  * Draw a rectangle onto the window's buffer. By default, the window have origin
@@ -211,8 +210,7 @@ bool rec2d(int x0, int y0, int x1, int y1, int x2, int y2, int x3,
  * \param window Pointer to the target window.
  * \return true if draw succeeds.
  */
-bool rec2d_r(const rectangle_t* r, color_t color, bool fill,
-                      window_t* window);
+bool rec2d_r(const rectangle_t* r, color_t color, bool fill, window_t* window);
 
 /**
  * Draw a rectangle onto the window's buffer. By default, the window have origin
@@ -229,5 +227,90 @@ bool rec2d_r(const rectangle_t* r, color_t color, bool fill,
  * \param window Pointer to the target window.
  * \return true if draw succeeds.
  */
-bool rec2d_wh(int x, int y, int width, int height, color_t color,
-                       bool fill, window_t* window);
+bool rec2d_wh(int x, int y, int width, int height, color_t color, bool fill,
+              window_t* window);
+
+/******************************************************************************/
+// Draw primitive to user's framebuffer in 3D
+/**
+ * Draw pixel onto the window's buffer. By default, the window have origin
+ * coordinate (0, 0) at the bottom left corner.
+ * \param x The horizontal coordinate of the pixel.
+ * \param y The vertical coordinate of the pixel.
+ * \param z The depth coordinate of the pixel.
+ * \param color The color of the pixel.
+ * \param window Pointer to the target window.
+ * \return true if draw succeeds.
+ */
+bool pixel3d(int x, int y, int z, color_t color, window_t* window);
+
+/**
+ * Draw pixel onto the window's buffer. By default, the window have origin
+ * coordinate (0, 0) at the bottom left corner.
+ * \param p Pointer to the point struct.
+ * \param color The color of the pixel.
+ * \param window Pointer to the target window.
+ * \return true if draw succeeds.
+ */
+bool pixel3d_p(point_t* p, color_t color, window_t* window);
+
+/**
+ * Credit: Dmitry V. Sokolov
+ * Link:
+ * https://github.com/ssloy/tinyrenderer/wiki/Lesson-1:-Bresenham’s-Line-Drawing-Algorithm
+ *
+ * Draw line onto the window's buffer. By default, the window have origin
+ * coordinate (0, 0) at the bottom left corner.
+ * \param x0 The horizontal coordinate of the start point.
+ * \param y0 The vertical coordinate of the start point.
+ * \param z0 The depth coordinate of the start point.
+ * \param x1 The horizontal coordinate of the end point.
+ * \param y1 The vertical coordinate of the end point.
+ * \param z1 The depth coordinate of the end.
+ * \param color The color of the line.
+ * \param window Pointer to the target window.
+ * \return true if draw succeeds.
+ */
+bool line3d(int x0, int y0, int z0, int x1, int y1, int z1, color_t color,
+            window_t* window);
+
+/**
+ * Draw line onto the window's buffer. By default, the window have origin
+ * coordinate (0, 0) at the bottom left corner.
+ * \param l Pointer to the line object.
+ * \param color The color of the line.
+ * \param window Pointer to the target window.
+ * \return true if draw succeeds.
+ */
+bool line3d_l(const line_t* l, color_t color, window_t* window);
+
+/**
+ * Draw a triangle onto the window's buffer. By default, the window have origin
+ * coordinate (0, 0) at the bottom left corner.
+ * \param x0 The horizontal coordinate of the 1st vertex.
+ * \param y0 The vertical coordinate of the 1st vertex.
+ * \param z0 The depth coordinate of the 1st vertex.
+ * \param x1 The horizontal coordinate of the 2nd vertex.
+ * \param y1 The vertical coordinate of the 2nd vertex.
+ * \param z1 The depth coordinate of the 2nd vertex.
+ * \param x2 The horizontal coordinate of the 3rd vertex.
+ * \param y2 The vertical coordinate of the 3rd vertex.
+ * \param z2 The depth coordinate of the 3rd vertex.
+ * \param color The color of the triangle.
+ * \param fill Boolean whether the shape is filled.
+ * \param window Pointer to the target window.
+ * \return true if draw succeeds.
+ */
+bool tri3d(int x0, int y0, int z0, int x1, int y1, int z1, int x2, int y2,
+           int z2, color_t color, bool fill, window_t* window);
+
+/**
+ * Draw a triangle onto the window's buffer. By default, the window have origin
+ * coordinate (0, 0) at the botom left corner.
+ * \param t Pointer to the triangle.
+ * \param color The color of the triangle.
+ * \param fill Boolean whether the shape is filled.
+ * \param window Pointer to the target window.
+ * \return true if draw succeeds.
+ */
+bool tri3d_t(const triangle_t* t, color_t color, bool fill, window_t* window);
