@@ -96,7 +96,7 @@ void window_clear(window_t *window) {
  * \param window Pointer to the target window.
  * \return true if draw succeeds.
  */
-bool draw_pixel(int x, int y, color_t color, window_t *window) {
+bool pixel2d(int x, int y, color_t color, window_t *window) {
   // Check if pixel is out of bound
   if (window == NULL || x >= window->width || x < 0 || y >= window->height ||
       y < 0) {
@@ -116,8 +116,8 @@ bool draw_pixel(int x, int y, color_t color, window_t *window) {
  * \param window Pointer to the target window.
  * \return true if draw succeeds.
  */
-bool draw_pixel_p(point_t *p, color_t color, window_t *window) {
-  return draw_pixel((int)p->x, (int)p->y, color, window);
+bool pixel2d_p(point_t *p, color_t color, window_t *window) {
+  return pixel2d((int)p->x, (int)p->y, color, window);
 }
 
 /**
@@ -135,8 +135,8 @@ bool draw_pixel_p(point_t *p, color_t color, window_t *window) {
  * \param window Pointer to the target window.
  * \return true if draw succeeds.
  */
-bool draw_line(int x0, int y0, int x1, int y1, color_t color,
-               window_t *window) {
+bool line2d(int x0, int y0, int x1, int y1, color_t color,
+                  window_t *window) {
   if (window == NULL) return false;
 
   // Using Bresenham algorithm to print the line
@@ -157,7 +157,7 @@ bool draw_line(int x0, int y0, int x1, int y1, color_t color,
   int y = y0;
   if (steep) {
     for (int x = x0; x <= x1; x++) {
-      draw_pixel(y, x, color, window);
+      pixel2d(y, x, color, window);
       error2 += derror2;
       if (error2 > dx) {
         y += (y1 > y0 ? 1 : -1);
@@ -166,7 +166,7 @@ bool draw_line(int x0, int y0, int x1, int y1, color_t color,
     }
   } else {
     for (int x = x0; x <= x1; x++) {
-      draw_pixel(x, y, color, window);
+      pixel2d(x, y, color, window);
       error2 += derror2;
       if (error2 > dx) {
         y += (y1 > y0 ? 1 : -1);
@@ -185,11 +185,11 @@ bool draw_line(int x0, int y0, int x1, int y1, color_t color,
  * \param window Pointer to the target window.
  * \return true if draw succeeds.
  */
-bool draw_line_l(const line_t *l, color_t color, window_t *window) {
+bool line2d_l(const line_t *l, color_t color, window_t *window) {
   if (l == NULL || window == NULL) return false;
 
-  return draw_line((int)l->p0.x, (int)l->p0.y, (int)l->p1.x, (int)l->p1.y,
-                   color, window);
+  return line2d((int)l->p0.x, (int)l->p0.y, (int)l->p1.x, (int)l->p1.y,
+                      color, window);
 }
 
 /**
@@ -206,8 +206,8 @@ bool draw_line_l(const line_t *l, color_t color, window_t *window) {
  * \param window Pointer to the target window.
  * \return true if draw succeeds.
  */
-bool draw_triangle(int x0, int y0, int x1, int y1, int x2, int y2,
-                   color_t color, bool fill, window_t *window) {
+bool tri2d(int x0, int y0, int x1, int y1, int x2, int y2,
+                     color_t color, bool fill, window_t *window) {
   if (window == NULL) return false;
 
   int x_min = max(min(x0, min(x1, x2)), 0);
@@ -224,15 +224,15 @@ bool draw_triangle(int x0, int y0, int x1, int y1, int x2, int y2,
 
         if ((z1 >= 0 && z2 >= 0 && z3 >= 0) ||
             (z1 <= 0 && z2 <= 0 && z3 <= 0)) {
-          draw_pixel(x, y, color, window);
+          pixel2d(x, y, color, window);
         }
       }
     }
     return true;
   } else {
-    return draw_line(x0, y0, x1, y1, color, window) &&
-           draw_line(x1, y1, x2, y2, color, window) &&
-           draw_line(x2, y2, x0, y0, color, window);
+    return line2d(x0, y0, x1, y1, color, window) &&
+           line2d(x1, y1, x2, y2, color, window) &&
+           line2d(x2, y2, x0, y0, color, window);
   }
 }
 
@@ -245,12 +245,11 @@ bool draw_triangle(int x0, int y0, int x1, int y1, int x2, int y2,
  * \param window Pointer to the target window.
  * \return true if draw succeeds.
  */
-bool draw_triangle_t(const triangle_t *t, color_t color, bool fill,
-                     window_t *window) {
+bool tri2d_t(const triangle_t *t, color_t color, bool fill, window_t *window) {
   if (t == NULL || window == NULL) return false;
 
-  return draw_triangle((int)t->p0.x, (int)t->p0.y, (int)t->p1.x, (int)t->p1.y,
-                       (int)t->p2.x, (int)t->p2.y, color, fill, window);
+  return tri2d((int)t->p0.x, (int)t->p0.y, (int)t->p1.x, (int)t->p1.y,
+               (int)t->p2.x, (int)t->p2.y, color, fill, window);
 }
 
 /**
@@ -269,8 +268,8 @@ bool draw_triangle_t(const triangle_t *t, color_t color, bool fill,
  * \param window Pointer to the target window.
  * \return true if draw succeeds.
  */
-bool draw_rectangle(int x0, int y0, int x1, int y1, int x2, int y2, int x3,
-                    int y3, color_t color, bool fill, window_t *window) {
+bool rec2d(int x0, int y0, int x1, int y1, int x2, int y2, int x3, int y3,
+           color_t color, bool fill, window_t *window) {
   if (window == NULL) return false;
 
   int x_min = max(min(x0, min(x1, min(x2, x3))), 0);
@@ -281,15 +280,15 @@ bool draw_rectangle(int x0, int y0, int x1, int y1, int x2, int y2, int x3,
   if (fill) {
     for (int y = y_min; y <= y_max; y++) {
       for (int x = x_min; x <= x_max; x++) {
-        draw_pixel(x, y, color, window);
+        pixel2d(x, y, color, window);
       }
     }
     return true;
   } else {
-    return draw_line(x_min, y_min, x_min, y_max, color, window) &&
-           draw_line(x_min, y_min, x_max, y_min, color, window) &&
-           draw_line(x_max, y_min, x_max, y_max, color, window) &&
-           draw_line(x_max, y_max, x_min, y_max, color, window);
+    return line2d(x_min, y_min, x_min, y_max, color, window) &&
+           line2d(x_min, y_min, x_max, y_min, color, window) &&
+           line2d(x_max, y_min, x_max, y_max, color, window) &&
+           line2d(x_max, y_max, x_min, y_max, color, window);
   }
 }
 
@@ -302,13 +301,12 @@ bool draw_rectangle(int x0, int y0, int x1, int y1, int x2, int y2, int x3,
  * \param window Pointer to the target window.
  * \return true if draw succeeds.
  */
-bool draw_rectangle_r(const rectangle_t *r, color_t color, bool fill,
-                      window_t *window) {
+bool rec2d_r(const rectangle_t *r, color_t color, bool fill, window_t *window) {
   if (r == NULL || window == NULL) return false;
 
-  return draw_rectangle((int)r->p0.x, (int)r->p0.y, (int)r->p1.x, (int)r->p1.y,
-                        (int)r->p2.x, (int)r->p2.y, (int)r->p3.x, (int)r->p3.y,
-                        color, fill, window);
+  return rec2d((int)r->p0.x, (int)r->p0.y, (int)r->p1.x, (int)r->p1.y,
+               (int)r->p2.x, (int)r->p2.y, (int)r->p3.x, (int)r->p3.y, color,
+               fill, window);
 }
 
 /**
@@ -326,8 +324,8 @@ bool draw_rectangle_r(const rectangle_t *r, color_t color, bool fill,
  * \param window Pointer to the target window.
  * \return true if draw succeeds.
  */
-bool draw_rectangle_2d(int x, int y, int width, int height, color_t color,
-                       bool fill, window_t *window) {
+bool rec2d_wh(int x, int y, int width, int height, color_t color, bool fill,
+              window_t *window) {
   if (window == NULL) return false;
 
   int x_end = min(x + width - 1, window->width - 1);
@@ -342,14 +340,14 @@ bool draw_rectangle_2d(int x, int y, int width, int height, color_t color,
   if (fill) {
     for (int c = y_end; c <= y; c++) {
       for (int r = x; r <= x_end; r++) {
-        draw_pixel(r, c, color, window);
+        pixel2d(r, c, color, window);
       }
     }
   } else {
-    draw_line(x, y, x, y_end - 1, color, window);
-    draw_line(x, y, x_end - 1, y, color, window);
-    draw_line(x_end, y, x_end, y_end, color, window);
-    draw_line(x, y_end, x_end, y_end, color, window);
+    line2d(x, y, x, y_end - 1, color, window);
+    line2d(x, y, x_end - 1, y, color, window);
+    line2d(x_end, y, x_end, y_end, color, window);
+    line2d(x, y_end, x_end, y_end, color, window);
   }
   return true;
 }

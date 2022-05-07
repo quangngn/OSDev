@@ -116,7 +116,7 @@ void window_clear(window_t* window);
  * \param window Pointer to the target window.
  * \return true if draw succeeds.
  */
-bool draw_pixel(int x, int y, color_t color, window_t* window);
+bool pixel2d(int x, int y, color_t color, window_t* window);
 
 /**
  * Draw pixel onto the window's buffer. By default, the window have origin
@@ -126,7 +126,7 @@ bool draw_pixel(int x, int y, color_t color, window_t* window);
  * \param window Pointer to the target window.
  * \return true if draw succeeds.
  */
-bool draw_pixel_p(point_t* p, color_t color, window_t* window);
+bool pixel2d_p(point_t* p, color_t color, window_t* window);
 
 /**
  * Credit: Dmitry V. Sokolov
@@ -143,7 +143,7 @@ bool draw_pixel_p(point_t* p, color_t color, window_t* window);
  * \param window Pointer to the target window.
  * \return true if draw succeeds.
  */
-bool draw_line(int x0, int y0, int x1, int y1, color_t color, window_t* window);
+bool line2d(int x0, int y0, int x1, int y1, color_t color, window_t* window);
 
 /**
  * Draw line onto the window's buffer. By default, the window have origin
@@ -153,7 +153,7 @@ bool draw_line(int x0, int y0, int x1, int y1, color_t color, window_t* window);
  * \param window Pointer to the target window.
  * \return true if draw succeeds.
  */
-bool draw_line_l(const line_t* l, color_t color, window_t* window);
+bool line2d_l(const line_t* l, color_t color, window_t* window);
 
 /**
  * Draw a triangle onto the window's buffer. By default, the window have origin
@@ -169,7 +169,7 @@ bool draw_line_l(const line_t* l, color_t color, window_t* window);
  * \param window Pointer to the target window.
  * \return true if draw succeeds.
  */
-bool draw_triangle(int x0, int y0, int x1, int y1, int x2, int y2,
+bool tri2d(int x0, int y0, int x1, int y1, int x2, int y2,
                    color_t color, bool fill, window_t* window);
 
 /**
@@ -181,7 +181,7 @@ bool draw_triangle(int x0, int y0, int x1, int y1, int x2, int y2,
  * \param window Pointer to the target window.
  * \return true if draw succeeds.
  */
-bool draw_triangle_t(const triangle_t* t, color_t color, bool fill,
+bool tri2d_t(const triangle_t* t, color_t color, bool fill,
                      window_t* window);
 /**
  * Draw a rectangle onto the window's buffer. By default, the window have origin
@@ -199,7 +199,7 @@ bool draw_triangle_t(const triangle_t* t, color_t color, bool fill,
  * \param window Pointer to the target window.
  * \return true if draw succeeds.
  */
-bool draw_rectangle(int x0, int y0, int x1, int y1, int x2, int y2, int x3,
+bool rec2d(int x0, int y0, int x1, int y1, int x2, int y2, int x3,
                     int y3, color_t color, bool fill, window_t* window);
 
 /**
@@ -211,7 +211,7 @@ bool draw_rectangle(int x0, int y0, int x1, int y1, int x2, int y2, int x3,
  * \param window Pointer to the target window.
  * \return true if draw succeeds.
  */
-bool draw_rectangle_r(const rectangle_t* r, color_t color, bool fill,
+bool rec2d_r(const rectangle_t* r, color_t color, bool fill,
                       window_t* window);
 
 /**
@@ -229,5 +229,5 @@ bool draw_rectangle_r(const rectangle_t* r, color_t color, bool fill,
  * \param window Pointer to the target window.
  * \return true if draw succeeds.
  */
-bool draw_rectangle_2d(int x, int y, int width, int height, color_t color,
+bool rec2d_wh(int x, int y, int width, int height, color_t color,
                        bool fill, window_t* window);

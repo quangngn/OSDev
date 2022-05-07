@@ -18,14 +18,14 @@ void draw_star() {
   line_t l6 = {.p0 = {.x = 360, .y = 360}, .p1 = {.x = 360, .y = 0}};
   line_t l7 = {.p0 = {.x = 360, .y = 360}, .p1 = {.x = 720, .y = 0}};
 
-  draw_line_l(&l0, ARGB32_RED, &window);
-  draw_line_l(&l1, ARGB32_RED, &window);
-  draw_line_l(&l2, ARGB32_RED, &window);
-  draw_line_l(&l3, ARGB32_RED, &window);
-  draw_line_l(&l4, ARGB32_RED, &window);
-  draw_line_l(&l5, ARGB32_RED, &window);
-  draw_line_l(&l6, ARGB32_RED, &window);
-  draw_line_l(&l7, ARGB32_RED, &window);
+  line2d_l(&l0, ARGB32_RED, &window);
+  line2d_l(&l1, ARGB32_RED, &window);
+  line2d_l(&l2, ARGB32_RED, &window);
+  line2d_l(&l3, ARGB32_RED, &window);
+  line2d_l(&l4, ARGB32_RED, &window);
+  line2d_l(&l5, ARGB32_RED, &window);
+  line2d_l(&l6, ARGB32_RED, &window);
+  line2d_l(&l7, ARGB32_RED, &window);
   graphic_draw(&window, false);
 }
 
@@ -55,14 +55,14 @@ void draw_triangle_pattern() {
   triangle_t t6 = {.p0 = p0, .p1 = p7, .p2 = p4};
   triangle_t t7 = {.p0 = p0, .p1 = p4, .p2 = p1};
 
-  draw_triangle_t(&t0, ARGB32_RED, true, &window);
-  draw_triangle_t(&t1, ARGB32_BLUE, true, &window);
-  draw_triangle_t(&t2, ARGB32_GREEN, true, &window);
-  draw_triangle_t(&t3, ARGB32_LIGHT_RED, true, &window);
-  draw_triangle_t(&t4, ARGB32_LIGHT_BLUE, true, &window);
-  draw_triangle_t(&t5, ARGB32_LIGHT_GREEN, true, &window);
-  draw_triangle_t(&t6, ARGB32_BROW, true, &window);
-  draw_triangle_t(&t7, ARGB32_CYAN, true, &window);
+  tri2d_t(&t0, ARGB32_RED, true, &window);
+  tri2d_t(&t1, ARGB32_BLUE, true, &window);
+  tri2d_t(&t2, ARGB32_GREEN, true, &window);
+  tri2d_t(&t3, ARGB32_LIGHT_RED, true, &window);
+  tri2d_t(&t4, ARGB32_LIGHT_BLUE, true, &window);
+  tri2d_t(&t5, ARGB32_LIGHT_GREEN, true, &window);
+  tri2d_t(&t6, ARGB32_BROW, true, &window);
+  tri2d_t(&t7, ARGB32_CYAN, true, &window);
   graphic_draw(&window, false);
 }
 
@@ -81,7 +81,7 @@ void running_triangle() {
   while (temp.p0.x < 720) {
     if (get_time() - prev_time > 10000000) {
       // Draw
-      draw_triangle_t(&temp, ARGB32_YELLOW, true, &window);
+      tri2d_t(&temp, ARGB32_YELLOW, true, &window);
       graphic_draw(&window, true);
 
       // Update object
@@ -118,7 +118,7 @@ void transform_triangle() {
   fmat4x4_mult_vec4(&tf_mat, &(t.p1), &(t.p1));
   fmat4x4_mult_vec4(&tf_mat, &(t.p2), &(t.p2));
 
-  draw_triangle_t(&t, ARGB32_YELLOW, true, &window);
+  tri2d_t(&t, ARGB32_YELLOW, true, &window);
 
   graphic_draw(&window, true);
 }
@@ -133,6 +133,6 @@ void draw_test_rectangle() {
   point_t p3 = {.x = 320, .y = 0, .z = 0, .w = 0};
 
   rectangle_t r0 = {.p0 = p0, .p1 = p1, .p2 = p2, .p3 = p3};
-  draw_rectangle_r(&r0, ARGB32_RED, true, &window);
+  rec2d_r(&r0, ARGB32_RED, true, &window);
   graphic_draw(&window, false);
 }
