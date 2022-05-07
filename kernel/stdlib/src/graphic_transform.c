@@ -93,9 +93,8 @@ bool transform_mat4x4(fmat4x4_t* transform_mat, fmat4x4_t* translate_mat,
     return false;
   }
 
-  fmat4x4_t temp;
-  return fmat4x4_matmul(translate_mat, rot_mat, &temp) &&
-         fmat4x4_matmul(&temp, scale_mat, transform_mat);
+  return fmat4x4_matmul(translate_mat, rot_mat, transform_mat) &&
+         fmat4x4_matmul(transform_mat, scale_mat, transform_mat);
 }
 
 bool perspective_mat4x4(fmat4x4_t* pers_mat, float screen_w, float screen_h,
@@ -110,13 +109,13 @@ bool perspective_mat4x4(fmat4x4_t* pers_mat, float screen_w, float screen_h,
   float z = (far + near) / (near - far);
   float w = (2 * far * near) / (near - far);
 
-  pers_mat->c1.x = x;
+  pers_mat->c1.x = x * screen_h;
   pers_mat->c1.y = 0;
   pers_mat->c1.z = 0;
   pers_mat->c1.w = 0;
 
   pers_mat->c2.x = 0;
-  pers_mat->c2.y = y;
+  pers_mat->c2.y = y * screen_h;
   pers_mat->c2.z = 0;
   pers_mat->c2.w = 0;
 

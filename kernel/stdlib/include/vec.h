@@ -3,6 +3,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "mem.h"
+
 /******************************************************************************/
 // 2D Vector and Matrix
 typedef struct {
@@ -114,6 +116,17 @@ typedef struct {
   fvec4_t c4;
 } fmat4x4_t;
 
+static fvec4_t x_axis = {.x = 1, .y = 0, .z = 0, .w = 0};
+static fvec4_t y_axis = {.x = 0, .y = 1, .z = 0, .w = 0};
+static fvec4_t z_axis = {.x = 0, .y = 0, .z = 1, .w = 0};
+
+static fmat4x4_t id_mat = {
+  .c1 = {.x = 1, .y = 0, .z = 0, .w = 0},
+  .c2 = {.x = 0, .y = 1, .z = 0, .w = 0},
+  .c3 = {.x = 0, .y = 0, .z = 1, .w = 0},
+  .c4 = {.x = 0, .y = 0, .z = 0, .w = 1},
+};
+
 // Vec4 integer functions
 // Elementwise add vectors
 bool ivec4_add(ivec4_t *v1, ivec4_t *v2, ivec4_t *res);
@@ -124,9 +137,9 @@ bool ivec4_mult(ivec4_t *v1, ivec4_t *v2, ivec4_t *res);
 // Multiple vector with scalar
 bool ivec4_scale(ivec4_t *v1, int scale, ivec4_t *res);
 // Dot-product of two vectors
-int ivec4_dot_prod(ivec4_t *v1, ivec4_t *v2, int *res);
+bool ivec4_dot_prod(ivec4_t *v1, ivec4_t *v2, int *res);
 // Square of the vector's magnitude
-int ivec4_mag_sq(ivec4_t *v1, int *res);
+bool ivec4_mag_sq(ivec4_t *v1, int *res);
 // Check if two vectors are equal (x1 == x2 && y1 == y2 && z1 == z2 && w1 == w2)
 bool ivec4_equal(ivec4_t *v1, ivec4_t *v2);
 
@@ -140,9 +153,9 @@ bool fvec4_ew_mult(fvec4_t *v1, fvec4_t *v2, fvec4_t *res);
 // Multiple vector with scalar
 bool fvec4_scale(fvec4_t *v1, float scale, fvec4_t *res);
 // Dot-product of two vectors
-float fvec4_dot_prod(fvec4_t *v1, fvec4_t *v2, float *res);
+bool fvec4_dot_prod(fvec4_t *v1, fvec4_t *v2, float *res);
 // Square of the vector's magnitude
-float fvec4_mag_sq(fvec4_t *v1, float *res);
+bool fvec4_mag_sq(fvec4_t *v1, float *res);
 // Check if two vectors are equal (x1 == x2 && y1 == y2 && z1 == z2 && w1 == w2)
 bool fvec4_equal(fvec4_t *v1, fvec4_t *v2);
 

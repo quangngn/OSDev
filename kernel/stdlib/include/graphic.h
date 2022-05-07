@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "graphic_transform.h"
 #include "math.h"
 #include "mem.h"
 #include "time.h"
@@ -63,12 +64,10 @@ bool graphic_get_framebuffer_info(framebuffer_info_t* fb_info);
 /**
  * Copy the current window's frame buffer to the kernel's framebuffer.
  * \param window Pointer to the window struct.
- * \param flip Boolean whether we flip the buffer vertically. Effectively
- * changing the origin from top-left to bottom-left.
  * \param clear Clear window buffer after draw.
  * \return true if draw successfully.
  */
-void graphic_draw(window_t* window_t, bool flip, bool clear);
+void graphic_draw(window_t* window_t, bool clear);
 
 /******************************************************************************/
 // Window functions
@@ -97,7 +96,7 @@ void window_clear(window_t* window);
 // Draw primitive to user's framebuffer in 2D
 /**
  * Draw pixel onto the window's buffer. By default, the window have origin
- * coordinate (0, 0) at the top left corner.
+ * coordinate (0, 0) at the bottom left corner.
  * \param x The horizontal coordinate of the pixel.
  * \param y The vertical coordinate of the pixel.
  * \param color The color of the pixel.
@@ -108,7 +107,7 @@ bool draw_pixel(int x, int y, color_t color, window_t* window);
 
 /**
  * Draw pixel onto the window's buffer. By default, the window have origin
- * coordinate (0, 0) at the top left corner.
+ * coordinate (0, 0) at the bottom left corner.
  * \param p Pointer to the point struct.
  * \param color The color of the pixel.
  * \param window Pointer to the target window.
@@ -122,7 +121,7 @@ bool draw_pixel_p(point_t* p, color_t color, window_t* window);
  * https://github.com/ssloy/tinyrenderer/wiki/Lesson-1:-Bresenham’s-Line-Drawing-Algorithm
  *
  * Draw line onto the window's buffer. By default, the window have origin
- * coordinate (0, 0) at the top left corner.
+ * coordinate (0, 0) at the bottom left corner.
  * \param x0 The horizontal coordinate of the start point.
  * \param y0 The vertical coordinate of the start point.
  * \param x1 The horizontal coordinate of the end point.
@@ -135,7 +134,7 @@ bool draw_line(int x0, int y0, int x1, int y1, color_t color, window_t* window);
 
 /**
  * Draw line onto the window's buffer. By default, the window have origin
- * coordinate (0, 0) at the top left corner.
+ * coordinate (0, 0) at the bottom left corner.
  * \param l Pointer to the line object.
  * \param color The color of the line.
  * \param window Pointer to the target window.
@@ -145,7 +144,7 @@ bool draw_line_l(const line_t* l, color_t color, window_t* window);
 
 /**
  * Draw a triangle onto the window's buffer. By default, the window have origin
- * coordinate (0, 0) at the top left corner.
+ * coordinate (0, 0) at the bottom left corner.
  * \param x0 The horizontal coordinate of the 1st vertex.
  * \param y0 The vertical coordinate of the 1st vertex.
  * \param x1 The horizontal coordinate of the 2nd vertex.
@@ -162,7 +161,7 @@ bool draw_triangle(int x0, int y0, int x1, int y1, int x2, int y2,
 
 /**
  * Draw a triangle onto the window's buffer. By default, the window have origin
- * coordinate (0, 0) at the top left corner.
+ * coordinate (0, 0) at the botom left corner.
  * \param t Pointer to the triangle.
  * \param color The color of the triangle.
  * \param fill Boolean whether the shape is filled.
@@ -173,7 +172,7 @@ bool draw_triangle_t(const triangle_t* t, color_t color, bool fill,
                      window_t* window);
 /**
  * Draw a rectangle onto the window's buffer. By default, the window have origin
- * coordinate (0, 0) at the top left corner.
+ * coordinate (0, 0) at the bottom left corner.
  * \param x0 The horizontal coordinate of the 1st vertex.
  * \param y0 The vertical coordinate of the 1st vertex.
  * \param x1 The horizontal coordinate of the 2nd vertex.
@@ -192,7 +191,7 @@ bool draw_rectangle(int x0, int y0, int x1, int y1, int x2, int y2, int x3,
 
 /**
  * Draw a rectangle onto the window's buffer. By default, the window have origin
- * coordinate (0, 0) at the top left corner.
+ * coordinate (0, 0) at the bottom left corner.
  * \param r Pointer to the rectangle.
  * \param color The color of the triangle.
  * \param fill Boolean whether the shape is filled.
@@ -202,3 +201,20 @@ bool draw_rectangle(int x0, int y0, int x1, int y1, int x2, int y2, int x3,
 bool draw_rectangle_r(const rectangle_t* r, color_t color, bool fill,
                       window_t* window);
 
+/**
+ * Draw a rectangle onto the window's buffer. By default, the window have origin
+ * coordinate (0, 0) at the bottom left corner. Notice that the horizontal
+ * coordinate of the rectangle is from x to x + width - 1 (inclusively). The
+ * vertical coordinate of the rectangle is from y to y - height + 1
+ * (inclusively). 
+ * \param x X of top left corner. 
+ * \param y Y of top left corner.
+ * \param width Width of the rectangle.
+ * \param height Height of the rectangle.
+ * \param color The color of the triangle.
+ * \param fill Boolean whether the shape is filled.
+ * \param window Pointer to the target window.
+ * \return true if draw succeeds.
+ */
+bool draw_rectangle_2d(int x, int y, int width, int height, color_t color,
+                       bool fill, window_t *window);
