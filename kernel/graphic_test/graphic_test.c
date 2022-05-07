@@ -74,7 +74,7 @@ void running_triangle() {
     if (get_time() - prev_time > 10000000) {
       // Draw
       draw_triangle_t(&t, ARGB32_YELLOW, true, &window);
-      graphic_draw(&window, true);
+      graphic_draw(&window, true, true);
 
       // Update object
       t.p0.x = min(720, t.p0.x + 1);
@@ -107,7 +107,7 @@ void _start() {
   //  running_triangle();
 
   draw_test_rectangle();
-  graphic_draw(&window, true);
+  graphic_draw(&window, true, false);
 
   // running_triangle();
 

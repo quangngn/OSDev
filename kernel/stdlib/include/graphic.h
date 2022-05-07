@@ -9,6 +9,7 @@
 
 typedef struct {
   pixel_t* addr;
+  int32_t* z_buffer;
   color_t bg;
   int32_t width;
   int32_t height;
@@ -64,9 +65,10 @@ bool graphic_get_framebuffer_info(framebuffer_info_t* fb_info);
  * \param window Pointer to the window struct.
  * \param flip Boolean whether we flip the buffer vertically. Effectively
  * changing the origin from top-left to bottom-left.
+ * \param clear Clear window buffer after draw.
  * \return true if draw successfully.
  */
-void graphic_draw(window_t* window_t, bool flip);
+void graphic_draw(window_t* window_t, bool flip, bool clear);
 
 /******************************************************************************/
 // Window functions
@@ -170,7 +172,7 @@ bool draw_triangle(int x0, int y0, int x1, int y1, int x2, int y2,
 bool draw_triangle_t(const triangle_t* t, color_t color, bool fill,
                      window_t* window);
 /**
- * Draw a triangle onto the window's buffer. By default, the window have origin
+ * Draw a rectangle onto the window's buffer. By default, the window have origin
  * coordinate (0, 0) at the top left corner.
  * \param x0 The horizontal coordinate of the 1st vertex.
  * \param y0 The vertical coordinate of the 1st vertex.
@@ -200,5 +202,3 @@ bool draw_rectangle(int x0, int y0, int x1, int y1, int x2, int y2, int x3,
 bool draw_rectangle_r(const rectangle_t* r, color_t color, bool fill,
                       window_t* window);
 
-/******************************************************************************/
-// Transformation

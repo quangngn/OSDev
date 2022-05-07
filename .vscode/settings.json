@@ -11,7 +11,8 @@
         "complex": "c",
         "cmath": "c",
         "queue": "c",
-        "random": "c"
+        "random": "c",
+        "cfloat": "c"
     },
     "editor.wordWrap": "wordWrapColumn",
     "editor.wordWrapColumn": 80

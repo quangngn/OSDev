@@ -22,14 +22,14 @@ bool graphic_get_framebuffer_info(framebuffer_info_t *fb_info) {
  * changing the origin from top-left to bottom-left.
  * \return true if draw successfully.
  */
-void graphic_draw(window_t *window, bool flip) {
+void graphic_draw(window_t *window, bool flip, bool clear) {
   if (window == NULL) return;
 
   // Make draw call
   syscall(SYSCALL_FRAMEBUFFER_CPY, window->addr, (int64_t)window->screen_x,
           (int64_t)window->screen_y, (int64_t)window->width,
           (int64_t)window->height, flip);
-  window_clear(window);
+  if (clear) window_clear(window);
 }
 
 /******************************************************************************/
@@ -78,9 +78,11 @@ void window_clear(window_t *window) {
   if (window == NULL) return;
 
   color_t *src = (color_t *)window->addr;
+  int32_t *z_buff = window->z_buffer;
   for (int r = 0; r < window->height; r++) {
     for (int c = 0; c < window->width; c++) {
       src[r * window->width + c] = window->bg;
+      z_buff = INT32_MIN;
     }
   }
 }
@@ -253,7 +255,7 @@ bool draw_triangle_t(const triangle_t *t, color_t color, bool fill,
 }
 
 /**
- * Draw a triangle onto the window's buffer. By default, the window have origin
+ * Draw a rectangle onto the window's buffer. By default, the window have origin
  * coordinate (0, 0) at the top left corner.
  * \param x0 The horizontal coordinate of the 1st vertex.
  * \param y0 The vertical coordinate of the 1st vertex.
@@ -309,3 +311,4 @@ bool draw_rectangle_r(const rectangle_t *r, color_t color, bool fill,
                         (int)r->p2.x, (int)r->p2.y, (int)r->p3.x, (int)r->p3.y,
                         color, fill, window);
 }
+
