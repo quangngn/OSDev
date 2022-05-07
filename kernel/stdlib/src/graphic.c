@@ -62,7 +62,10 @@ bool window_init(window_t *window, int width, int height, int screen_x,
   window->screen_x = screen_x;
   window->screen_y = screen_y;
   window->bg = bg;
+  // Set buffer to the default background color. This would also set dirty_buff
+  // to false
   window_clear(window);
+
   return true;
 }
 

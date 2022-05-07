@@ -4,9 +4,6 @@
 #include <stdint.h>
 
 #include "mem.h"
-
-/******************************************************************************/
-// 2D Vector and Matrix
 typedef struct {
   int x;
   int y;
@@ -29,6 +26,49 @@ typedef struct {
   fvec2_t c2;
 } fmat2x2_t;
 
+typedef struct {
+  int x;
+  int y;
+  int z;
+  int w;
+} ivec4_t;
+
+typedef struct {
+  float x;
+  float y;
+  float z;
+  float w;
+} fvec4_t;
+
+// Column major matrix
+typedef struct {
+  ivec4_t c1;
+  ivec4_t c2;
+  ivec4_t c3;
+  ivec4_t c4;
+} imat4x4_t;
+
+// Column major matrix
+typedef struct {
+  fvec4_t c1;
+  fvec4_t c2;
+  fvec4_t c3;
+  fvec4_t c4;
+} fmat4x4_t;
+
+static fvec4_t x_axis = {.x = 1, .y = 0, .z = 0, .w = 0};
+static fvec4_t y_axis = {.x = 0, .y = 1, .z = 0, .w = 0};
+static fvec4_t z_axis = {.x = 0, .y = 0, .z = 1, .w = 0};
+
+static fmat4x4_t id_mat = {
+  .c1 = {.x = 1, .y = 0, .z = 0, .w = 0},
+  .c2 = {.x = 0, .y = 1, .z = 0, .w = 0},
+  .c3 = {.x = 0, .y = 0, .z = 1, .w = 0},
+  .c4 = {.x = 0, .y = 0, .z = 0, .w = 1},
+};
+
+/******************************************************************************/
+// 2D Vector and Matrix
 // Vec2 integer functions
 // Elementwise add vectors
 bool ivec2_add(ivec2_t *v1, ivec2_t *v2, ivec2_t *res);
@@ -86,47 +126,6 @@ bool fmat2x2_equal(fmat2x2_t *m1, fmat2x2_t *m2);
 
 /******************************************************************************/
 // 4D Vector and Matrix
-typedef struct {
-  int x;
-  int y;
-  int z;
-  int w;
-} ivec4_t;
-
-typedef struct {
-  float x;
-  float y;
-  float z;
-  float w;
-} fvec4_t;
-
-// Column major matrix
-typedef struct {
-  ivec4_t c1;
-  ivec4_t c2;
-  ivec4_t c3;
-  ivec4_t c4;
-} imat4x4_t;
-
-// Column major matrix
-typedef struct {
-  fvec4_t c1;
-  fvec4_t c2;
-  fvec4_t c3;
-  fvec4_t c4;
-} fmat4x4_t;
-
-static fvec4_t x_axis = {.x = 1, .y = 0, .z = 0, .w = 0};
-static fvec4_t y_axis = {.x = 0, .y = 1, .z = 0, .w = 0};
-static fvec4_t z_axis = {.x = 0, .y = 0, .z = 1, .w = 0};
-
-static fmat4x4_t id_mat = {
-  .c1 = {.x = 1, .y = 0, .z = 0, .w = 0},
-  .c2 = {.x = 0, .y = 1, .z = 0, .w = 0},
-  .c3 = {.x = 0, .y = 0, .z = 1, .w = 0},
-  .c4 = {.x = 0, .y = 0, .z = 0, .w = 1},
-};
-
 // Vec4 integer functions
 // Elementwise add vectors
 bool ivec4_add(ivec4_t *v1, ivec4_t *v2, ivec4_t *res);

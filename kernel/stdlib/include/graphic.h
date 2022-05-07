@@ -53,6 +53,19 @@ typedef struct {
   point_t p3;
 } rectangle_t;
 
+typedef struct {
+  triangle_t* mesh;
+  float degx;
+  float degy;
+  float degz;
+  float sx;
+  float sy;
+  float sz;
+  int32_t dx;
+  int32_t dy;
+  int32_t dz;
+} object_t;
+
 /******************************************************************************/
 // Graphical functions
 /**
@@ -206,8 +219,8 @@ bool draw_rectangle_r(const rectangle_t* r, color_t color, bool fill,
  * coordinate (0, 0) at the bottom left corner. Notice that the horizontal
  * coordinate of the rectangle is from x to x + width - 1 (inclusively). The
  * vertical coordinate of the rectangle is from y to y - height + 1
- * (inclusively). 
- * \param x X of top left corner. 
+ * (inclusively).
+ * \param x X of top left corner.
  * \param y Y of top left corner.
  * \param width Width of the rectangle.
  * \param height Height of the rectangle.
@@ -217,4 +230,4 @@ bool draw_rectangle_r(const rectangle_t* r, color_t color, bool fill,
  * \return true if draw succeeds.
  */
 bool draw_rectangle_2d(int x, int y, int width, int height, color_t color,
-                       bool fill, window_t *window);
+                       bool fill, window_t* window);
