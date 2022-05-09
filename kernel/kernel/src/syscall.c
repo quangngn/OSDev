@@ -136,7 +136,7 @@ int64_t read_handler(uint64_t f_descriptor, char* buff, size_t read_size,
     // This variable is also used as the index for the next available slot for
     // new character to be read.
     char c = '\0';
-    while (read_char_counter < read_size - 1) {
+    while (read_char_counter < read_size) {
       c = kget_c();
       // If c is delim (in this case new line), break out of loop
       if (c == '\n') {
@@ -210,13 +210,19 @@ int64_t write_handler(uint64_t f_descriptor, const char* str,
  * \param exe_name Name of the executable to be exec.
  * \returns true if the function is executed successfully, else return falses.
  */
-bool exec_handler(const char* exe_name) { return run_exe(exe_name); }
+bool exec_handler(const char* exe_name) { 
+  term_init();
+  return run_exe(exe_name); 
+}
 
 /**
  * Hanlder to exit the current process and invoke shell exec.
  * \returns true if the function is executed successfully, else return falses.
  */
-bool exit_handler() { return run_exe("shell"); }
+bool exit_handler() {
+  term_init();
+  return run_exe("shell");
+}
 
 /******************************************************************************/
 /**

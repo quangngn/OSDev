@@ -75,6 +75,11 @@ int64_t getline(char** str, size_t* size, uint64_t* stream);
 char getc(uint64_t f_descriptor);
 
 /**
+ * Similar to getc but we do not print out the input
+ */ 
+char getc_silent(uint64_t f_descriptor);
+
+/**
  * Read char from the keyboard buffer without stalling.
  * \returns the character from the keyboard. If the keyboard buffer is empty,
  * return null-terminate character.

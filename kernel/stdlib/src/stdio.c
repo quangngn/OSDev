@@ -276,7 +276,7 @@ int64_t getline(char** str, size_t* size, uint64_t* stream) {
     // 1. Continue reading to *str from (*str)[str_len]. Null terminate the
     // result.
     int64_t prev_str_len = str_len;
-    str_len = sys_read(STD_IN, *str, *size, true, true, str_len);
+    str_len = sys_read(STD_IN, *str, *size - 1, true, true, str_len);
     (*str)[str_len] = '\0';
 
     // 2. If all following conditions are met (aka we still have more character
@@ -309,6 +309,15 @@ int64_t getline(char** str, size_t* size, uint64_t* stream) {
 char getc(uint64_t f_descriptor) {
   char ret_c = 0;
   read(f_descriptor, &ret_c, 1);
+  return ret_c;
+}
+
+/**
+ * Similar to getc but we do not print out the input
+ */ 
+char getc_silent(uint64_t f_descriptor) {
+  char ret_c = '\0';
+  sys_read(f_descriptor, &ret_c, 1, true, false, 0);
   return ret_c;
 }
 

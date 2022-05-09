@@ -6,14 +6,14 @@
 #include "term.h"
 
 // Defined in psf.c
-extern uint32_t psf_font_w;
-extern uint32_t psf_font_h;
-extern size_t term_h;
-extern size_t term_w;
+extern int32_t psf_font_w;
+extern int32_t psf_font_h;
+extern int32_t term_h;
+extern int32_t term_w;
 
 // Defined in kgraphic.c
-extern size_t screen_h;
-extern size_t screen_w;
+extern int32_t screen_h;
+extern int32_t screen_w;
 extern uintptr_t buffer_addr;
 
 // Struct to hold the current state of the terminal

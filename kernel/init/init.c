@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+
 #include "test_stdlib.h"
 
 void run_test() {
@@ -24,9 +25,12 @@ void get_input() {
 }
 
 void _start() {
-  // get_input();
-  run_test();
+  get_input();
 
+  // Press 'q' to exit the the program
+  printf("Finish execution, please press 'q' to exit the program!\n");
+  while (getc_silent(STD_IN) != 'q') {}
   exit();
+  
   for (;;) {}
 }

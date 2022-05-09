@@ -12,7 +12,8 @@
         "cmath": "c",
         "queue": "c",
         "random": "c",
-        "cfloat": "c"
+        "cfloat": "c",
+        "process.h": "c"
     },
     "editor.wordWrap": "wordWrapColumn",
     "editor.wordWrapColumn": 80
