@@ -55,6 +55,7 @@
 #define ARGB32_CYAN 0x0000FFFF
 #define ARGB32_YELLOW 0x00FFFF00
 #define ARGB32_BROW 0x00CC6600
+#define ARGB32_GRAY 0x00808080
 
 typedef uint32_t color_t;
 typedef uint32_t pixel_t;

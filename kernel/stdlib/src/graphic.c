@@ -545,3 +545,43 @@ bool tri3d_t(const triangle_t *t, color_t color, bool fill, window_t *window) {
                (int)t->p1.y, (int)t->p1.z, (int)t->p2.x, (int)t->p2.y,
                (int)t->p2.z, color, fill, window);
 }
+
+/******************************************************************************/
+/** 
+ * Render object in 3D using orthogonal projection. 
+ * \param obj Pointer to the object.
+ * \param translate Boolean to whether we translate the object.
+ * \param rotate Boolean to whether we rotate the object.
+ * \param scale Boolean to whether we scale the object.
+ * \param fill Boolean to whether we fill the triangles.
+ * \param window Pointer to the window.
+ * return true if draw succeeds.
+ */ 
+bool obj3d_o(object_t *obj, bool translate, bool rotate, bool scale,
+             bool fill, window_t *window) {
+  if (obj == NULL || window == NULL) return false;
+
+  // Compose transformation matrix
+  fmat4x4_t tmat = id_mat;
+  fmat4x4_t rmat = id_mat;
+  fmat4x4_t smat = id_mat;
+  fmat4x4_t transform_mat = id_mat;
+  if (translate) translate_mat4x4(&tmat, obj->dx, obj->dy, obj->dz);
+  if (rotate) rotate_mat4x4(&rmat, obj->rot_angle, &(obj->rot_axis));
+  if (scale) scale_mat4x4(&smat, obj->sx, obj->sy, obj->sz);
+  transform_mat4x4(&transform_mat, &tmat, &rmat, &smat);
+
+  // Draw each triangle to the buffer
+  triangle_t* cur_tri = NULL;
+  triangle_t temp_tri;
+  for (int64_t i = 0; i < obj->nb_tri; i++) {
+    cur_tri = obj->mesh + i;
+
+    fmat4x4_mult_vec4(&transform_mat, &(cur_tri->p0), &(temp_tri.p0));
+    fmat4x4_mult_vec4(&transform_mat, &(cur_tri->p1), &(temp_tri.p1));
+    fmat4x4_mult_vec4(&transform_mat, &(cur_tri->p2), &(temp_tri.p2));
+    
+    tri3d_t(&temp_tri, (obj->mess_color)[i], fill, window);
+  }
+  return true;
+}

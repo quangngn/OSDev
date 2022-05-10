@@ -13,7 +13,8 @@
         "queue": "c",
         "random": "c",
         "cfloat": "c",
-        "process.h": "c"
+        "process.h": "c",
+        "graphic.h": "c"
     },
     "editor.wordWrap": "wordWrapColumn",
     "editor.wordWrapColumn": 80

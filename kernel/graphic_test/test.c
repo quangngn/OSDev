@@ -4,6 +4,7 @@ window_t window;
 fmat4x4_t t_mat;
 fmat4x4_t r_mat;
 fmat4x4_t s_mat;
+fmat4x4_t p_mat;
 fmat4x4_t tf_mat;
 
 void draw_star() {
@@ -39,7 +40,6 @@ void draw_triangle_pattern() {
   point_t p3 = {.x = 720, .y = 720, .z = 0, .w = 1};
 
   point_t p4 = {.x = 0, .y = 360, .z = 0, .w = 1};
-  point_t p5 = {.x = 360, .y = 360, .z = 0, .w = 1};
   point_t p6 = {.x = 720, .y = 360, .z = 0, .w = 1};
 
   point_t p7 = {.x = 0, .y = 0, .z = 0, .w = 1};
@@ -86,12 +86,12 @@ void running_triangle() {
 
       // Update object
       translate_mat4x4(&t_mat, x, y, 0);
-      rotate_mat4x4(&r_mat, angle, &z_axis);
+      rotate_mat4x4(&r_mat, angle, &y_axis);
       transform_mat4x4(&tf_mat, &t_mat, &r_mat, &id_mat);
       x += 0.5;
       y += 0.5;
       angle -= 0.5;
-      
+
       fmat4x4_mult_vec4(&tf_mat, &(t.p0), &(temp.p0));
       fmat4x4_mult_vec4(&tf_mat, &(t.p1), &(temp.p1));
       fmat4x4_mult_vec4(&tf_mat, &(t.p2), &(temp.p2));
