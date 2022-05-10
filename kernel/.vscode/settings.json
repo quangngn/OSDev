@@ -9,5 +9,6 @@
     "stddef.h": "c"
   },
   "editor.wordWrap": "wordWrapColumn",
-  "editor.wordWrapColumn": 80  
+  "editor.wordWrapColumn": 80,
+  "C_Cpp.errorSquiggles": "Disabled"
 }
