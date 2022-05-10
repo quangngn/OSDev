@@ -1,5 +1,10 @@
 #include "graphic_transform.h"
 
+/**
+ * Construct a translation matrix based on given movement in x, y, and z
+ * direction. The result is stored in transl_mat.
+ * \returns true if succeed, false other wise.
+ */
 bool translate_mat4x4(fmat4x4_t* transl_mat, float dx, float dy, float dz) {
   if (transl_mat == NULL) return false;
 
@@ -26,6 +31,11 @@ bool translate_mat4x4(fmat4x4_t* transl_mat, float dx, float dy, float dz) {
   return true;
 }
 
+/**
+ * Construct a scaling matrix based on given scale of in x, y, and z direction.
+ * The result is stored in scale_mat.
+ * \returns true if succeed, false otherwise.
+ */
 bool scale_mat4x4(fmat4x4_t* scale_mat, float sx, float sy, float sz) {
   if (scale_mat == NULL) return false;
 
@@ -52,6 +62,13 @@ bool scale_mat4x4(fmat4x4_t* scale_mat, float sx, float sy, float sz) {
   return true;
 }
 
+/**
+ * Source: https://en.wikipedia.org/wiki/Rotation_matrix
+ * 
+ * Construct a rotation matrix based on given the angle and an axis. The axis
+ * must be a unit vector. The result is stored in rot_mat.
+ * \returns true if succeed, false otherwise.
+ */
 bool rotate_mat4x4(fmat4x4_t* rot_mat, float angle, fvec4_t* axis) {
   if (rot_mat == NULL || axis == NULL) return false;
 
@@ -86,6 +103,12 @@ bool rotate_mat4x4(fmat4x4_t* rot_mat, float angle, fvec4_t* axis) {
   return true;
 }
 
+/**
+ * Construct a general transformation matrix from the given translation,
+ * rotation, and scale matrix. The order is as follows:
+ * transf = transl x rotation x scale
+ * \returns true if succeed, false otherwise.
+ */
 bool transform_mat4x4(fmat4x4_t* transform_mat, fmat4x4_t* translate_mat,
                       fmat4x4_t* rot_mat, fmat4x4_t* scale_mat) {
   if (transform_mat == NULL || translate_mat == NULL || rot_mat == NULL ||
@@ -95,39 +118,4 @@ bool transform_mat4x4(fmat4x4_t* transform_mat, fmat4x4_t* translate_mat,
 
   return fmat4x4_matmul(translate_mat, rot_mat, transform_mat) &&
          fmat4x4_matmul(transform_mat, scale_mat, transform_mat);
-}
-
-bool perspective_mat4x4(fmat4x4_t* pers_mat, float screen_w, float screen_h,
-                        float near, float far, float fov) {
-  if (pers_mat == NULL) return 0;
-
-  float tan_half_fov = tan(fov / 2);
-  float aspect_ratio = screen_w / screen_h;
-
-  float x = 1 / (aspect_ratio * tan_half_fov);
-  float y = 1 / tan_half_fov;
-  float z = (far + near) / (near - far);
-  float w = (2 * far * near) / (near - far);
-
-  pers_mat->c1.x = x * screen_h;
-  pers_mat->c1.y = 0;
-  pers_mat->c1.z = 0;
-  pers_mat->c1.w = 0;
-
-  pers_mat->c2.x = 0;
-  pers_mat->c2.y = y * screen_h;
-  pers_mat->c2.z = 0;
-  pers_mat->c2.w = 0;
-
-  pers_mat->c3.x = 0;
-  pers_mat->c3.y = 0;
-  pers_mat->c3.z = z;
-  pers_mat->c3.w = -1;
-
-  pers_mat->c4.x = 0;
-  pers_mat->c4.y = 0;
-  pers_mat->c4.z = w;
-  pers_mat->c4.w = 0;
-
-  return true;
 }

@@ -7,6 +7,7 @@
 #include "math.h"
 #include "mem.h"
 #include "time.h"
+// Color is defined in system.h
 
 typedef struct {
   pixel_t* addr;
@@ -55,15 +56,16 @@ typedef struct {
 
 typedef struct {
   triangle_t* mesh;
-  float degx;
-  float degy;
-  float degz;
+  color_t* mess_color;
+  int64_t nb_tri;
+  fvec4_t rot_axis;
+  float rot_angle;
   float sx;
   float sy;
   float sz;
-  int32_t dx;
-  int32_t dy;
-  int32_t dz;
+  float dx;
+  float dy;
+  float dz;
 } object_t;
 
 /******************************************************************************/
@@ -81,6 +83,11 @@ bool graphic_get_framebuffer_info(framebuffer_info_t* fb_info);
  * \return true if draw successfully.
  */
 void graphic_draw(window_t* window_t, bool clear);
+
+/**
+ * Clear the kernel's buffer
+ */ 
+void graphic_clear_screen();
 
 /******************************************************************************/
 // Window functions
@@ -314,3 +321,17 @@ bool tri3d(int x0, int y0, int z0, int x1, int y1, int z1, int x2, int y2,
  * \return true if draw succeeds.
  */
 bool tri3d_t(const triangle_t* t, color_t color, bool fill, window_t* window);
+
+/******************************************************************************/
+/** 
+ * Render object in 3D using orthogonal projection. 
+ * \param obj Pointer to the object.
+ * \param translate Boolean to whether we translate the object.
+ * \param rotate Boolean to whether we rotate the object.
+ * \param scale Boolean to whether we scale the object.
+ * \param fill Boolean to whether we fill the triangles.
+ * \param window Pointer to the window.
+ * return true if draw succeeds.
+ */ 
+bool obj3d_o(object_t* obj, bool translate, bool rotate, bool scale,
+             bool fill, window_t* window);

@@ -11,6 +11,7 @@
 #define SYSCALL_EXIT 60
 #define SYSCALL_GET_FRAMEBUFFER_INFO 1000
 #define SYSCALL_FRAMEBUFFER_CPY 1001
+#define SYSCALL_FRAMEBUFFER_CLEAR 1002
 #define SYSCALL_PEEK_CHAR 2000
 
 /******************************************************************************/
@@ -55,6 +56,7 @@
 #define ARGB32_CYAN 0x0000FFFF
 #define ARGB32_YELLOW 0x00FFFF00
 #define ARGB32_BROW 0x00CC6600
+#define ARGB32_GRAY 0x00808080
 
 typedef uint32_t color_t;
 typedef uint32_t pixel_t;
