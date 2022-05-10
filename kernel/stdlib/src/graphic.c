@@ -32,10 +32,8 @@ void graphic_draw(window_t *window, bool clear) {
 
 /**
  * Clear the kernel's buffer
- */ 
-void graphic_clear_screen() {
-  syscall(SYSCALL_FRAMEBUFFER_CLEAR);
-}
+ */
+void graphic_clear_screen() { syscall(SYSCALL_FRAMEBUFFER_CLEAR); }
 
 /******************************************************************************/
 // Window functions
@@ -501,29 +499,32 @@ bool tri3d(int x0, int y0, int z0, int x1, int y1, int z1, int x2, int y2,
   int y_max = min(max(y0, max(y1, y2)), window->height - 1);
   float dx10 = (float)(x1 - x0);
   float dy10 = (float)(y1 - y0);
-  float dx21 = (float)(x2 - x1);
-  float dy21 = (float)(y2 - y1);
   float dx02 = (float)(x0 - x2);
   float dy02 = (float)(y0 - y2);
+  float dx21 = (float)(x2 - x1);
+  float dy21 = (float)(y2 - y1);
 
   if (fill) {
     for (int y = y_min; y <= y_max; y++) {
       for (int x = x_min; x <= x_max; x++) {
-        float dx0 = (float)(x - x0);
-        float dx1 = (float)(x - x1);
-        float dx2 = (float)(x - x2);
-        float dy0 = (float)(y - y0);
-        float dy1 = (float)(y - y1);
-        float dy2 = (float)(y - y2);
-        float z0_det = det2f(dx0, dy0, dx10, dy10);
-        float z1_det = det2f(dx1, dy1, dx21, dy21);
-        float z2_det = det2f(dx2, dy2, dx02, dy02);
+        float dx0 = (float)(x0 - x);
+        float dx1 = (float)(x1 - x);
+        float dx2 = (float)(x2 - x);
+
+        float dy0 = (float)(y0 - y);
+        float dy1 = (float)(y1 - y);
+        float dy2 = (float)(y2 - y);
+
+        float z0_det = det2f(dx0, dy0, dx02, dy02);
+        float z1_det = det2f(dx1, dy1, dx10, dy10);
+        float z2_det = det2f(dx2, dy2, dx21, dy21);
 
         if ((z0_det >= 0 && z1_det >= 0 && z2_det >= 0) ||
             (z0_det <= 0 && z1_det <= 0 && z2_det <= 0)) {
           float sum_det = z0_det + z1_det + z2_det;
-          float z = z0 * (z0_det / sum_det) + z1 * (z1_det / sum_det) +
-                    z2 * (z2_det / sum_det);
+          float z = (float)z0 * (z0_det / sum_det) +
+                    (float)z1 * (z1_det / sum_det) +
+                    (float)z2 * (z2_det / sum_det);
           pixel3d(x, y, z, color, window);
         }
       }
@@ -554,8 +555,8 @@ bool tri3d_t(const triangle_t *t, color_t color, bool fill, window_t *window) {
 }
 
 /******************************************************************************/
-/** 
- * Render object in 3D using orthogonal projection. 
+/**
+ * Render object in 3D using orthogonal projection.
  * \param obj Pointer to the object.
  * \param translate Boolean to whether we translate the object.
  * \param rotate Boolean to whether we rotate the object.
@@ -563,9 +564,9 @@ bool tri3d_t(const triangle_t *t, color_t color, bool fill, window_t *window) {
  * \param fill Boolean to whether we fill the triangles.
  * \param window Pointer to the window.
  * return true if draw succeeds.
- */ 
-bool obj3d_o(object_t *obj, bool translate, bool rotate, bool scale,
-             bool fill, window_t *window) {
+ */
+bool obj3d_o(object_t *obj, bool translate, bool rotate, bool scale, bool fill,
+             window_t *window) {
   if (obj == NULL || window == NULL) return false;
 
   // Compose transformation matrix
@@ -579,7 +580,7 @@ bool obj3d_o(object_t *obj, bool translate, bool rotate, bool scale,
   transform_mat4x4(&transform_mat, &tmat, &rmat, &smat);
 
   // Draw each triangle to the buffer
-  triangle_t* cur_tri = NULL;
+  triangle_t *cur_tri = NULL;
   triangle_t temp_tri;
   for (int64_t i = 0; i < obj->nb_tri; i++) {
     cur_tri = obj->mesh + i;
@@ -587,7 +588,7 @@ bool obj3d_o(object_t *obj, bool translate, bool rotate, bool scale,
     fmat4x4_mult_vec4(&transform_mat, &(cur_tri->p0), &(temp_tri.p0));
     fmat4x4_mult_vec4(&transform_mat, &(cur_tri->p1), &(temp_tri.p1));
     fmat4x4_mult_vec4(&transform_mat, &(cur_tri->p2), &(temp_tri.p2));
-    
+
     tri3d_t(&temp_tri, (obj->mess_color)[i], fill, window);
   }
   return true;

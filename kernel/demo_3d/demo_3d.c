@@ -33,8 +33,8 @@ object_t make_color_cube(float w, float h, float d, int x, int y, int z) {
   cube.sz = 1.0;
 
   cube.rot_angle = 0;
-  cube.rot_axis = (fvec4_t){.x = 1/1.4142, .y = 1/1.4142, .z = 0, .w = 0};
-  //cube.rot_axis = x_axis;
+  cube.rot_axis = (fvec4_t){.x = 1 / 1.4142, .y = 1 / 1.4142, .z = 0, .w = 0};
+  // cube.rot_axis = x_axis;
 
   cube.nb_tri = 12;
   // Vertices insides the cube
@@ -97,10 +97,13 @@ void _start() {
   window_init(&window, window_w, window_h, 0, 0, ARGB32_GRAY);
 
   // Create a cube
-  object_t cube = make_color_cube(80, 80, 80, window_w / 2, window_h / 2, 0);
+  object_t cube =
+      make_color_cube(50, 50, 50, window_w / 2 + 100, window_h / 2, 0);
+  object_t cube2 =
+      make_color_cube(50, 50, 50, window_w / 2 - 100, window_h / 2, 0);
 
   // Draw the cube for the first time;
-  obj3d_o(&cube, true, true, false, true, &window);
+  obj3d_o(&cube, true, true, false, false, &window);
   graphic_draw(&window, true);
 
   // Repeat drawing after a certain number of ticks. The program also get input
@@ -110,7 +113,9 @@ void _start() {
   while (true) {
     if (get_time() - prev_draw_time > DRAW_TIME) {
       cube.rot_angle += 1;
-      obj3d_o(&cube, true, true, false, true, &window);
+      cube2.rot_angle += 1;
+      obj3d_o(&cube, true, true, false, false, &window);
+      obj3d_o(&cube2, true, true, false, true, &window);
       graphic_draw(&window, true);
       prev_draw_time = get_time();
     }
@@ -121,15 +126,19 @@ void _start() {
       switch (c) {
         case 'a':
           cube.dx -= MOVE_SPEED;
+          cube2.dx -= MOVE_SPEED;
           break;
         case 'd':
           cube.dx += MOVE_SPEED;
+          cube2.dx += MOVE_SPEED;
           break;
         case 'w':
           cube.dy += MOVE_SPEED;
+          cube2.dy += MOVE_SPEED;
           break;
         case 's':
           cube.dy -= MOVE_SPEED;
+          cube2.dy -= MOVE_SPEED;
           break;
         case 'q':
           exit();
