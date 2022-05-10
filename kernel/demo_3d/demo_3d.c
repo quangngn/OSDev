@@ -11,6 +11,7 @@
 #define DRAW_TIME 1000000
 #define INPUT_TIME 100000
 #define MOVE_SPEED 5
+#define SCALE_INC 1
 
 window_t window;
 int32_t window_w = 960;
@@ -99,8 +100,6 @@ void _start() {
   // Create a cube
   object_t cube =
       make_color_cube(50, 50, 50, window_w / 2 + 100, window_h / 2, 0);
-  object_t cube2 =
-      make_color_cube(50, 50, 50, window_w / 2 - 100, window_h / 2, 0);
 
   // Draw the cube for the first time;
   obj3d_o(&cube, true, true, false, false, &window);
@@ -110,12 +109,12 @@ void _start() {
   // from keyboard.
   uint64_t prev_draw_time = 0;
   uint64_t prev_input_time = 0;
+  bool fill = false;
+  bool rotate = false;
   while (true) {
     if (get_time() - prev_draw_time > DRAW_TIME) {
-      cube.rot_angle += 1;
-      cube2.rot_angle += 1;
-      obj3d_o(&cube, true, true, false, false, &window);
-      obj3d_o(&cube2, true, true, false, true, &window);
+      if (rotate) cube.rot_angle += 1;
+      obj3d_o(&cube, true, true, true, fill, &window);
       graphic_draw(&window, true);
       prev_draw_time = get_time();
     }
@@ -126,19 +125,31 @@ void _start() {
       switch (c) {
         case 'a':
           cube.dx -= MOVE_SPEED;
-          cube2.dx -= MOVE_SPEED;
           break;
         case 'd':
           cube.dx += MOVE_SPEED;
-          cube2.dx += MOVE_SPEED;
           break;
         case 'w':
           cube.dy += MOVE_SPEED;
-          cube2.dy += MOVE_SPEED;
           break;
         case 's':
           cube.dy -= MOVE_SPEED;
-          cube2.dy -= MOVE_SPEED;
+          break;
+        case 'r':
+          rotate = !rotate;
+          break;
+        case 'f':
+          fill = !fill;
+          break;
+        case 'k':
+          cube.sx += SCALE_INC;
+          cube.sy += SCALE_INC;
+          cube.sz += SCALE_INC;
+          break;
+        case 'j':
+          cube.sx -= SCALE_INC;
+          cube.sy -= SCALE_INC;
+          cube.sz -= SCALE_INC;
           break;
         case 'q':
           exit();
