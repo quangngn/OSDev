@@ -30,6 +30,13 @@ void graphic_draw(window_t *window, bool clear) {
   if (clear) window_clear(window);
 }
 
+/**
+ * Clear the kernel's buffer
+ */ 
+void graphic_clear_screen() {
+  syscall(SYSCALL_FRAMEBUFFER_CLEAR);
+}
+
 /******************************************************************************/
 // Window functions
 /**

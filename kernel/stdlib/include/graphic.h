@@ -84,6 +84,11 @@ bool graphic_get_framebuffer_info(framebuffer_info_t* fb_info);
  */
 void graphic_draw(window_t* window_t, bool clear);
 
+/**
+ * Clear the kernel's buffer
+ */ 
+void graphic_clear_screen();
+
 /******************************************************************************/
 // Window functions
 /**
