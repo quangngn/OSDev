@@ -13,8 +13,8 @@
 #define MOVE_SPEED 5
 
 window_t window;
-int32_t window_w = 640;
-int32_t window_h = 480;
+int32_t window_w = 960;
+int32_t window_h = 720;
 
 object_t make_color_cube(float w, float h, float d, int x, int y, int z) {
   object_t cube;
@@ -97,7 +97,7 @@ void _start() {
   window_init(&window, window_w, window_h, 0, 0, ARGB32_GRAY);
 
   // Create a cube
-  object_t cube = make_color_cube(50, 50, 50, window_w / 2, window_h / 2, 0);
+  object_t cube = make_color_cube(80, 80, 80, window_w / 2, window_h / 2, 0);
 
   // Draw the cube for the first time;
   obj3d_o(&cube, true, true, false, true, &window);
