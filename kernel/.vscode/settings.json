@@ -6,7 +6,8 @@
     "*.t": "ignore",
     "stdint.h": "c",
     "stivale2.h": "c",
-    "stddef.h": "c"
+    "stddef.h": "c",
+    "game.h": "c"
   },
   "editor.wordWrap": "wordWrapColumn",
   "editor.wordWrapColumn": 80,
