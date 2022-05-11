@@ -515,10 +515,10 @@ bool tri3d(int x0, int y0, int z0, int x1, int y1, int z1, int x2, int y2,
         float dy1 = (float)(y1 - y);
         float dy2 = (float)(y2 - y);
 
-        float z0_det = det2f(dx0, dy0, dx02, dy02);
-        float z1_det = det2f(dx1, dy1, dx10, dy10);
-        float z2_det = det2f(dx2, dy2, dx21, dy21);
-
+        float z0_det = det2f(dx2, dy2, dx21, dy21);
+        float z1_det = det2f(dx0, dy0, dx02, dy02);
+        float z2_det = det2f(dx1, dy1, dx10, dy10);
+        
         if ((z0_det >= 0 && z1_det >= 0 && z2_det >= 0) ||
             (z0_det <= 0 && z1_det <= 0 && z2_det <= 0)) {
           float sum_det = z0_det + z1_det + z2_det;
