@@ -153,13 +153,16 @@ int64_t read_handler(uint64_t f_descriptor, char* buff, size_t read_size,
       // Else, Handle input character
       if (c == ASCII_BACKSPACE) {
         // Delete the last character and decrease the read_char_counter
-        read_char_counter = read_char_counter == 0 ? 0 : read_char_counter - 1;
-        buff[read_char_counter] = '\0';
+        if (read_char_counter > 0) {
+          read_char_counter = read_char_counter - 1;
+          buff[read_char_counter] = '\0';
+          if (echo_char) term_putchar(c);
+        }
       } else {
         // Put the valid character into the buffer
         buff[read_char_counter++] = c;
+        if (echo_char) term_putchar(c);
       }
-      if (echo_char) term_putchar(c);
     }
     // Reset the color setting
     term_reset_color();
@@ -213,9 +216,7 @@ int64_t write_handler(uint64_t f_descriptor, const char* str,
  * \param exe_name Name of the executable to be exec.
  * \returns true if the function is executed successfully, else return falses.
  */
-bool exec_handler(const char* exe_name) { 
-  return run_exe(exe_name); 
-}
+bool exec_handler(const char* exe_name) { return run_exe(exe_name); }
 
 /**
  * Hanlder to exit the current process and invoke shell exec.
