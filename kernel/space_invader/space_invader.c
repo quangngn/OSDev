@@ -129,8 +129,8 @@ void update_bullet() {
   bullet_lst_t* current_bullet = head->next;
   bullet_lst_t* previous_bullet = head;
 
-  if (current_bullet == NULL && previous_bullet != NULL){
-    previous_bullet->bullet.y += 10;
+  if (current_bullet == NULL && previous_bullet != NULL) {
+    previous_bullet->bullet.y += 5;
   }
 
   while (current_bullet != NULL) {
@@ -139,12 +139,38 @@ void update_bullet() {
       free(current_bullet);
       current_bullet = previous_bullet->next;
     } else {
-      current_bullet->bullet.y += 10;
+      current_bullet->bullet.y += 5;
       current_bullet = current_bullet->next;
       previous_bullet = previous_bullet->next;
     }
   }
 }
+
+void delete_enemy(int index) {
+  enemies[index].h = 0;
+  enemies[index].w = 0;
+}
+
+void hit_enemy() {
+  if (head == NULL) {
+    return;
+  }
+
+  bullet_lst_t* current_bullet = head;
+
+  while (current_bullet != NULL) {
+    for (int i = 0; i < NUM_OF_ENEMIES; i++) {
+      if (current_bullet->bullet.x >= enemies[i].x - ENEMY_WIDTH &&
+          current_bullet->bullet.x <= enemies[i].x + ENEMY_WIDTH \ 
+      && current_bullet->bullet.y >= enemies[i].y - ENEMY_HEIGHT) {
+        delete_enemy(i);
+        continue;
+      }
+    }
+    current_bullet = current_bullet->next;
+  }
+}
+
 void initialize_game() {
   window_init(&window, WINDOW_WIDTH, WINDOW_HEIGHT, 0, 0, ARGB32_GRAY);
 
@@ -166,6 +192,7 @@ void _start() {
       draw_player();
       update_bullet();
       draw_bullet();
+      hit_enemy();
 
       graphic_draw(&window, true);
       prev_draw_time = get_time();
