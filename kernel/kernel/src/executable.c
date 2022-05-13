@@ -1,4 +1,5 @@
 #include "executable.h"
+#include "term.h"
 
 exe_info_t* exe_list = NULL;
 exe_info_t* current_exe = NULL;
@@ -395,6 +396,7 @@ bool run_exe(const char* exe_name) {
   if (!load_exe(exe_name, &fn)) {
     return false;
   }
+  term_init();
   to_usermode(fn);
   return true;
 }

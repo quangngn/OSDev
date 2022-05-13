@@ -27,7 +27,7 @@ void _start() {
       if (strcmp(tok, "quit") == 0) {
         break;
       } else if (strcmp(tok, "clear") == 0) {
-        // Clear the terminal 
+        exec("shell");
       } else {
         exec(tok);
       }

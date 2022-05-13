@@ -214,7 +214,6 @@ int64_t write_handler(uint64_t f_descriptor, const char* str,
  * \returns true if the function is executed successfully, else return falses.
  */
 bool exec_handler(const char* exe_name) { 
-  term_init();
   return run_exe(exe_name); 
 }
 
