@@ -13,13 +13,13 @@ S_OBJ := $(patsubst %.s, $(OUT)/%.o, $(ASM))
 DEP := $(patsubst %.c, $(OUT)/%.d, $(SRC))
 
 .PHONY: all
-all: init
+all: demo_term
 
 .PHONY: clean
 clean:
-	rm -rf init $(OUT)
+	rm -rf demo_term $(OUT)
 
-init: $(C_OBJ) $(S_OBJ) linker.ld ../stdlib/libc.a
+demo_term: $(C_OBJ) $(S_OBJ) linker.ld ../stdlib/libc.a
 	$(LD) -T linker.ld -o $@ $(C_OBJ) $(S_OBJ) $(LDFLAGS)
 
 $(C_OBJ): $(OUT)/%.o: %.c
