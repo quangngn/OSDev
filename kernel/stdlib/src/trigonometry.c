@@ -3,7 +3,6 @@
 // Bellows are the lookup table for sine, cosine, and tangent.
 // For sine table, the values are from 0 to 360 degrees with 0.1 step.
 // For cosine table, the values are from 0 to 360 degrees with 0.1 step.
-// For tangent table, the values are from -90 to 90 degrees with 0.1 step.
 static const float sin_tbl[] = {
     0.00000,  0.00175,  0.00349,  0.00524,  0.00698,  0.00873,  0.01047,
     0.01222,  0.01396,  0.01571,  0.01745,  0.01920,  0.02094,  0.02269,

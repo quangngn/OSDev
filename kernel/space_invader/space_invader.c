@@ -161,8 +161,8 @@ void hit_enemy() {
   while (current_bullet != NULL) {
     for (int i = 0; i < NUM_OF_ENEMIES; i++) {
       if (current_bullet->bullet.x >= enemies[i].x - ENEMY_WIDTH &&
-          current_bullet->bullet.x <= enemies[i].x + ENEMY_WIDTH \ 
-      && current_bullet->bullet.y >= enemies[i].y - ENEMY_HEIGHT) {
+          current_bullet->bullet.x <= enemies[i].x + ENEMY_WIDTH &&
+          current_bullet->bullet.y >= enemies[i].y - ENEMY_HEIGHT) {
         delete_enemy(i);
         continue;
       }
