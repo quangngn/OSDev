@@ -129,9 +129,9 @@ void update_bullet() {
   bullet_lst_t* current_bullet = head->next;
   bullet_lst_t* previous_bullet = head;
 
-  if (current_bullet == NULL && previous_bullet != NULL) {
-    previous_bullet->bullet.y += 5;
-  }
+  // We might not be able to delete if the list has 1 bullet. But the behavior
+  // is fine. Will patch in future update
+  head->bullet.y += 5;
 
   while (current_bullet != NULL) {
     if (current_bullet->bullet.y > WINDOW_HEIGHT + BULLET_HEIGHT) {
@@ -160,7 +160,7 @@ void hit_enemy() {
 
   while (current_bullet != NULL) {
     for (int i = 0; i < NUM_OF_ENEMIES; i++) {
-      if (current_bullet->bullet.x >= enemies[i].x - ENEMY_WIDTH &&
+      if (current_bullet->bullet.x + BULLET_WIDTH >= enemies[i].x &&
           current_bullet->bullet.x <= enemies[i].x + ENEMY_WIDTH &&
           current_bullet->bullet.y >= enemies[i].y - ENEMY_HEIGHT) {
         delete_enemy(i);
