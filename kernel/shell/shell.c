@@ -12,7 +12,7 @@ void _start() {
 
   // Endless loop of read to
   while (true) {
-    printf("? ");
+    printf("> ");
     if (getline(&line, &line_size, &stream) == -1) {
       perror("[ERROR] Unable to read command line.\n");
     } else {
