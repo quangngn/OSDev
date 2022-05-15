@@ -8,21 +8,29 @@ This section is quoted from CSC 395 "Setting Up a Development Environment" instr
 Source: [Setting Up a Development Environment](https://curtsinger.cs.grinnell.edu/teaching/2022S/CSC395/activities/setup.html)  
 
 ### a. For MacOS:
+```
 > brew install xorriso x86_64-elf-binutils qemu
+```
 
 ### b. For Linux:
+```
 > sudo apt-get install clang xorriso qemu-system
+```
 Next, we need to install Binutils. Download a copy of Binutils from: https://ftp.gnu.org/gnu/binutils/binutils-2.37.tar.gz. Open the terminal in the extracted directory and run:
+```
 > ./configure --target=x86_64-elf
 > make
 > sudo make install
+```
 
 
 ## 2. Installation:
 To build and run this project
+```
 > cd kernel 
 > make clean
 > make run 
+```
 
 
 ## 3. Project's structure:
