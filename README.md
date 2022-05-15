@@ -1,5 +1,5 @@
 # Kernel Project
-This is the kernel code for the spring 2022 offering of CSC 395: Advanced Operating Systems at Grinnell College. This project include a basic kernel with graphical rendering capability. For more information, please see section 3 (Project's structure and user manual).  
+This is the kernel code for the spring 2022 offering of CSC 395: Advanced Operating Systems at Grinnell College. This project includes a basic kernel with graphical rendering capability. For more information, please see section 3 (Project's structure and user manual).  
 
 By Quang Nguyen & Mario Manalu  
 
@@ -7,7 +7,7 @@ By Quang Nguyen & Mario Manalu
 This section is quoted from CSC 395 "Setting Up a Development Environment" instruction by professor Charlie Curtsinger.  
 Source: [Setting Up a Development Environment](https://curtsinger.cs.grinnell.edu/teaching/2022S/CSC395/activities/setup.html)  
 
-### a. For MacOS:
+### a. For macOS:
 ```
 > brew install xorriso x86_64-elf-binutils qemu
 ```
@@ -36,25 +36,25 @@ To build and run this project
 ## 3. Project's structure:
 The project contains the kernel code, standard library, and other folders for demo programs (which are loaded as Stivale2 modules because the current kernel does not support a file system). The structure of the project is as follows:
 - kernel/kernel: The kernel's source code. 
-- kernel/stdlib: The standard library that can be used by user's program. 
-- kernel/shell: a user application, runs as a terminal when the kernel boot. It can launch other applications.
-- kernel/demo_term: A simple text based program that asks you to type input and outputs the exact string.
-- kernel/demo_window: A demo of user's window.
+- kernel/stdlib: The standard library that can be used by user's programs. 
+- kernel/shell: a user application, that runs as a terminal when the kernel boot. It can launch other applications.
+- kernel/demo_term: A simple text-based program that asks you to type input and outputs the exact string.
+- kernel/demo_window: A demo of the user's window.
 - kernel/space_invaders: A simple Space Invaders game as a demo. 
-- kernel/demo_3d: An interactive 3D cube to demo graphical capability.
+- kernel/demo_3d: An interactive 3D cube to demonstrate graphical capability.
 
 
 ## 4. User manual:
 ### a. shell:
-This is a terminal which allow you to launch other applications. Once a program exit, it would launch shell. The inputs include:
+This is a terminal that allows you to launch other applications. Once a program exits, it would launch shell. The inputs include:
 - "clear": Clear the terminal.
-- Name of a program: Launch the program. Currently, shell accepts "demo_term", "demo_window", "space_invaders", "demo_3d", "shell". Wrong input name would lead to an error message. The shell currently does not accept arguments (Some say it is hard to work with but we disagree :) ).
+- Name of a program: Launch the program. Currently, shell accepts "demo_term", "demo_window", "space_invaders", "demo_3d", "shell". The wrong input name would lead to an error message. The shell currently does not accept arguments (Some say it is hard to work with but we disagree :) ).
 
 ### b. demo_term:
-This is a demonstration for the read/write IO of the kernel's system calls. The program will ask you type an input string (backspace is functional) and output the exact input. Press 'q' to quit and return to shell.
+This is a demonstration of the read/write IO of the kernel's system calls. The program will ask you to type an input string (backspace is functional) and output the exact input. Press 'q' to quit and return to shell.
 
 ### c. demo_window:
-This program show a mock up of a window (managed by the user's program) on top of the screen (managed by the kernel). The control includes:
+This program shows a mock-up of a window (managed by the user's program) on top of the screen (managed by the kernel). The control includes:
 - 'a': move left.
 - 'd': move right.
 - 'w': move up.
@@ -63,7 +63,7 @@ This program show a mock up of a window (managed by the user's program) on top o
 - 'q': quit and return to shell.
 
 ### d. space_invaders:
-This demonstration showcases the 2D graphic library, keyboard interaction, and animation. The user control the spaceship (the triangle) and shoot down the aliens (the square). The control includes:
+This demonstration showcases the 2D graphic library, keyboard interaction, and animation. The user controls the spaceship (the triangle) and shoots down the aliens (the square). The control includes:
 - 'a': move left.
 - 'd': move right.
 - space bar: shoot.
