@@ -17,6 +17,7 @@ typedef struct {
   int32_t height;
   int32_t screen_x;
   int32_t screen_y;
+  bool flip;
 } window_t;
 
 typedef struct {

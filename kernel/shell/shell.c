@@ -24,9 +24,7 @@ void _start() {
       }
 
       // If type "quit", the shell program exits, else we launch the executable.
-      if (strcmp(tok, "quit") == 0) {
-        break;
-      } else if (strcmp(tok, "clear") == 0) {
+      if (strcmp(tok, "clear") == 0) {
         exec("shell");
       } else {
         exec(tok);
@@ -36,6 +34,7 @@ void _start() {
     line = NULL;
     line_size = 0;
   }
+
   // Loop forever
   for (;;) {
   }

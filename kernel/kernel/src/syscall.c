@@ -80,6 +80,7 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1,
        * arg2: y in pixel coordinate of dst buffer. (top-left origin)
        * arg3: source's buffer width in pixel.
        * arg4: source's buffer height in pixel.
+       * arg5: whether we would flip the window.
        */
       return framebuffer_cpy_handler((pixel_t*)arg0, (int32_t)arg1,
                                      (int32_t)arg2, (int32_t)arg3,
@@ -317,7 +318,7 @@ bool framebuffer_cpy_handler(pixel_t* src, int32_t dst_x, int32_t dst_y,
   if (src_x >= src_w || src_y >= src_h || src_x_end <= 0 || src_y_end <= 0)
     return true;
 
-  // Print the source buffer depend on whether you would flip it
+  // Paint the source buffer depend on whether you would flip it
   if (flip) {
     src_y = src_h - src_y;
     src_y_end = src_h - src_y_end;

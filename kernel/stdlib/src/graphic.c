@@ -26,7 +26,9 @@ void graphic_draw(window_t *window, bool clear) {
   // Make draw call
   syscall(SYSCALL_FRAMEBUFFER_CPY, window->addr, (int64_t)window->screen_x,
           (int64_t)window->screen_y, (int64_t)window->width,
-          (int64_t)window->height, true);
+          (int64_t)window->height, (int64_t)window->flip);
+
+  // Clear the window buffer if needed
   if (clear) window_clear(window);
 }
 
@@ -67,10 +69,10 @@ bool window_init(window_t *window, int width, int height, int screen_x,
   window->screen_x = screen_x;
   window->screen_y = screen_y;
   window->bg = bg;
+  window->flip = true; // default for bottom-left origin.
   // Set buffer to the default background color. This would also set dirty_buff
   // to false
   window_clear(window);
-
   return true;
 }
 

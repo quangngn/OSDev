@@ -55,6 +55,9 @@ void _start() {
         case 's':
           window.screen_y += MOVE_SPEED;
           break;
+        case 'f':
+          window.flip = !window.flip;
+          break;
         case 'q':
           exit();
         default:
