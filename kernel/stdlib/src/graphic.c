@@ -69,7 +69,7 @@ bool window_init(window_t *window, int width, int height, int screen_x,
   window->screen_x = screen_x;
   window->screen_y = screen_y;
   window->bg = bg;
-  window->flip = true; // default for bottom-left origin.
+  window->flip = true;  // default for bottom-left origin.
   // Set buffer to the default background color. This would also set dirty_buff
   // to false
   window_clear(window);
@@ -129,7 +129,7 @@ bool pixel2d_p(point_t *p, color_t color, window_t *window) {
 }
 
 /**
- * Credit: Dmitry V. Sokolov
+ * Study from Dmitry V. Sokolov's blog
  * Link:
  * https://github.com/ssloy/tinyrenderer/wiki/Lesson-1:-Bresenham’s-Line-Drawing-Algorithm
  *
@@ -146,41 +146,64 @@ bool pixel2d_p(point_t *p, color_t color, window_t *window) {
 bool line2d(int x0, int y0, int x1, int y1, color_t color, window_t *window) {
   if (window == NULL) return false;
 
-  // Using Bresenham algorithm to print the line
-  bool steep = false;
-  if (abs(x0 - x1) < abs(y0 - y1)) {
-    swap(&x0, &y0);
-    swap(&x1, &y1);
-    steep = true;
-  }
-  if (x0 > x1) {
-    swap(&x0, &x1);
-    swap(&y0, &y1);
-  }
+  // Set up variables
+  int x = x0, y = y0;
+
+  // Compute the different in each axis. We do not care about the sign.
   int dx = x1 - x0;
   int dy = y1 - y0;
-  int derror2 = abs(dy) * 2;
-  int error2 = 0;
-  int y = y0;
+  // Get sign of dx and dy
+  int sign_x = 0, sign_y = 0;
+  if (dx != 0) {
+    sign_x = dx > 0 ? 1 : -1;
+  }
+  if (dy != 0) {
+    sign_y = dy > 0 ? 1 : -1;
+  }
+  // From now on we only use the absolute value of dx and dy
+  dx = abs(dx);
+  dy = abs(dy);
+
+  // If the slop is greater than 45 degree, we swap dx and dy
+  bool steep = false;
+  if (dx < dy) {
+    swap(&dx, &dy);
+    steep = true;
+  }
+
+  // Compute constants
+  int decision = 2 * dy - dx;
+  int step_dec_neg = 2 * dy;
+  int step_dec_non_neg = step_dec_neg - 2 * dx;
+
+  // Draw pixel in the line
+  pixel2d(x, y, color, window);
   if (steep) {
-    for (int x = x0; x <= x1; x++) {
-      pixel2d(y, x, color, window);
-      error2 += derror2;
-      if (error2 > dx) {
-        y += (y1 > y0 ? 1 : -1);
-        error2 -= dx * 2;
+    for (int i = 0; i < dx; i++) {
+      if (decision < 0) {
+        decision += step_dec_neg;
+      } else {
+        x += sign_x;
+        decision += step_dec_non_neg;
       }
+      y += sign_y;
+      // Draw the point
+      pixel2d(x, y, color, window);
     }
   } else {
-    for (int x = x0; x <= x1; x++) {
-      pixel2d(x, y, color, window);
-      error2 += derror2;
-      if (error2 > dx) {
-        y += (y1 > y0 ? 1 : -1);
-        error2 -= dx * 2;
+    for (int i = 0; i < dx; i++) {
+      if (decision < 0) {
+        decision += step_dec_neg;
+      } else {  
+        y += sign_y;
+        decision += step_dec_non_neg;
       }
+      x += sign_x;
+      // Draw the point
+      pixel2d(x, y, color, window);
     }
   }
+
   return true;
 }
 
@@ -397,7 +420,7 @@ bool pixel3d_p(point_t *p, color_t color, window_t *window) {
 }
 
 /**
- * Credit: Dmitry V. Sokolov
+ * Study from Dmitry V. Sokolov's blog
  * Link:
  * https://github.com/ssloy/tinyrenderer/wiki/Lesson-1:-Bresenham’s-Line-Drawing-Algorithm
  *
@@ -417,43 +440,64 @@ bool line3d(int x0, int y0, int z0, int x1, int y1, int z1, color_t color,
             window_t *window) {
   if (window == NULL) return false;
 
-  // Using Bresenham algorithm to print the line
-  bool steep = false;
-  if (abs(x0 - x1) < abs(y0 - y1)) {
-    swap(&x0, &y0);
-    swap(&x1, &y1);
-    steep = true;
-  }
-  if (x0 > x1) {
-    swap(&x0, &x1);
-    swap(&y0, &y1);
-    swap(&z0, &z1);
-  }
+  // Set up variables
+  int x = x0, y = y0;
+  float z = (float)z0;
+
+  // Compute the different in each axis. We do not care about the sign.
   int dx = x1 - x0;
   int dy = y1 - y0;
-  int derror2 = abs(dy) * 2;
-  int error2 = 0;
-  int y = y0;
-  float z = z0;
+  // Get sign of dx and dy
+  int sign_x = 0, sign_y = 0;
+  if (dx != 0) {
+    sign_x = dx > 0 ? 1 : -1;
+  }
+  if (dy != 0) {
+    sign_y = dy > 0 ? 1 : -1;
+  }
+  // From now on we only use the absolute value of dx and dy
+  dx = abs(dx);
+  dy = abs(dy);
+
+  // If the slop is greater than 45 degree, we swap dx and dy
+  bool steep = false;
+  if (dx < dy) {
+    swap(&dx, &dy);
+    steep = true;
+  }
+
+  // Compute constants
+  int decision = 2 * dy - dx;
+  int step_dec_neg = 2 * dy;
+  int step_dec_non_neg = step_dec_neg - 2 * dx;
+
+  // Draw pixel in the line
+  pixel3d(x, y, z, color, window);
   if (steep) {
-    for (int x = x0; x <= x1; x++) {
-      z = z_line_itpl((float)x, (float)x0, (float)x1, (float)z0, (float)z1);
-      pixel3d(y, x, (int)z, color, window);
-      error2 += derror2;
-      if (error2 > dx) {
-        y += (y1 > y0 ? 1 : -1);
-        error2 -= dx * 2;
+    for (int i = 0; i < dx; i++) {
+      if (decision < 0) {
+        decision += step_dec_neg;
+      } else {
+        x += sign_x;
+        decision += step_dec_non_neg;
       }
+      y += sign_y;
+      z = z_line_itpl((float)x, (float)x0, (float)x1, (float)z0, (float)z1);
+      // Draw the point
+      pixel3d(x, y, z, color, window);
     }
   } else {
-    for (int x = x0; x <= x1; x++) {
+    for (int i = 0; i < dx; i++) {
+      if (decision < 0) {
+        decision += step_dec_neg;
+      } else {  
+        y += sign_y;
+        decision += step_dec_non_neg;
+      }
+      x += sign_x;
+      // Draw the point
       z = z_line_itpl((float)x, (float)x0, (float)x1, (float)z0, (float)z1);
       pixel3d(x, y, z, color, window);
-      error2 += derror2;
-      if (error2 > dx) {
-        y += (y1 > y0 ? 1 : -1);
-        error2 -= dx * 2;
-      }
     }
   }
   return true;
@@ -520,7 +564,7 @@ bool tri3d(int x0, int y0, int z0, int x1, int y1, int z1, int x2, int y2,
         float z0_det = det2f(dx2, dy2, dx21, dy21);
         float z1_det = det2f(dx0, dy0, dx02, dy02);
         float z2_det = det2f(dx1, dy1, dx10, dy10);
-        
+
         if ((z0_det >= 0 && z1_det >= 0 && z2_det >= 0) ||
             (z0_det <= 0 && z1_det <= 0 && z2_det <= 0)) {
           float sum_det = z0_det + z1_det + z2_det;
