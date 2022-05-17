@@ -70,7 +70,7 @@ https://user-images.githubusercontent.com/43867447/168721712-bce53813-176f-4398-
 
 
 ### d. space_invaders:
-This demonstration showcases the 2D graphic library, keyboard interaction, and animation. The user controls the spaceship (the triangle) and shoots down the aliens (the square). The control includes:
+This demonstration showcases the 2D graphic library, keyboard interaction, and animation. The user controls the spaceship (the triangle) and shoots down the aliens (the squares). The control includes:
 - 'a': move left.
 - 'd': move right.
 - space bar: shoot.
