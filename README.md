@@ -51,7 +51,11 @@ This is a terminal that allows you to launch other applications. Once a program 
 - Name of a program: Launch the program. Currently, shell accepts "demo_term", "demo_window", "space_invaders", "demo_3d", "shell". The wrong input name would lead to an error message. The shell currently does not accept arguments (Some say it is hard to work with but we disagree :) ).
 
 ### b. demo_term:
+
 This is a demonstration of the read/write IO of the kernel's system calls. The program will ask you to type an input string (backspace is functional) and output the exact input. Press 'q' to quit and return to shell.
+
+https://user-images.githubusercontent.com/43867447/168721688-2375e4ef-be95-4711-aca3-871a636f21e9.mov
+
 
 ### c. demo_window:
 This program shows a mock-up of a window (managed by the user's program) on top of the screen (managed by the kernel). The control includes:
@@ -62,12 +66,18 @@ This program shows a mock-up of a window (managed by the user's program) on top 
 - 'f': toggle flipping the window (usually used to change the origin point between top-left downward and bottom-left upward).
 - 'q': quit and return to shell.
 
+https://user-images.githubusercontent.com/43867447/168721712-bce53813-176f-4398-92c2-6e96b682a093.mov
+
+
 ### d. space_invaders:
 This demonstration showcases the 2D graphic library, keyboard interaction, and animation. The user controls the spaceship (the triangle) and shoots down the aliens (the square). The control includes:
 - 'a': move left.
 - 'd': move right.
 - space bar: shoot.
 - 'q': quit and return to shell.
+
+https://user-images.githubusercontent.com/43867447/168721764-628e2fdd-e4cf-4efa-a9a3-ad53e68ceaa5.mov
+
 
 ### e. demo_3d:
 This demonstration showcases the 3D graphic library, keyboard interaction, and animation. The user transforms the cube using the keyboard inputs. The control includes:
@@ -80,6 +90,9 @@ This demonstration showcases the 3D graphic library, keyboard interaction, and a
 - 'j': reduce the size of the cube.
 - 'k': increase the size of the cube.
 - 'q': quit and return to shell.
+
+https://user-images.githubusercontent.com/43867447/168721816-745bd0c6-ff24-4678-a39e-40a8cc4b80cb.mov
+
 
 ## 5. Acknowledgements
 This starter code is based on the following example projects:
