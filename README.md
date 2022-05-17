@@ -1,5 +1,5 @@
 # Kernel Project
-This is the kernel code for the spring 2022 offering of CSC 395: Advanced Operating Systems at Grinnell College. This project includes a basic kernel with graphical rendering capability. For more information, please see section 3 (Project's structure and user manual).  
+This is the kernel code for the spring 2022 offering of CSC 395: Advanced Operating Systems at Grinnell College. This project includes a kernel (based on Quang's kernel) with graphical rendering capability. For more information, please see section 3 (Project's structure and user manual).  
 
 By Quang Nguyen & Mario Manalu  
 
@@ -44,13 +44,20 @@ The project contains the kernel code, standard library, and other folders for de
 - kernel/demo_3d: An interactive 3D cube to demonstrate graphical capability.
 
 In this update, we extend the system calls to include or change:
-- SYSCALL_EXEC: We change its behavior such that upon successful launch of other executables, we clean the screen buffer.
-- SYSCALL_EXIT: We change its behavior such that we clean the screen buffer before launching shell.
+- SYSCALL_EXEC: We change its behavior such that upon the successful launch of other executables, we clean the screen buffer.
+- SYSCALL_EXIT: We change its behavior such that we clean the screen buffer before launching the shell.
 - SYSCALL_READ: We update read_handler() such that backspace does not delete beyond the buffer. 
 - SYSCALL_GET_FRAMEBUFFER_INFO: We add this system call to allow user programs to query framebuffer struct tag information.
-- SYSCALL_FRAMEBUFFER_CPY: We add this system call to copy user's buffer to kernel's buffer, effectively draw on the screen.
-- SYSCALL_PEEK_CHAR: We add this system call to read from keyboard without stalling.
+- SYSCALL_FRAMEBUFFER_CPY: We add this system call to copy the user's buffer to the kernel's buffer, effectively drawing on the screen.
+- SYSCALL_PEEK_CHAR: We add this system call to read from the keyboard without stalling.
 - SYSCALL_FRAMEBUFFER_CLEAR: We add this system call to clear the screen (this might not be appropriate when multiple programs' windows share the same screen).
+
+Other notable changes:  
+For the most part, this project does not change significantly from Quang's original kernel. The small changes that can be listed are:
+- kernel/kernel/src/boot.c no longer load stivale2 terminal struct tag. It also adds support for floating numbers by setting bits in registers CR0 and CR4.
+- kernel/kernel/src/term.c is changed to printing PSF font. Most of the logic is the same, we only change the backend to paint the glyph to the framebuffer. 
+- PSF fonts are embedded directly into the kernel as an object file instead of a module.
+- Inside kernel/kernel, pdf.* and kgraphic.* are two pairs of files to help with processing fonts and graphics in kernel mode.
 
 
 ## 4. User manual:
