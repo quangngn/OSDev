@@ -14,6 +14,8 @@ void run_test() {
   // test_trig();
 }
 
+// Prompt the user for input through keyboard and then print out the exact
+// string
 void get_input() {
   char* s = NULL;
   size_t size = 0;
@@ -25,12 +27,15 @@ void get_input() {
 }
 
 void _start() {
+  // Get the user input
   get_input();
 
   // Press 'q' to exit the the program
   printf("Finish execution, please press 'q' to exit the program!\n");
-  while (getc_silent(STD_IN) != 'q') {}
+  while (getc_silent(STD_IN) != 'q') {
+  }
   exit();
-  
-  for (;;) {}
+
+  for (;;) {
+  }
 }

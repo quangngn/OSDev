@@ -160,6 +160,7 @@ void _start() {
     }
   }
 
+  exit();
   for (;;) {
   }
 }

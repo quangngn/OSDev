@@ -175,8 +175,8 @@ void hit_enemy() {
   bullet_lst_t* current_bullet = head;
 
   // Iterate through all the bullets and for each bullet, check if
-  //  it hits an enemy. If an enemy is hit, call delete_enemy on it.
-  //  Otherwise, continue iterating.
+  // it hits an enemy. If an enemy is hit, call delete_enemy on it.
+  // Otherwise, continue iterating.
   while (current_bullet != NULL) {
     for (int i = 0; i < NUM_OF_ENEMIES; i++) {
       if (current_bullet->bullet.x + BULLET_WIDTH >= enemies[i].x &&
@@ -245,22 +245,11 @@ void _start() {
         default:
           break;
       }
-
       prev_input_time = get_time();
     }
   }
 
-  for (;;) {
-  }
-  // Press 'q' to exit the the program
-  while (true) {
-    char c = getc_silent(STD_IN);
-    if (c == 'q')
-      exit();
-    else
-      move_player(c);
-  }
-
+  exit();
   for (;;) {
   }
 }
