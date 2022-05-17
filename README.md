@@ -36,12 +36,21 @@ To build and run this project
 ## 3. Project's structure:
 The project contains the kernel code, standard library, and other folders for demo programs (which are loaded as Stivale2 modules because the current kernel does not support a file system). The structure of the project is as follows:
 - kernel/kernel: The kernel's source code. 
-- kernel/stdlib: The standard library that can be used by user's programs. 
+- kernel/stdlib: The standard library that can be used by user's programs. The newly added library includes: graphic.h, graphic_transform.h; math.h, trigonometry.h; vec.h, time.h (for get_time()).
 - kernel/shell: a user application, that runs as a terminal when the kernel boot. It can launch other applications.
 - kernel/demo_term: A simple text-based program that asks you to type input and outputs the exact string.
 - kernel/demo_window: A demo of the user's window.
 - kernel/space_invaders: A simple Space Invaders game as a demo. 
 - kernel/demo_3d: An interactive 3D cube to demonstrate graphical capability.
+
+In this update, we extend the system calls to include or change:
+- SYSCALL_EXEC: We change its behavior such that upon successful launch of other executables, we clean the screen buffer.
+- SYSCALL_EXIT: We change its behavior such that we clean the screen buffer before launching shell.
+- SYSCALL_READ: We update read_handler() such that backspace does not delete beyond the buffer. 
+- SYSCALL_GET_FRAMEBUFFER_INFO: We add this system call to allow user programs to query framebuffer struct tag information.
+- SYSCALL_FRAMEBUFFER_CPY: We add this system call to copy user's buffer to kernel's buffer, effectively draw on the screen.
+- SYSCALL_PEEK_CHAR: We add this system call to read from keyboard without stalling.
+- SYSCALL_FRAMEBUFFER_CLEAR: We add this system call to clear the screen (this might not be appropriate when multiple programs' windows share the same screen).
 
 
 ## 4. User manual:
